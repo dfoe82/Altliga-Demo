@@ -70,6 +70,16 @@ h1 em{font-style:normal;color:var(--c2)}
 .adminbtn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .adminbtn.on{background:var(--c2);color:var(--on-c2);border-color:var(--c2)}
 .adminbtn.half{border-color:var(--c2)}
+.hbtns{display:flex;gap:8px;flex:none;align-self:flex-start}
+.news{display:grid;gap:6px}
+.nitem{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--c2);border-radius:6px;padding:8px 10px;display:grid;gap:3px;min-width:0}
+.nitem .who{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;font-weight:700}
+.nitem .who small{font-weight:500;color:var(--muted)}
+.nitem .tx{white-space:pre-wrap;overflow-wrap:anywhere}
+.pstate{border-radius:6px;padding:8px 10px;font-weight:600;font-size:14px;background:var(--chip)}
+.pstate.ok{background:var(--ok-bg);color:var(--ok)}
+.pstate.warn{background:var(--warn-bg);color:var(--warn)}
+.psteps{margin:0;padding-left:20px;display:grid;gap:4px;font-size:14px}
 
 nav.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--c1) 78%,#000)}
 nav.top .wrap{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
@@ -248,7 +258,16 @@ textarea{min-height:84px;resize:vertical}
 .ev .s{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
 .ev .tags{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:3px}
 .evact{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
-.ev .confirm,.ev .poll,.ev .sq{grid-column:1/-1}
+.ev .confirm,.ev .poll,.ev .sq,.ev .tquick,.ev .cxnote{grid-column:1/-1}
+.ev.cancel .t{text-decoration:line-through;opacity:.65}
+.badge.cx{background:var(--due);color:#fff}
+.badge.vin{background:color-mix(in srgb,var(--c1) 16%,var(--surface))}
+.tquick{display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-top:1px dashed var(--line);padding-top:8px}
+.tquick .seg button{padding:5px 12px;font-size:13px}
+.cxnote{font-size:13px;font-weight:600;color:var(--due)}
+.tpoll{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--events);border-radius:6px;padding:10px;display:grid;gap:8px;min-width:0}
+.tpoll .tph{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--muted);font-weight:600}
+.tpoll .pq{font-weight:700}
 .sq{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px dashed var(--line);padding-top:8px;font-size:13px}
 .sq b{font-weight:700}
 .shifts{display:grid;gap:8px}
@@ -334,6 +353,17 @@ table.grid{border-collapse:separate;border-spacing:0;font-size:13.5px;width:100%
 .grid .nm{text-align:left;position:sticky;left:0;background:var(--surface);padding:5px 10px;z-index:1;font-weight:600;border-right:1px solid var(--line);max-width:150px}
 .grid .tot{text-align:right;padding-right:10px;font-weight:700}
 .grid .sep{border-left:1px solid var(--line)}
+.grid td .pp{display:block;font-size:11px;font-weight:700;margin-top:2px}
+.grid td.tot .cell{min-width:58px}
+@media (max-width:480px){
+  .grid th,.grid td{padding:5px 3px}
+  .grid .nm{padding:5px 7px;max-width:100px}
+  .grid .tot{padding-right:5px}
+  .grid td.tot .cell{min-width:44px;padding:5px 4px}
+  .grid thead th{letter-spacing:.03em}
+  .grid th.ent{max-width:66px}
+}
+.swipe{font-size:12px;color:var(--muted);font-weight:600;text-align:right;margin:-2px 2px 0}
 .grid tfoot td{font-weight:600;color:var(--muted);border-bottom:0;font-size:12.5px}
 .grid tbody tr:last-child td{border-bottom:2px solid var(--line)}
 .cell{display:inline-block;border:0;border-radius:4px;padding:5px 6px;min-width:50px;font-variant-numeric:tabular-nums;font-size:13px}
@@ -474,7 +504,8 @@ table.grid{border-collapse:separate;border-spacing:0;font-size:13.5px;width:100%
   <div class="htxt"><div class="eyebrow" id="season">Mannschaftskasse</div><h1 id="teamName">Unsere <em>Mannschaft</em></h1></div>
   <img class="logo2" id="logo2" alt="Logo" hidden>
   <div class="score" id="score"></div>
-  <button class="adminbtn" id="adminBtn" data-act="adminBtn" aria-label="Admin-Ansicht"></button>
+  <div class="hbtns"><button class="adminbtn" id="bellBtn" data-act="pushModal" aria-label="Benachrichtigungen" hidden></button>
+  <button class="adminbtn" id="adminBtn" data-act="adminBtn" aria-label="Admin-Ansicht"></button></div>
 </div></header>
 <nav class="top" aria-label="Bereiche"><div class="wrap" role="tablist" id="tabs"></div></nav>
 <main><div class="wrap" id="view"><div class="panel"><p class="hint">Lädt …</p></div></div></main>
@@ -497,7 +528,10 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "",
   appId: ""
 };
+/* Schlüssel für Push-Nachrichten (Firebase → Projekteinstellungen → Cloud Messaging → Web-Push-Zertifikate). Leer = Push aus. */
+const FIREBASE_VAPID_KEY = "";
 const FIREBASE_VERSION = "10.12.2";
+const APP_VERSION = "1.5"; /* Version der App – steht auch im Namen der ZIP-Dateien */
 
 const LIVE_MODE=false; /* Demo-Repository: läuft immer als Demo mit Beispieldaten */
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
@@ -508,15 +542,16 @@ const SEC={
   misc:{label:'Sonstiges',short:'Sonstiges'},
   events:{label:'Termine',short:'Termine'}
 };
-const AREAS={drinks:'Getränke',team:'Beiträge',misc:'Sonstiges',events:'Termine & Kader'};
-const PART_LABEL={private:'Geburtsdaten',main:'Einstellungen',players:'Spielerliste',drinks:'Getränkekasse',fees:'Mannschaftskasse',misc:'Sonstiges',events:'Termine',archive:'Auswertungen'};
+const AREAS={drinks:'Getränke',team:'Beiträge',misc:'Sonstiges',finance:'Einnahmen & Ausgaben',events:'Termine & Kader'};
+const PART_LABEL={finance:'Einnahmen & Ausgaben',private:'Geburtsdaten',main:'Einstellungen',players:'Spielerliste',drinks:'Getränkekasse',fees:'Mannschaftskasse',misc:'Sonstiges',events:'Termine',archive:'Auswertungen'};
 const ICON={
   home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
   events:'<rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/>',
   settings:'<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
   roster:'<path d="M8 3 3 6l2 5 3-1v11h8V10l3 1 2-5-5-3a4 4 0 0 1-8 0z"/>',
   lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
-  unlock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.6-1.7"/>'
+  unlock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.6-1.7"/>',
+  bell:'<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2.5h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/>'
 };
 const PRESETS=[
   {n:'Blau · Gelb',c:['#0E2F7A','#FFD21F','#D7263D','#0F8580']},
@@ -575,11 +610,13 @@ const MONEY=['drinks','team','misc'];
 const VARIANT=(()=>{ if(FIREBASE_CONFIG.apiKey) return 'a'; const m=location.search.match(/[?&]v=([abc])/i); return m?m[1].toLowerCase():'a'; })();
 const FEAT={money:VARIANT!=='b',events:VARIANT!=='c',roster:VARIANT!=='c'};
 const areasOn=()=>Object.entries(AREAS).filter(([k])=>k==='events'?FEAT.events:FEAT.money);
+/* Vorlagen für Rechte */
+const ROLE_PRESETS={cash:{label:'Kassenwart',role:'part',areas:['drinks','team','misc','finance']},trainer:{label:'Trainer',role:'part',areas:['events']},full:{label:'Alles',role:'full',areas:[]}};
 const DEMO_ADMINS=VARIANT==='b'
   ?[{uid:'demo-full',name:'Teamleiter',role:'full',areas:[],email:'team@example.org'},{uid:'demo-part',name:'Trainer',role:'part',areas:['events'],email:'trainer@example.org'}]
   :VARIANT==='c'
-  ?[{uid:'demo-full',name:'Kassenwart',role:'full',areas:[],email:'kasse@example.org'},{uid:'demo-part',name:'Getränkewart',role:'part',areas:['drinks'],email:'getraenke@example.org'}]
-  :[{uid:'demo-full',name:'Kassenwart',role:'full',areas:[],email:'kasse@example.org'},{uid:'demo-part',name:'Trainer',role:'part',areas:['events'],email:'trainer@example.org'}];
+  ?[{uid:'demo-full',name:'Admin',role:'full',areas:[],email:'admin@example.org'},{uid:'demo-cash',name:'Kassenwart',role:'part',areas:['drinks','team','misc','finance'],email:'kasse@example.org'},{uid:'demo-part',name:'Getränkewart',role:'part',areas:['drinks'],email:'getraenke@example.org'}]
+  :[{uid:'demo-full',name:'Admin',role:'full',areas:[],email:'admin@example.org'},{uid:'demo-cash',name:'Kassenwart',role:'part',areas:['drinks','team','misc','finance'],email:'kasse@example.org'},{uid:'demo-part',name:'Trainer',role:'part',areas:['events'],email:'trainer@example.org'}];
 const KEY='mannschaftskasse-demo'+(VARIANT==='a'?'':'-'+VARIANT), BKEY=KEY+'-sicherungen';
 const CODE_ABC='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const uid=()=>Math.random().toString(36).slice(2,9);
@@ -647,7 +684,7 @@ function readImg(file,cb){
 
 /* ---------- Grunddaten ---------- */
 function emptyState(){
-  return {sample:false,appName:'Mannschaftskasse',teamName:'Unsere Mannschaft',showSeason:false,fee:10,rate:3,paypal:'',statsPublic:false,amountsPublic:false,publicView:false,birth:{},reports:{},
+  return {sample:false,appName:'Mannschaftskasse',teamName:'Unsere Mannschaft',showSeason:false,statPeriod:'year',financeOn:false,payreqOn:true,finance:{start:0,list:[]},fee:10,rate:3,paypal:'',statsPublic:false,amountsPublic:false,publicView:false,birth:{},reports:{},
     club:{c:[...PRESETS[0].c],use3:true,use4:true,crest:'',logo:''},order:['drinks','team','misc'],
     players:[],days:[],misc:[],paid:{team:{},drinks:{}},events:[],archive:[]};
 }
@@ -701,10 +738,10 @@ function sample(){
     {id:uid(),e:seeblick.id,k:'event',p:ids[7],t:'Ich kann zwei Leute mitnehmen.',ts:Date.now()-864e5},
     {id:uid(),e:seeblick.id,k:'event',p:ids[25],t:'Nehme das Angebot gern an, danke!',ts:Date.now()-80e6},
     {id:uid(),e:kohl.id,k:'poll',p:ids[18],t:'Vegetarisch klingt gut, gibt es dann Kartoffeln extra?',ts:Date.now()-150e6},
-    {id:uid(),e:kohl.id,k:'event',a:'demo-full',an:'Kassenwart',t:'Busanteil bitte bis Ende des Monats überweisen.',ts:Date.now()-170e6}];
+    {id:uid(),e:kohl.id,k:'event',a:'demo-cash',an:'Kassenwart',t:'Busanteil bitte bis Ende des Monats überweisen.',ts:Date.now()-170e6}];
   const members=ids.filter((id,i)=>codes[id]&&i%4!==1).map((id,i)=>({p:id,code:codes[id],seen:Date.now()-(i%6)*86400000*(1+i%3)}));
   const out={
-    ...emptyState(), reports:{}, sample:true, sampleV:44,
+    ...emptyState(), reports:{}, sample:true, sampleV:47,
     players,
     days:[
       {date:prev2+'-12',att:pickN(8,26)},{date:prev2+'-26',att:pickN(9,29)},
@@ -724,7 +761,8 @@ function sample(){
       ...pastTr,
       {id:uid(),type:'training',date:addDays(nextTue),time:'19:00',title:'',place:'Sportplatz',note:'',poll:rsvp('training',votes(3,24))},
       seeblick,
-      {id:uid(),type:'training',date:addDays(nextThu),time:'19:00',title:'',place:'Sportplatz',note:'',poll:rsvp('training',votes(4,15))},
+      {id:uid(),type:'training',date:addDays(nextThu),time:'19:00',title:'',place:'Sporthalle',note:'Bei Regen in der Halle',venue:'in',poll:rsvp('training',votes(4,15))},
+      ...[1,2,3,4,5,6].map(w=>({id:uid(),type:'training',date:addDays(nextTue+7*w),time:'19:00',title:'',place:'Sportplatz',note:'',venue:'out',...(w===2?{cancel:true}:{}),poll:rsvp('training',{})})),
       kohl,
       turnier,
       {id:uid(),type:'game',date:addDays(17),time:'14:00',title:'FC Westerau',home:true,place:'Heimplatz',note:''},
@@ -741,6 +779,16 @@ function sample(){
   /* Beispieldaten je Demo-Variante */
   if(!FEAT.money){ out.appName='Mannschafts-App'; out.days=[]; out.misc=[]; out.paid={team:{},drinks:{}}; }
   if(!FEAT.events){ out.events=[]; out.archive=[]; out.reports={}; out.demoComments=[]; }
+  out.demoNews=[{id:uid(),t:FEAT.events?'Am Samstag bitte alle um 13:45 Uhr am Vereinsheim sein – wir fahren gemeinsam.':'Bitte die offenen Beträge bis Monatsende überweisen. Danke!',a:FEAT.money?'demo-cash':'demo-full',an:FEAT.money?'Kassenwart':'Teamleiter',ts:Date.now()-26*3600e3}];
+  out.demoPayreq=FEAT.money?[{id:uid(),p:ids[2],amount:21,method:'paypal',note:'Getränke September',ts:Date.now()-3*3600e3,status:'open'}]:[];
+  if(FEAT.money){ out.financeOn=true; out.finance={start:350,list:[
+    {id:uid(),ts:1,date:addDays(-40),kind:'out',amount:60,title:'Schiedsrichter',cat:'Schiedsrichter',note:''},
+    {id:uid(),ts:2,date:addDays(-33),kind:'in',amount:150,title:'Spende Autohaus',cat:'Sponsor',note:''},
+    {id:uid(),ts:3,date:addDays(-20),kind:'out',amount:84.5,title:'Getränke Großhandel',cat:'Getränke',note:'2 Kisten Wasser, 4 Kisten Bier'},
+    {id:uid(),ts:4,date:addDays(-12),kind:'in',amount:120,title:'Beiträge bar eingesammelt',cat:'Beiträge',note:''},
+    {id:uid(),ts:5,date:addDays(-5),kind:'out',amount:35,title:'Startgeld Hallenturnier',cat:'Startgeld',note:''}]}; }
+  out.demoPolls=FEAT.events?[{id:uid(),q:'Grillen nach dem letzten Heimspiel vor der Winterpause?',opts:['Ja, bin dabei','Nein','Ich bringe Salat mit'],open:true,p:ids[5],ts:Date.now()-5*3600e3,
+    votes:Object.fromEntries(ids.slice(0,23).map((id,i)=>[id,i%5===4?1:(i%4===3?2:0)]))}]:[];
   out.variant=VARIANT;
   return out;
 }
@@ -776,7 +824,7 @@ const rightsText=a=>a.role==='part'?((a.areas||[]).length?a.areas.map(k=>AREAS[k
 const adminList=()=>AUTH.mode==='live'?LIVE.admins:DEMO_ADMINS;
 const fullCount=()=>adminList().filter(a=>a.role!=='part').length;
 
-const blankEv=()=>({type:'game',time:'',title:'',home:true,place:'',note:'',poll:false,ptype:'rsvp',pq:'',popts:'',repeat:false,weeks:4,comments:false,pcomments:false,result:''});
+const blankEv=()=>({venue:'out',cancel:false,until:'',type:'game',time:'',title:'',home:true,place:'',note:'',poll:false,ptype:'rsvp',pq:'',popts:'',repeat:false,weeks:4,comments:false,pcomments:false,result:''});
 ui.ev=blankEv();
 
 /* ---------- Online (Firebase) ---------- */
@@ -784,7 +832,7 @@ const FB={};
 const LIVE={parts:{},loaded:new Set(),votes:{},signups:{},synced:{},unsubs:[],admins:[],invites:[],codes:{},members:[],backups:[],log:[],pending:false,
   comments:[],balance:null,balances:{},balLoaded:false,pubJson:undefined,derivedDone:false,derivedTimer:null,rep:{},migrate:{}};
 const BASE_PARTS=['main','players','drinks','fees','misc','events','archive'];
-const partList=()=>AUTH.admin&&AUTH.admin.role!=='part'?[...BASE_PARTS,'private']:BASE_PARTS;
+const partList=()=>{ const a=AUTH.admin; if(!a) return BASE_PARTS; if(a.role!=='part') return [...BASE_PARTS,'finance','private']; return (a.areas||[]).includes('finance')?[...BASE_PARTS,'finance']:BASE_PARTS; };
 /* Vergleich unabhängig von der Reihenfolge der Felder */
 const stable=o=>Array.isArray(o)?'['+o.map(stable).join(',')+']':(o&&typeof o==='object')?'{'+Object.keys(o).sort().map(k=>JSON.stringify(k)+':'+stable(o[k])).join(',')+'}':JSON.stringify(o);
 
@@ -824,6 +872,11 @@ function buildPublicS(){
     events:(P.events||[]).map(e=>e.poll?{...e,poll:{...e.poll,votes:{...(LIVE.votes[e.id]||{})}}}:e),reports:liveReports()};
   normalize();
 }
+/* Admin mit zugeordnetem Spieler ist auf jedem Gerät automatisch auch dieser Spieler */
+function linkAdminPlayer(){
+  if(AUTH.admin&&AUTH.admin.p&&(!AUTH.member||AUTH.member.linked)) AUTH.member={p:AUTH.admin.p,code:'',linked:true};
+  else if(AUTH.member&&AUTH.member.linked&&!(AUTH.admin&&AUTH.admin.p)) AUTH.member=null;
+}
 async function refreshAccess(user){
   AUTH.user=user; AUTH.admin=null; AUTH.member=null; AUTH.public=false; LIVE.derivedDone=false;
   if(!user){
@@ -854,6 +907,7 @@ async function refreshAccess(user){
     if(user.isAnonymous) return tryPublic();
     unsubscribeAll(); AUTH.ready=true; AUTH.gate='noaccess'; render(); return;
   }
+  linkAdminPlayer();
   AUTH.gate=null; ui.adminView=!!AUTH.admin;
   subscribeAll();
 }
@@ -863,6 +917,11 @@ function subscribeAll(){
   const err=e=>{console.warn(e);};
   partList().forEach(k=>LIVE.unsubs.push(FB.onSnapshot(D('team',k),s=>{LIVE.parts[k]=s.exists()?s.data():null; LIVE.loaded.add(k); onLiveData();},e=>{if(!['drinks','fees','misc'].includes(k)) err(e); LIVE.parts[k]=null; LIVE.loaded.add(k); onLiveData();})));
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'votes'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); (v[x.e]=v[x.e]||{})[x.p]=x.i;}); LIVE.votes=v; onLiveData();},err));
+  LIVE.unsubs.push(FB.onSnapshot(FB.query(FB.collection(FB.db,'news'),FB.orderBy('ts','desc'),FB.limit(20)),qs=>{LIVE.news=qs.docs.map(d=>{const x=d.data(); return {id:d.id,...x,ts:x.ts&&x.ts.toMillis?x.ts.toMillis():Date.now()};}); schedule();},err));
+  { const pq=AUTH.admin&&(AUTH.admin.role!=='part'||(AUTH.admin.areas||[]).some(x=>['drinks','team','misc','finance'].includes(x)))?FB.collection(FB.db,'payreq'):(AUTH.member?FB.query(FB.collection(FB.db,'payreq'),FB.where('p','==',AUTH.member.p)):null);
+    if(pq) LIVE.unsubs.push(FB.onSnapshot(pq,qs=>{LIVE.payreq=qs.docs.map(d=>{const x=d.data(); return {id:d.id,...x,ts:x.ts&&x.ts.toMillis?x.ts.toMillis():Date.now()};}); schedule();},()=>{})); }
+  LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'polls'),qs=>{LIVE.polls=qs.docs.map(d=>{const x=d.data(); return {id:d.id,...x,ts:x.ts&&x.ts.toMillis?x.ts.toMillis():Date.now()};}); schedule();},err));
+  LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'pvotes'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); (v[x.q]=v[x.q]||{})[x.p]=x.i;}); LIVE.pvotes=v; schedule();},err));
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'signups'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); const m=(v[x.e]=v[x.e]||{}); (m[x.s]=m[x.s]||[]).push(x.p);}); LIVE.signups=v; onLiveData();},err));
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'comments'),qs=>{LIVE.comments=qs.docs.map(d=>{const x=d.data(); return {id:d.id,...x,ts:x.ts&&x.ts.toMillis?x.ts.toMillis():Date.now()};}); schedule();},err));
   if(AUTH.member&&!AUTH.admin) LIVE.unsubs.push(FB.onSnapshot(D('balances',AUTH.member.p),s=>{LIVE.balance=s.exists()?s.data():null; onLiveData();},()=>{}));
@@ -870,7 +929,7 @@ function subscribeAll(){
   const a=AUTH.admin; if(!a) return;
   LIVE.unsubs.push(FB.onSnapshot(D('team','public'),s=>{LIVE.pubJson=s.exists()?stable(s.data()):'null'; maybeSyncDerived();},err));
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'balances'),qs=>{const b={}; qs.forEach(d=>{b[d.id]=stable(d.data());}); LIVE.balances=b; LIVE.balLoaded=true; maybeSyncDerived();},err));
-  LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'admins'),qs=>{LIVE.admins=qs.docs.map(d=>({uid:d.id,...d.data()})); const mine=LIVE.admins.find(x=>x.uid===a.uid); if(mine) AUTH.admin={...AUTH.admin,...mine}; schedule();},err));
+  LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'admins'),qs=>{LIVE.admins=qs.docs.map(d=>({uid:d.id,...d.data()})); const mine=LIVE.admins.find(x=>x.uid===a.uid); if(mine){ AUTH.admin={...AUTH.admin,...mine}; linkAdminPlayer(); } schedule();},err));
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'members'),qs=>{LIVE.members=qs.docs.map(d=>{const x=d.data(); return {p:x.p,code:x.code,seen:x.seen&&x.seen.toMillis?x.seen.toMillis():0};}); schedule();},err));
   LIVE.unsubs.push(FB.onSnapshot(FB.query(FB.collection(FB.db,'log'),FB.orderBy('ts','desc'),FB.limit(40)),qs=>{LIVE.log=qs.docs.map(d=>{const x=d.data(); return {ts:x.ts&&x.ts.toMillis?x.ts.toMillis():Date.now(),name:x.name,text:x.text};}); schedule();},err));
   if(a.role!=='part'){
@@ -884,7 +943,7 @@ function subscribeAll(){
 }
 function onLiveData(){
   if(partList().some(k=>!LIVE.loaded.has(k))) return;
-  buildS(); AUTH.ready=true; schedule(); maybeSyncDerived();
+  buildS(); AUTH.ready=true; schedule(); maybeSyncDerived(); pushRefresh();
 }
 /* Admins halten beim Öffnen öffentliche Termine, Spieler-Salden und Alter aktuell */
 function maybeSyncDerived(){
@@ -894,7 +953,7 @@ function maybeSyncDerived(){
 }
 function buildS(){
   const P=LIVE.parts, d=emptyState(), m=P.main||{};
-  S={...d,appName:m.appName||d.appName,showSeason:!!m.showSeason,teamName:m.teamName??d.teamName,fee:m.fee??d.fee,rate:m.rate??d.rate,paypal:m.paypal??'',club:{...d.club,...(m.club||{})},order:m.order||d.order,
+  S={...d,appName:m.appName||d.appName,showSeason:!!m.showSeason,statPeriod:m.statPeriod==='season'?'season':'year',financeOn:!!m.financeOn,payreqOn:m.payreqOn!==false,finance:{start:(P.finance&&P.finance.start)||0,list:(P.finance&&P.finance.list)||[]},teamName:m.teamName??d.teamName,fee:m.fee??d.fee,rate:m.rate??d.rate,paypal:m.paypal??'',club:{...d.club,...(m.club||{})},order:m.order||d.order,
     amountsPublic:!!m.amountsPublic,publicView:!!m.publicView,birth:(P.private&&P.private.birth)||{},
     statsPublic:!!(P.events&&P.events.statsPublic),
     players:(P.players&&P.players.list)||[],
@@ -923,12 +982,13 @@ function withSignups(e){
 }
 function partsOf(s){
   return {
-    main:clean({appName:s.appName,showSeason:!!s.showSeason,teamName:s.teamName,fee:s.fee,rate:s.rate,paypal:s.paypal,club:s.club,order:s.order,amountsPublic:!!s.amountsPublic,publicView:!!s.publicView}),
+    main:clean({appName:s.appName,showSeason:!!s.showSeason,statPeriod:s.statPeriod==='season'?'season':'year',financeOn:!!s.financeOn,payreqOn:s.payreqOn!==false,teamName:s.teamName,fee:s.fee,rate:s.rate,paypal:s.paypal,club:s.club,order:s.order,amountsPublic:!!s.amountsPublic,publicView:!!s.publicView}),
     private:clean({birth:s.birth||{}}),
     players:clean({list:s.players}),
     drinks:clean({days:s.days,paid:s.paid.drinks}),
     fees:clean({paid:s.paid.team}),
     misc:clean({items:s.misc}),
+    finance:clean({start:+((s.finance||{}).start)||0,list:(s.finance||{}).list||[]}),
     events:clean({statsPublic:!!s.statsPublic,map:Object.fromEntries(s.events.map(e=>{const c={...e}; if(c.poll) c.poll={q:c.poll.q,opts:c.poll.opts,open:!!c.poll.open}; if(c.shifts) c.shifts={self:!!c.shifts.self,list:(c.shifts.list||[]).map(({self,...r})=>r)}; return [e.id,c];}))}),
     archive:clean({list:s.archive.map(a=>({...a,names:(a.names||[]).map(l=>({l}))}))}) /* Firestore erlaubt keine verschachtelten Listen */
   };
@@ -937,6 +997,7 @@ function partsOf(s){
 function publicOf(s){
   return clean({on:!!s.publicView,appName:s.appName,showSeason:!!s.showSeason,teamName:s.teamName,club:{c:s.club.c,use3:s.club.use3,use4:s.club.use4,crest:s.club.crest||'',logo:s.club.logo||''},
     events:s.events.map(e=>{const x={id:e.id,type:e.type,date:e.date,time:e.time||'',title:e.title||'',home:e.home!==false,place:e.place||''};
+      if(e.type==='training'){ x.venue=e.venue==='in'?'in':'out'; if(e.cancel) x.cancel=true; }
       if(e.poll&&e.type!=='event') x.poll={q:e.poll.q,opts:e.poll.opts,open:!!e.poll.open}; return x;})});
 }
 /* Persönlicher Saldo: nur die Daten eines Spielers */
@@ -991,7 +1052,7 @@ const MAXB=10, AUTO_GAP=30*60*1000;
 const slug=t=>String(t||'Mannschaftskasse').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ß/g,'ss').replace(/[^A-Za-z0-9]+/g,'-').replace(/^-+|-+$/g,'').toLowerCase()||'mannschaftskasse';
 const stamp=(d=new Date())=>`${iso(d)}_${String(d.getHours()).padStart(2,'0')}-${String(d.getMinutes()).padStart(2,'0')}`;
 function loadBackups(){ if(AUTH.mode==='live') return LIVE.backups; try{return JSON.parse(ls.get(BKEY))||[]}catch(e){return []} }
-function stripImages(json){const o=JSON.parse(json); if(o.club){o.club.crest='';o.club.logo='';} delete o.demoCodes; delete o.demoMembers; delete o.demoLog; delete o.demoComments; return JSON.stringify(o);}
+function stripImages(json){const o=JSON.parse(json); if(o.club){o.club.crest='';o.club.logo='';} delete o.demoPayreq; delete o.demoPolls; delete o.demoNews; delete o.demoCodes; delete o.demoMembers; delete o.demoLog; delete o.demoComments; return JSON.stringify(o);}
 function addBackup(json,label){
   const b={ts:Date.now(),name:S.appName||'Mannschaftskasse',label,data:stripImages(json)};
   if(AUTH.mode==='live'){ if(!AUTH.admin) return; FB.setDoc(D('backups',String(b.ts)),{...b,by:AUTH.admin.name}).catch(e=>console.warn(e)); return; }
@@ -1006,11 +1067,11 @@ function autoBackup(){
 }
 function restoreFrom(json,label){
   addBackup(JSON.stringify(S),'Vor '+label);
-  const o=JSON.parse(json); const keep={crest:S.club.crest,logo:S.club.logo,demoCodes:S.demoCodes,demoMembers:S.demoMembers,demoLog:S.demoLog,demoComments:S.demoComments};
+  const o=JSON.parse(json); const keep={crest:S.club.crest,logo:S.club.logo,demoPayreq:S.demoPayreq,demoPolls:S.demoPolls,demoNews:S.demoNews,demoCodes:S.demoCodes,demoMembers:S.demoMembers,demoLog:S.demoLog,demoComments:S.demoComments};
   const votes=Object.fromEntries(S.events.filter(e=>e.poll).map(e=>[e.id,e.poll.votes]));
   S=o; normalize();
   if(!S.club.crest) S.club.crest=keep.crest; if(!S.club.logo) S.club.logo=keep.logo;
-  if(AUTH.mode==='demo') Object.assign(S,{demoCodes:keep.demoCodes,demoMembers:keep.demoMembers,demoLog:keep.demoLog,demoComments:keep.demoComments});
+  if(AUTH.mode==='demo') Object.assign(S,{demoPayreq:keep.demoPayreq,demoPolls:keep.demoPolls,demoNews:keep.demoNews,demoCodes:keep.demoCodes,demoMembers:keep.demoMembers,demoLog:keep.demoLog,demoComments:keep.demoComments});
   else S.events.forEach((e,i)=>{if(e.poll) e.poll.votes=votes[e.id]||{}; if(e.shifts) S.events[i]=withSignups(e);});
   S.sample=false; save(); closeForm(); render(); logAction(label+' durchgeführt');
 }
@@ -1132,6 +1193,314 @@ function pollBox(e,full){
     ${p.comments&&!full?`<div class="pmeta"><button class="edit" data-act="evOpen" data-v="${e.id}">💬 ${cmtCount(e.id,'poll')} Kommentare zur Umfrage ›</button></div>`:''}</div>`;
 }
 
+/* ---------- Push-Nachrichten ---------- */
+/* Pro Gerät: Erlaubnis + Token in push/{uid}; der Versand läuft über die Cloud Functions im Ordner functions/ */
+const PUSH_PREFS={ev:'Termine, Umfragen & Trainingsänderungen',news:'Nachrichten an alle',cmt:'Neue Kommentare'};
+const pushLocal=()=>{try{return JSON.parse(ls.get('mk-push'))||{}}catch(e){return {}}};
+const pushPrefs=()=>({ev:true,news:true,cmt:true,...(pushLocal().prefs||{})});
+const isIOS=()=>/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const isStandalone=()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}};
+const pushCapable=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
+const pushActive=()=>!!pushLocal().on&&(AUTH.mode==='demo'||(pushCapable()&&Notification.permission==='granted'));
+function pushState(){
+  if(AUTH.mode==='demo') return {k:'demo'};
+  if(!FIREBASE_VAPID_KEY) return {k:'nokey'};
+  if(isIOS()&&!isStandalone()) return {k:'ios'};
+  if(!pushCapable()) return {k:'unsupported'};
+  if(Notification.permission==='denied') return {k:'denied'};
+  return {k:pushActive()?'on':'off'};
+}
+let MSG=null;
+async function messaging(){
+  if(MSG) return MSG;
+  const m=await import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-messaging.js`);
+  if(!(await m.isSupported())) throw new Error('unsupported');
+  MSG={m,inst:m.getMessaging(FB.app)}; return MSG;
+}
+async function pushToken(){
+  const reg=await navigator.serviceWorker.register('sw.js'); await navigator.serviceWorker.ready;
+  const {m,inst}=await messaging();
+  return m.getToken(inst,{vapidKey:FIREBASE_VAPID_KEY,serviceWorkerRegistration:reg});
+}
+function pushDoc(token,prefs){
+  const d={token,prefs,url:location.origin+location.pathname,ts:FB.serverTimestamp(),ua:(isIOS()?'iOS':/Android/.test(navigator.userAgent)?'Android':'Browser')};
+  if(AUTH.member) d.p=AUTH.member.p; if(AUTH.admin) d.a=AUTH.admin.uid; return d;
+}
+async function enablePush(){
+  const prefs=pushPrefs();
+  if(AUTH.mode==='demo'){ ls.set('mk-push',JSON.stringify({on:true,prefs})); renderModal(); renderChrome(); toast('Demo: Benachrichtigungen an – in der Demo wird nichts verschickt'); return; }
+  const m=ui.modal; if(m){m.busy=true; m.err=''; renderModal();}
+  try{
+    const perm=await Notification.requestPermission(); /* muss direkt nach dem Tippen kommen */
+    if(perm!=='granted') throw new Error('perm');
+    const token=await pushToken(); if(!token) throw new Error('token');
+    await FB.setDoc(D('push',FB.auth.currentUser.uid),pushDoc(token,prefs));
+    ls.set('mk-push',JSON.stringify({on:true,prefs,token}));
+    if(m){m.busy=false; m.info='Benachrichtigungen sind auf diesem Gerät aktiv.';}
+    toast('Benachrichtigungen aktiviert');
+  }catch(e){
+    console.warn(e);
+    if(m){m.busy=false; m.err=e.message==='perm'?'Benachrichtigungen wurden nicht erlaubt.':e.message==='unsupported'?'Dieser Browser unterstützt keine Push-Nachrichten.':'Aktivieren hat nicht geklappt. Bitte später erneut versuchen.';}
+  }
+  renderModal(); renderChrome();
+}
+async function disablePush(){
+  if(AUTH.mode!=='demo'){
+    try{ await FB.deleteDoc(D('push',FB.auth.currentUser.uid)); }catch(e){console.warn(e);}
+    try{ const {m,inst}=await messaging(); await m.deleteToken(inst); }catch(e){}
+  }
+  ls.set('mk-push',JSON.stringify({on:false,prefs:pushPrefs()}));
+  if(ui.modal) ui.modal.info='Benachrichtigungen auf diesem Gerät ausgeschaltet.';
+  renderModal(); renderChrome(); toast('Benachrichtigungen aus');
+}
+async function savePushPrefs(prefs){
+  const l=pushLocal(); ls.set('mk-push',JSON.stringify({...l,prefs}));
+  if(AUTH.mode==='live'&&l.on&&l.token){ try{ await FB.setDoc(D('push',FB.auth.currentUser.uid),pushDoc(l.token,prefs)); }catch(e){console.warn(e); toast('Speichern fehlgeschlagen'); return;} }
+  toast('Einstellungen gespeichert');
+}
+/* Beim Öffnen: Token aktuell halten (Browser erneuern ihn gelegentlich) */
+async function pushRefresh(){
+  if(AUTH.mode!=='live'||LIVE.pushChecked||!FIREBASE_VAPID_KEY) return; LIVE.pushChecked=true;
+  const l=pushLocal(); if(!l.on||!pushCapable()||Notification.permission!=='granted') return;
+  try{ const token=await pushToken(); if(token&&token!==l.token){ await FB.setDoc(D('push',FB.auth.currentUser.uid),pushDoc(token,pushPrefs())); ls.set('mk-push',JSON.stringify({...l,token})); } }catch(e){console.warn(e);}
+}
+function pushModalBody(){
+  const st=pushState(), pr=pushPrefs(), on=st.k==='on'||(st.k==='demo'&&pushActive());
+  const prefs=`<div style="display:grid;gap:4px"><b style="font-size:13px">Benachrichtigen bei</b>${Object.entries(PUSH_PREFS).map(([k,l])=>`<label class="check"><input type="checkbox" name="pPref" value="${k}" ${pr[k]?'checked':''}> ${l}</label>`).join('')}</div>`;
+  const state={on:['ok','Aktiv auf diesem Gerät'],off:['','Auf diesem Gerät aus'],demo:[pushActive()?'ok':'',pushActive()?'Demo: aktiv':'Demo: aus'],
+    nokey:['warn','Push ist für diese App noch nicht eingerichtet'],ios:['warn','Zuerst zum Home-Bildschirm hinzufügen'],unsupported:['warn','Dieser Browser kann keine Push-Nachrichten'],denied:['warn','Benachrichtigungen sind blockiert']}[st.k];
+  let help='';
+  if(st.k==='ios') help=`<p class="hint">Auf dem iPhone funktionieren Push-Nachrichten nur, wenn die App auf dem Home-Bildschirm liegt:</p>
+    <ol class="psteps"><li>In Safari unten auf <b>Teilen</b> tippen</li><li><b>Zum Home-Bildschirm</b> wählen</li><li>Die App über das neue Symbol öffnen, ggf. Code eingeben</li><li>Dort auf die Glocke tippen und aktivieren</li></ol>`;
+  if(st.k==='denied') help=`<p class="hint">${isIOS()?'iPhone: Einstellungen → Mitteilungen → diese App → Mitteilungen erlauben.':'In den Browser-Einstellungen für diese Seite Benachrichtigungen erlauben.'} Danach hier erneut öffnen.</p>`;
+  if(st.k==='nokey') help=`<p class="hint">Ein Admin muss Push einmalig einrichten (Anleitung, Abschnitt „Push-Nachrichten“).</p>`;
+  if(st.k==='unsupported') help=`<p class="hint">Bitte einen aktuellen Browser verwenden – auf dem iPhone Safari ab iOS 16.4.</p>`;
+  if(st.k==='demo') help=`<p class="hint">In der Demo werden keine Nachrichten verschickt. In der echten App bekommt jeder, der hier aktiviert, eine Nachricht aufs Handy – wie bei WhatsApp.</p>`;
+  const btn=['off','demo'].includes(st.k)&&!on?`<button type="button" class="btn" data-act="pushOn">Benachrichtigungen aktivieren</button>`
+    :on?`<button type="button" class="btn ghost sm" data-act="pushOff" style="justify-self:start">Auf diesem Gerät ausschalten</button>`:'';
+  return `<h2>Benachrichtigungen</h2><div class="pstate ${state[0]}">${state[1]}</div>${help}${btn}${['on','off','demo'].includes(st.k)?prefs:''}
+    <p class="hint">Gilt nur für dieses Gerät. Auf jedem Handy einmal aktivieren.</p>`;
+}
+
+/* ---------- Einnahmen & Ausgaben (Kassenbuch, optional) ---------- */
+const FIN_CATS=['Beiträge','Getränke','Sonstiges','Spielerzahlung','Schiedsrichter','Ausrüstung','Startgeld','Feier','Spende','Sponsor'];
+const finOn=()=>FEAT.money&&!!S.financeOn&&can('finance');
+const finList=()=>((S.finance||{}).list||[]).slice().sort((a,b)=>b.date.localeCompare(a.date)||(b.ts||0)-(a.ts||0));
+const finSigned=x=>x.kind==='out'?-x.amount:x.amount;
+const finBalance=()=>r2((+(S.finance||{}).start||0)+finList().reduce((a,x)=>a+finSigned(x),0));
+function financeView(){
+  const y=ui.fy||NOW.getFullYear(), all=finList(), list=all.filter(x=>x.date.startsWith(String(y)));
+  const inc=r2(list.filter(x=>x.kind==='in').reduce((a,x)=>a+x.amount,0)), out=r2(list.filter(x=>x.kind==='out').reduce((a,x)=>a+x.amount,0));
+  const f=ui.finForm;
+  const form=f?`<div class="panel form nobar"><h2>${f.id?'Buchung bearbeiten':f.kind==='in'?'Neue Einnahme':'Neue Ausgabe'}</h2>
+      <div class="seg wide" role="group" aria-label="Art"><button data-act="finKind" data-v="in" aria-pressed="${f.kind==='in'}">Einnahme</button><button data-act="finKind" data-v="out" aria-pressed="${f.kind==='out'}">Ausgabe</button></div>
+      <div class="row" style="flex-wrap:nowrap"><label class="f" style="flex:1.3;min-width:0">Datum<input type="date" id="fnDate" value="${esc(f.date)}"></label><label class="f" style="flex:1;min-width:0">Betrag (€)<input type="number" id="fnAmt" step="0.01" min="0" inputmode="decimal" value="${f.amount||''}"></label></div>
+      <label class="f">Bezeichnung<input type="text" id="fnTitle" maxlength="60" value="${esc(f.title||'')}" placeholder="${f.kind==='in'?'z. B. Spende Sportlerheim':'z. B. Schiedsrichter Heimspiel'}"></label>
+      <label class="f">Kategorie<input type="text" id="fnCat" maxlength="30" list="finCats" value="${esc(f.cat||'')}" placeholder="optional"><datalist id="finCats">${FIN_CATS.map(c=>`<option value="${c}">`).join('')}</datalist></label>
+      <label class="f">Notiz<input type="text" id="fnNote" maxlength="120" value="${esc(f.note||'')}" placeholder="optional"></label>
+      <div class="row"><button class="btn" data-act="finSave">Speichern</button><button class="btn ghost" data-act="finCancel">Abbrechen</button>${f.id?(ui.confirmDel==='fin:'+f.id?confirmBox('fin:'+f.id,'','Buchung löschen?'):`<button class="edit" data-act="askDel" data-v="fin:${f.id}">Löschen</button>`):''}</div></div>`:'';
+  let lastM='';
+  const rows=list.map(x=>{const m=x.date.slice(0,7); const head=m!==lastM?`<div class="pgh" style="margin-top:6px">${MONTHS[+m.slice(5)-1]} ${m.slice(0,4)}</div>`:''; lastM=m;
+    return head+`<button class="p" data-act="finEdit" data-v="${x.id}" style="text-align:left"><span class="n">${esc(x.title||'(ohne Bezeichnung)')}<div>${fmtShort(x.date)}${x.cat?' · '+esc(x.cat):''}${x.ref?' · <span class="badge">gemeldet</span>':''}${x.note?' · '+esc(x.note):''}</div></span>
+      <span class="v" style="color:${x.kind==='out'?'var(--due)':'var(--ok)'}">${x.kind==='out'?'−':'+'}${eur(x.amount)}</span></button>`;}).join('');
+  return `<div class="panel" style="${secStyle('team')}">
+      <button class="back" data-act="goto" data-v="home">‹ Übersicht</button>
+      <div class="summary"><div><div class="lbl">Kassenstand</div><div class="big" style="color:${finBalance()<0?'var(--due)':'inherit'}">${eur(finBalance())}</div></div>
+        <div class="row tight"><button class="btn sm" data-act="finNew" data-v="in">+ Einnahme</button><button class="btn ghost sm" data-act="finNew" data-v="out">+ Ausgabe</button></div></div>
+      <div class="toolbar"><div class="period"><button class="icon" data-act="fyPrev" aria-label="Voriges Jahr">‹</button><b>${y}</b><button class="icon" data-act="fyNext" aria-label="Nächstes Jahr">›</button></div></div>
+      <div class="row" style="justify-content:space-between"><span>Einnahmen <b style="color:var(--ok)">${eur(inc)}</b></span><span>Ausgaben <b style="color:var(--due)">${eur(out)}</b></span><span>Saldo <b>${eur(r2(inc-out))}</b></span></div>
+      <p class="hint">Anfangsbestand ${eur(+(S.finance||{}).start||0)} (änderbar unter Optionen). Bestätigte Zahlungen von Spielern werden hier automatisch als Einnahme gebucht.</p>
+    </div>
+    ${payreqPanel()}
+    ${form}
+    <div class="panel"><h2>Buchungen ${y} · ${list.length}</h2>${list.length?`<div class="plist">${rows}</div>`:'<p class="hint">Noch keine Buchungen in diesem Jahr.</p>'}</div>`;
+}
+function finSave(){
+  const f=ui.finForm; if(!f||!finOn()) return;
+  const amount=r2(parseFloat(String(document.getElementById('fnAmt').value).replace(',','.'))||0), date=document.getElementById('fnDate').value;
+  if(!date) return toast('Bitte ein Datum wählen'); if(!(amount>0)) return toast('Bitte einen Betrag eingeben');
+  const x={date,amount,kind:f.kind==='out'?'out':'in',title:document.getElementById('fnTitle').value.trim(),cat:document.getElementById('fnCat').value.trim(),note:document.getElementById('fnNote').value.trim()};
+  S.finance=S.finance||{start:0,list:[]};
+  if(f.id){ const e=S.finance.list.find(y=>y.id===f.id); if(e) Object.assign(e,x); }
+  else S.finance.list.push({id:uid(),ts:Date.now(),...x});
+  ui.finForm=null; ui.fy=+date.slice(0,4); commit(); toast(x.kind==='in'?'Einnahme gebucht':'Ausgabe gebucht');
+}
+
+/* ---------- Gemeldete Zahlungen (Spieler melden, Kassenwart verrechnet) ---------- */
+const moneyAdmin=()=>FEAT.money&&(can('drinks')||can('team')||can('misc')||can('finance'));
+const PAY_METHODS={paypal:'PayPal',bank:'Überweisung',cash:'Bar',other:'Sonstiges'};
+const payreqs=()=>(AUTH.mode==='live'?(LIVE.payreq||[]):(S.demoPayreq||[])).slice().sort((a,b)=>b.ts-a.ts);
+/* Offene Posten eines Spielers im laufenden Jahr (wie „Dein Stand“), älteste zuerst */
+function openItems(pid){
+  const out=[], y=NOW.getFullYear();
+  [y].forEach(yy=>yearMonths(yy).forEach(k=>{
+    ['drinks','team'].forEach(sec=>{const c=calc(sec,pid,[k]); if(c.open>0) out.push({sec,k,date:k+'-01',amount:c.open,label:`${SEC[sec].short} ${MONTHS[+k.slice(5)-1]} ${k.slice(0,4)}`});});
+  }));
+  S.misc.filter(e=>e.persons.includes(pid)&&!e.paid.includes(pid)&&e.date.startsWith(String(y))).forEach(e=>out.push({sec:'misc',k:e.id,date:e.date,amount:e.amount,label:`${e.title} (${fmtShort(e.date)})`}));
+  return out.sort((a,b)=>a.date.localeCompare(b.date)||a.sec.localeCompare(b.sec));
+}
+function payreqPanel(){
+  if(!moneyAdmin()||!S.payreqOn) return '';
+  const open=payreqs().filter(x=>x.status==='open'), done=payreqs().filter(x=>x.status!=='open').slice(0,5);
+  if(!open.length&&!done.length) return '';
+  const row=x=>`<div class="nitem"><div class="who"><span>${esc(pname(x.p))} · ${eur(x.amount)} · ${PAY_METHODS[x.method]||''}</span><small>${fmtTs(x.ts)}</small></div>
+    ${x.note?`<div class="tx">${esc(x.note)}</div>`:''}
+    ${x.status==='open'?`<div class="row tight"><button class="btn sm" data-act="prCheck" data-v="${x.id}">Prüfen &amp; verrechnen</button></div>`:`<div class="hint">${x.status==='done'?'✓ verrechnet':'abgelehnt'}${x.by?' von '+esc(x.by):''}${x.items&&x.items.length?': '+esc(x.items.join(', ')):''}</div>`}</div>`;
+  return `<div class="panel" style="${secStyle('drinks')}"><h2>Gemeldete Zahlungen${open.length?' · '+open.length+' offen':''}</h2>
+    <div class="news">${open.map(row).join('')}</div>
+    ${done.length?`<details><summary class="hint">Zuletzt bearbeitet</summary><div class="news" style="margin-top:6px">${done.map(row).join('')}</div></details>`:''}</div>`;
+}
+function myPayreqs(pid){
+  const l=payreqs().filter(x=>x.p===pid&&Date.now()-x.ts<60*864e5).slice(0,3);
+  return l.length?`<div class="hint" style="grid-column:1/-1">${l.map(x=>`Gemeldet ${fmtShort(new Date(x.ts).toISOString().slice(0,10))}: ${eur(x.amount)} – ${x.status==='open'?'wird geprüft':x.status==='done'?'✓ verrechnet':'abgelehnt'}`).join('<br>')}</div>`:'';
+}
+function payreqNewBody(){
+  const pid=myPlayer(), y=yearMonths(NOW.getFullYear()), open=r2(MONEY.reduce((a,k)=>a+calc(k,pid,y).open,0));
+  return `<h2>Zahlung melden</h2><p class="hint">Du hast z. B. per PayPal, Überweisung oder bar bezahlt? Melde es hier – der Kassenwart prüft und verrechnet es mit deinen offenen Beträgen.</p>
+    <label class="f">Betrag (€)<input type="number" id="prAmt" step="0.01" min="0.01" inputmode="decimal" value="${open>0?open.toFixed(2):''}"></label>
+    <div class="f" style="font-size:12.5px;color:var(--muted);font-weight:600">Wie bezahlt?<div class="seg wide" role="group" aria-label="Zahlungsart">${['paypal','bank','cash'].map(k=>`<button type="button" data-act="prMethod" data-v="${k}" aria-pressed="${(ui.modal.method||'paypal')===k}">${PAY_METHODS[k]}</button>`).join('')}</div></div>
+    <label class="f">Notiz (optional)<input type="text" id="prNote" maxlength="200" placeholder="z. B. Getränke September und Oktober"></label>`;
+}
+function payreqCheckBody(m){
+  const x=payreqs().find(y=>y.id===m.id); if(!x) return '<h2>Zahlung</h2><p class="hint">Nicht mehr vorhanden.</p>';
+  const items=openItems(x.p).filter(i=>can(i.sec));
+  if(!m.sel){ m.sel=new Set(); let sum=0; items.forEach((it,i)=>{ if(sum+it.amount<=x.amount+0.001){ m.sel.add(i); sum=r2(sum+it.amount);} }); }
+  const sum=r2(items.reduce((a,it,i)=>a+(m.sel.has(i)?it.amount:0),0)), diff=r2(x.amount-sum);
+  return `<h2>Zahlung prüfen</h2>
+    <div class="pstate">${esc(pname(x.p))} · <b>${eur(x.amount)}</b> · ${PAY_METHODS[x.method]||''} · ${fmtTs(x.ts)}</div>
+    ${x.note?`<p class="hint" style="margin:0">„${esc(x.note)}“</p>`:''}
+    <b style="font-size:13px">Als bezahlt markieren</b>
+    ${items.length?`<div style="display:grid;gap:4px;max-height:38vh;overflow:auto">${items.map((it,i)=>`<label class="check"><input type="checkbox" name="prItem" value="${i}" ${m.sel.has(i)?'checked':''}> ${esc(it.label)} – ${eur(it.amount)}</label>`).join('')}</div>`:'<p class="hint">Keine offenen Posten, die du verrechnen darfst.</p>'}
+    <div class="pstate ${Math.abs(diff)<0.005?'ok':'warn'}" id="prSum">Ausgewählt ${eur(sum)} · gemeldet ${eur(x.amount)}${Math.abs(diff)<0.005?' · passt':diff>0?` · ${eur(diff)} mehr bezahlt`:` · ${eur(-diff)} fehlen`}</div>
+    ${S.financeOn&&can('finance')?`<label class="check"><input type="checkbox" id="prBook" checked> ${eur(x.amount)} als Einnahme buchen</label>`:''}`;
+}
+async function payreqSubmit(){
+  const pid=myPlayer(); if(!pid) return toast('Zum Melden deinen persönlichen Spieler-Link öffnen');
+  const amount=r2(parseFloat(String(document.getElementById('prAmt').value).replace(',','.'))||0), note=document.getElementById('prNote').value.trim().slice(0,200), method=ui.modal.method||'paypal';
+  if(!(amount>0)||amount>=10000) return toast('Bitte einen gültigen Betrag eingeben');
+  ui.modal=null; renderModal();
+  if(AUTH.mode==='live'){ try{ await FB.addDoc(FB.collection(FB.db,'payreq'),{p:pid,amount,method,note,ts:FB.serverTimestamp(),status:'open'}); }catch(e){console.warn(e); return toast('Meldung konnte nicht gesendet werden');} }
+  else { S.demoPayreq=S.demoPayreq||[]; S.demoPayreq.push({id:uid(),p:pid,amount,method,note,ts:Date.now(),status:'open'}); save(); }
+  render(); toast('Zahlung gemeldet – der Kassenwart wird benachrichtigt');
+}
+async function payreqResolve(m,ok){
+  const x=payreqs().find(y=>y.id===m.id); if(!x||!moneyAdmin()) return;
+  const items=openItems(x.p).filter(i=>can(i.sec)), chosen=ok?items.filter((_,i)=>m.sel.has(i)):[];
+  const book=ok&&S.financeOn&&can('finance')&&!!(document.getElementById('prBook')||{}).checked;
+  chosen.forEach(it=>{ if(it.sec==='misc'){const e=S.misc.find(z=>z.id===it.k); if(e&&!e.paid.includes(x.p)) e.paid.push(x.p);} else S.paid[it.sec][x.p+'|'+it.k]=true; });
+  if(book){ S.finance=S.finance||{start:0,list:[]}; S.finance.list.push({id:uid(),ts:Date.now(),date:TODAY,kind:'in',amount:x.amount,title:`Zahlung ${pname(x.p)}`,cat:'Spielerzahlung',note:[PAY_METHODS[x.method],x.note].filter(Boolean).join(' · '),ref:x.id}); }
+  const upd={status:ok?'done':'rejected',by:me().name,items:chosen.map(c=>c.label).slice(0,20)};
+  ui.modal=null; renderModal();
+  if(AUTH.mode==='live'){ try{ await FB.updateDoc(D('payreq',x.id),{...upd,done:FB.serverTimestamp()}); }catch(e){console.warn(e); return toast('Keine Berechtigung');} }
+  else Object.assign((S.demoPayreq||[]).find(y=>y.id===x.id),upd);
+  if(chosen.length||book) commit(); else { save(); render(); }
+  logAction(ok?`Zahlung von ${pname(x.p)} (${eur(x.amount)}) verrechnet`:`Zahlungsmeldung von ${pname(x.p)} abgelehnt`);
+  toast(ok?`Verrechnet: ${chosen.length} Posten${book?' · als Einnahme gebucht':''}`:'Meldung abgelehnt');
+}
+
+/* ---------- Umfragen der Mannschaft (von Spielern oder Admins, ohne Termin) ---------- */
+function tpolls(){
+  if(AUTH.mode!=='live') return (S.demoPolls||[]).slice().sort((a,b)=>b.ts-a.ts);
+  const v=LIVE.pvotes||{};
+  return (LIVE.polls||[]).map(x=>({...x,votes:{...(v[x.id]||{})}})).sort((a,b)=>b.ts-a.ts);
+}
+const tpAuthor=x=>x.p?pname(x.p):(x.an||'Admin');
+const tpMine=x=>{const a=myAuthor(); return !!a&&((x.p&&a.p===x.p)||(x.a&&a.a===x.a));};
+const tpCanManage=x=>tpMine(x)||can('events');
+function tpollCard(x){
+  const counts=x.opts.map(()=>0); Object.entries(x.votes||{}).forEach(([pid,i])=>{if(counts[i]!=null&&pById(pid)) counts[i]++;});
+  const total=counts.reduce((a,b)=>a+b,0), mp=myPlayer(), my=mp?(x.votes||{})[mp]:undefined, canVote=x.open&&(AUTH.mode==='demo'||!!mp);
+  const key='tp:'+x.id;
+  if(ui.confirmDel===key) return `<div class="tpoll">${confirmBox(key,esc(x.q),'Umfrage löschen?')}</div>`;
+  const names=ui.showNames===key?`<div class="names">${x.opts.map((o,i)=>{const l=sorted().filter(p=>(x.votes||{})[p.id]===i).map(p=>p.name); return `<div><b>${esc(o)} (${l.length}):</b> ${l.length?esc(l.join(', ')):'–'}</div>`;}).join('')}</div>`:'';
+  return `<div class="tpoll"><div class="tph"><span>Umfrage von ${esc(tpAuthor(x))}</span><span>${fmtTs(x.ts)}${x.open?'':' · beendet'}</span></div>
+    <div class="pq">${esc(x.q)}</div>
+    ${x.open?voterLine():''}
+    <div class="vopts">${x.opts.map((o,i)=>`<button class="vopt ${my===i?'mine':''}" data-act="tvote" data-v="${x.id}" data-i="${i}" ${canVote?'':'disabled'}><span>${my===i?'✓ ':''}${esc(o)}</span><b>${counts[i]}</b><i style="width:${total?Math.round(counts[i]/total*100):0}%"></i></button>`).join('')}</div>
+    <div class="pmeta">${total} von ${S.players.length} haben geantwortet · <button class="edit" data-act="pollNames" data-v="${key}">${ui.showNames===key?'Namen ausblenden':'Namen anzeigen'}</button>
+      ${tpCanManage(x)?`${x.open?`<button class="edit" data-act="tpClose" data-v="${x.id}">Beenden</button>`:`<button class="edit" data-act="tpOpen" data-v="${x.id}">Wieder öffnen</button>`}<button class="edit" data-act="askDel" data-v="${key}">Löschen</button>`:''}</div>${names}</div>`;
+}
+function tpollBlock(){
+  if(isPublic()||!FEAT.events) return '';
+  const all=tpolls(), open=all.filter(x=>x.open), old=all.filter(x=>!x.open&&Date.now()-x.ts<60*864e5);
+  const canCreate=!!myPlayer()||isAdmin();
+  if(!open.length&&!old.length&&!canCreate) return '';
+  const form=ui.tpForm?`<div class="panel form nobar"><h2>Neue Umfrage</h2>
+      <p class="hint">Alle sehen die Umfrage auf der Übersicht und können abstimmen. Wer Benachrichtigungen aktiviert hat, bekommt eine Nachricht.</p>
+      <label class="f">Frage<input type="text" id="tpQ" maxlength="200" placeholder="z. B. Grillen nach dem letzten Heimspiel?"></label>
+      <label class="f">Antworten (eine pro Zeile, 2 bis 6)<textarea id="tpO" placeholder="Ja&#10;Nein&#10;Vielleicht">Ja
+Nein</textarea></label>
+      <div class="row"><button class="btn" data-act="tpSave">Umfrage starten</button><button class="btn ghost" data-act="tpCancel">Abbrechen</button></div></div>`:'';
+  return `<div class="hd">Umfragen ${canCreate&&!ui.tpForm?'<button class="chip" data-act="tpNew" style="font-family:var(--body);text-transform:none;letter-spacing:0">+ Umfrage</button>':''}</div>
+    ${form}${open.length?`<div class="news">${open.map(tpollCard).join('')}</div>`:(ui.tpForm?'':'<p class="hint" style="margin:0">Gerade läuft keine Umfrage.</p>')}
+    ${old.length?`<button class="chip" data-act="tpOld" style="justify-self:start">${ui.tpOld?'Beendete ausblenden':`Beendete Umfragen (${old.length})`}</button>${ui.tpOld?`<div class="news">${old.map(tpollCard).join('')}</div>`:''}`:''}`;
+}
+async function tpSave(){
+  const q=(document.getElementById('tpQ').value||'').trim().slice(0,200), opts=[...new Set((document.getElementById('tpO').value||'').split('\n').map(x=>x.trim().slice(0,60)).filter(Boolean))];
+  if(!q) return toast('Bitte eine Frage eingeben'); if(opts.length<2||opts.length>6) return toast('Bitte 2 bis 6 Antworten eintragen');
+  const mp=myPlayer(), a=me(); if(!mp&&!isAdmin()) return toast('Zum Erstellen deinen persönlichen Spieler-Link öffnen');
+  const who=mp?{p:mp}:{a:a.uid,an:a.name};
+  if(AUTH.mode==='live'){
+    try{ await FB.addDoc(FB.collection(FB.db,'polls'),{q,opts,open:true,ts:FB.serverTimestamp(),...who}); }catch(e){console.warn(e); return toast('Umfrage konnte nicht gestartet werden');}
+  }else{ S.demoPolls=S.demoPolls||[]; S.demoPolls.push({id:uid(),q,opts,open:true,ts:Date.now(),votes:{},...who}); save(); }
+  ui.tpForm=false; render(); toast('Umfrage gestartet');
+}
+async function tpVote(x,i){
+  const p=myPlayer(); if(!p) return toast(AUTH.mode==='live'?'Zum Abstimmen deinen persönlichen Spieler-Link öffnen':'Bitte zuerst oben deinen Namen wählen');
+  if(!x.open) return; const remove=(x.votes||{})[p]===i;
+  if(AUTH.mode==='live'){
+    LIVE.pvotes=LIVE.pvotes||{}; const v=(LIVE.pvotes[x.id]=LIVE.pvotes[x.id]||{}); if(remove) delete v[p]; else v[p]=i; render();
+    try{ const ref=D('pvotes',`${x.id}_${p}`); if(remove) await FB.deleteDoc(ref); else await FB.setDoc(ref,{q:x.id,p,i}); }catch(e){console.warn(e); toast('Antwort konnte nicht gespeichert werden');}
+  }else{ const d=(S.demoPolls||[]).find(y=>y.id===x.id); d.votes=d.votes||{}; if(remove) delete d.votes[p]; else d.votes[p]=i; save(); render(); }
+  toast(remove?'Antwort zurückgenommen':`Antwort gespeichert: ${x.opts[i]}`);
+}
+async function tpSetOpen(x,open){
+  if(!tpCanManage(x)) return;
+  if(AUTH.mode==='live'){ try{await FB.updateDoc(D('polls',x.id),{open});}catch(e){console.warn(e); return toast('Keine Berechtigung');} }
+  else { const d=S.demoPolls.find(y=>y.id===x.id); d.open=open; save(); render(); }
+  toast(open?'Umfrage wieder geöffnet':'Umfrage beendet');
+}
+async function tpDelete(id){
+  const x=tpolls().find(y=>y.id===id); if(!x||!tpCanManage(x)) return; ui.confirmDel=null;
+  if(AUTH.mode==='live'){ try{await FB.deleteDoc(D('polls',id)); if(can('events')) Object.keys(x.votes||{}).forEach(pid=>FB.deleteDoc(D('pvotes',`${id}_${pid}`)).catch(()=>{}));}catch(e){return toast('Keine Berechtigung');} }
+  else { S.demoPolls=S.demoPolls.filter(y=>y.id!==id); save(); }
+  render(); toast('Umfrage gelöscht');
+}
+
+/* ---------- Nachrichten an alle ---------- */
+const newsList=()=>(AUTH.mode==='live'?(LIVE.news||[]):(S.demoNews||[])).slice().sort((a,b)=>b.ts-a.ts);
+function newsBlock(){
+  if(isPublic()) return '';
+  const all=newsList(), adm=isAdmin(), recent=all.filter(n=>Date.now()-n.ts<30*864e5);
+  const shown=ui.allNews?all:recent.slice(0,3);
+  if(!shown.length&&!adm) return '';
+  const form=ui.newsForm&&adm?`<div class="panel form nobar"><h2>Nachricht an alle</h2>
+      <p class="hint">Erscheint hier auf der Übersicht und kommt als Push-Nachricht bei allen an, die Benachrichtigungen aktiviert haben.</p>
+      <label class="f">Text<textarea id="newsText" maxlength="500" placeholder="z. B. Training fällt heute wegen Platzsperre aus."></textarea></label>
+      <div class="row"><button class="btn" data-act="newsSend">Senden</button><button class="btn ghost" data-act="newsCancel">Abbrechen</button></div></div>`:'';
+  const items=shown.map(n=>ui.newsDel===n.id?`<div class="nitem">${confirmBoxNews(n)}</div>`
+    :`<div class="nitem"><div class="who"><span>${esc(n.an||'Admin')}</span><span class="row tight"><small>${fmtTs(n.ts)}</small>${adm?`<button class="x" data-act="newsDel" data-v="${n.id}" aria-label="Nachricht löschen">×</button>`:''}</span></div><div class="tx">${esc(n.t)}</div></div>`).join('');
+  return `<div class="hd">Infos ${adm&&!ui.newsForm?'<button class="chip" data-act="newsNew" style="font-family:var(--body);text-transform:none;letter-spacing:0">+ Nachricht an alle</button>':''}</div>
+    ${form}${items?`<div class="news">${items}</div>`:(adm&&!ui.newsForm?'<p class="hint" style="margin:0">Noch keine Nachrichten. Mit „Nachricht an alle“ erreichst du die ganze Mannschaft.</p>':'')}
+    ${all.length>shown.length||ui.allNews?`<button class="chip" data-act="newsAll" style="justify-self:start">${ui.allNews?'Weniger anzeigen':`Ältere Nachrichten (${all.length-shown.length})`}</button>`:''}`;
+}
+const confirmBoxNews=n=>`<div class="row tight">Nachricht löschen? <button class="btn danger sm" data-act="newsDelGo" data-v="${n.id}">Löschen</button><button class="btn ghost sm" data-act="newsDelNo">Abbrechen</button></div>`;
+async function sendNews(){
+  const ta=document.getElementById('newsText'), t=(ta&&ta.value||'').trim().slice(0,500), a=me();
+  if(!t) return toast('Bitte einen Text eingeben'); if(!a||!isAdmin()) return;
+  if(AUTH.mode==='live'){
+    try{ await FB.addDoc(FB.collection(FB.db,'news'),{t,a:a.uid,an:a.name,ts:FB.serverTimestamp()}); logAction('Nachricht an alle gesendet'); }
+    catch(e){console.warn(e); return toast('Senden fehlgeschlagen');}
+  }else{ S.demoNews=S.demoNews||[]; S.demoNews.push({id:uid(),t,a:a.uid,an:a.name,ts:Date.now()}); logAction('Nachricht an alle gesendet'); save(); }
+  ui.newsForm=false; render(); toast(AUTH.mode==='live'?'Nachricht gesendet':'Demo: Nachricht gespeichert – Push gibt es nur in der echten App');
+}
+async function delNews(id){
+  ui.newsDel=null;
+  if(AUTH.mode==='live'){ try{await FB.deleteDoc(D('news',id));}catch(e){return toast('Keine Berechtigung');} }
+  else { S.demoNews=(S.demoNews||[]).filter(n=>n.id!==id); save(); }
+  render(); toast('Nachricht gelöscht');
+}
+
 /* ---------- Kommentare ---------- */
 function commentsOf(eid,k){
   const all=AUTH.mode==='live'?LIVE.comments:(S.demoComments||[]);
@@ -1172,16 +1541,21 @@ function renderChrome(){
   const words=(S.teamName||'Unsere Mannschaft').trim().split(/\s+/);
   document.getElementById('teamName').innerHTML=words.length>1?`${esc(words.slice(0,-1).join(' '))} <em>${esc(words[words.length-1])}</em>`:`<em>${esc(words[0])}</em>`;
   const y=NOW.getFullYear(), sy=NOW.getMonth()>=6?y:y-1;
-  document.getElementById('season').textContent=`${S.appName||'Mannschaftskasse'}${S.showSeason?` · Saison ${sy}/${String(sy+1).slice(2)}`:''}${AUTH.mode==='demo'?' · Demo':''}`;
+  document.getElementById('season').textContent=`${S.appName||'Mannschaftskasse'}${S.showSeason?` · ${seasonLabel()}`:''}${AUTH.mode==='demo'?' · Demo':''}`;
   document.title=S.appName||'Mannschaftskasse';
   let am=document.querySelector('meta[name="apple-mobile-web-app-title"]'); if(am) am.content=(S.appName||'Kasse').slice(0,20);
+  const bb=document.getElementById('bellBtn');
+  if(bb){ const show=!gated&&!isPublic()&&(AUTH.mode==='demo'||!!AUTH.member||!!AUTH.admin);
+    bb.hidden=!show; bb.className='adminbtn'+(pushActive()?' on':'');
+    bb.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true">${ICON.bell}</svg>`;
+    bb.setAttribute('aria-label',pushActive()?'Benachrichtigungen: an':'Benachrichtigungen einrichten'); }
   const ab=document.getElementById('adminBtn');
   ab.className='adminbtn'+(isAdmin()?' on':(me()?' half':''));
   ab.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true">${isAdmin()?ICON.unlock:ICON.lock}</svg>`;
-  ab.setAttribute('aria-label',isAdmin()?'Zum Lesemodus wechseln':(me()?'Zur Admin-Ansicht wechseln':'Admin-Anmeldung'));
+  ab.setAttribute('aria-label',isAdmin()?(myPlayer()?'Zur Spieleransicht wechseln':'Zum Lesemodus wechseln'):(me()?'Zur Admin-Ansicht wechseln':'Admin-Anmeldung'));
   const tabs=(gated?[]:isPublic()?['home','events']:(isFull()?['home','events','roster','settings']:['home','events','roster']))
     .filter(k=>(k!=='events'||FEAT.events)&&(k!=='roster'||FEAT.roster));
-  const cur=(ui.person||MONEY.includes(ui.tab))?'home':((ui.lineup||ui.evDetail)?'events':ui.tab);
+  const cur=(ui.person||MONEY.includes(ui.tab)||ui.tab==='finance'||ui.tab==='payreqs')?'home':((ui.lineup||ui.evDetail)?'events':ui.tab);
   const lbl=k=>k==='settings'?'Optionen':k==='roster'?'Team':SEC[k].label;
   document.getElementById('tabs').innerHTML=tabs.map(k=>`<button role="tab" data-tab="${k}" aria-selected="${cur===k}">${lbl(k)}</button>`).join('');
   document.getElementById('tabbar').innerHTML=(tabs.length>1?tabs:[]).map(k=>`<button data-tab="${k}" aria-selected="${cur===k}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg><span>${lbl(k)}</span></button>`).join('');
@@ -1292,10 +1666,11 @@ function evTitle(e){
 }
 function mini(e){
   const [,m,d]=e.date.split('-'), g=e.type==='game';
-  const lb=g?`Spiel · ${e.home?'Heim':'Auswärts'}`:ETYPE[e.type];
+  const lb=g?`Spiel · ${e.home?'Heim':'Auswärts'}`:e.type==='training'?`Training · ${e.cancel?'Fällt aus':e.venue==='in'?'Halle':'Draußen'}`:ETYPE[e.type];
   const title=g?(e.home?`gegen ${e.title}`:`bei ${e.title}`):evTitle(e);
   const bits=[e.time?e.time+' Uhr':''];
-  if(e.poll&&!(isPublic()&&e.type==='event')){const c=pollCounts(e); bits.push(isRsvp(e)?`<b>✓ ${c[0]}</b> · ✗ ${c[1]} · ? ${c[2]}`:`${c.reduce((a,b)=>a+b,0)} Antworten`);}
+  if(e.cancel) bits.push('<b style="color:var(--due)">fällt aus</b>');
+  else if(e.poll&&!(isPublic()&&e.type==='event')){const c=pollCounts(e); bits.push(isRsvp(e)?`<b>✓ ${c[0]}</b> · ✗ ${c[1]} · ? ${c[2]}`:`${c.reduce((a,b)=>a+b,0)} Antworten`);}
   else if(e.place) bits.push(esc(e.place));
   const sq=!isPublic()&&g&&e.squad&&e.squad.ids.length;
   const target=sq?`data-act="lineup" data-v="${e.id}"`:isPublic()?`data-act="goto" data-v="events"`:`data-act="evOpen" data-v="${e.id}"`;
@@ -1323,7 +1698,7 @@ function mineCard(yr){
   return `<div class="mine">${nrBox(p)}<div><div class="lb">Dein Stand</div><div class="nm">${esc(p.name)}</div></div>
     <div class="amt" style="color:${open>0?'var(--due)':'var(--ok)'}">${open>0?eur(open):'✓ alles bezahlt'}</div>
     <div class="acts2">${url?`<a class="btn pp sm" href="${url}" target="_blank" rel="noopener">PayPal ${eur(open)}</a><button class="btn ghost sm" data-act="copy" data-v="${esc(txt)}">Verwendungszweck kopieren</button>`:''}
-      <button class="btn ghost sm" data-act="person" data-id="${pid}">Details</button></div></div>`;
+      ${S.payreqOn?'<button class="btn ghost sm" data-act="prNew">Zahlung melden</button>':''}<button class="btn ghost sm" data-act="person" data-id="${pid}">Details</button></div>${S.payreqOn?myPayreqs(pid):''}</div>`;
 }
 function myShifts(upcoming){
   const pid=myPlayer(); if(!pid||isPublic()||!FEAT.events) return '';
@@ -1335,7 +1710,8 @@ function myShifts(upcoming){
     return `<button class="mini evt" data-act="shiftsOpen" data-v="${e.id}"><span class="md"><b>${+d}</b><i>${wd(e.date)} · ${MONTHS[+m-1].slice(0,3)}</i></span>
       <span class="mt"><span class="ml">${esc(evTitle(e))}</span><span class="mv">${esc(s.name)}</span><span class="ms">${shiftTime(s)||'Uhrzeit folgt'}</span></span></button>`;}).join('')}</div>`;
 }
-function homeView(){
+function homeView(){ return newsBlock()+tpollBlock()+homeMain(); }
+function homeMain(){
   const y=NOW.getFullYear(), yr=yearMonths(y), cm=[mk(y,NOW.getMonth())];
   const upcoming=S.events.filter(e=>e.date>=TODAY).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
   if(!FEAT.money){ /* Variante ohne Geld-Themen: Termine im Mittelpunkt */
@@ -1362,7 +1738,9 @@ function homeView(){
       ${FEAT.roster?'<button class="chip" data-act="goto" data-v="roster" style="justify-self:start">Mannschaft ansehen ›</button>':''}`;
   }
   if(!S.players.length&&isFull()) return `<div class="panel"><h2>Los geht's</h2><p class="hint">Trag unter Optionen die Spieler mit Spitznamen ein, wähle die Vereinsfarben und verschicke die Einladungen.</p><button class="btn" data-act="goto" data-v="settings" style="justify-self:start">Zu den Optionen</button></div>`;
-  return `${mineCard(yr)}<div class="kassen">${tiles}</div>
+  const nOpenPr=moneyAdmin()&&S.payreqOn?payreqs().filter(x=>x.status==='open').length:0;
+  const finTile=finOn()?`<button class="gesamt" data-act="goto" data-v="finance" style="text-align:left;border:0;width:100%"><div><div class="lb">Einnahmen &amp; Ausgaben</div><div class="big">${eur(finBalance())}</div></div><div class="side"><div>Kassenstand</div><div><b>Buchungen ›</b></div></div></button>`:'';
+  return `${mineCard(yr)}${nOpenPr?`<button class="chip" data-act="goto" data-v="${finOn()?'finance':'payreqs'}" style="justify-self:start;border-color:var(--due);color:var(--due)">💶 ${nOpenPr} gemeldete Zahlung${nOpenPr>1?'en':''} prüfen ›</button>`:''}<div class="kassen">${tiles}</div>${finTile}
     <div class="gesamt">
       <div><div class="lb">Gesamt offen · ${y} bis ${MONTHS[NOW.getMonth()]}</div><div class="big">${eur(gesamt)}</div></div>
       <div class="side"><div>${MONTHS[NOW.getMonth()]}: <b>${eur(gesamtMonat)}</b></div><div><b>${debt.length}</b> von ${S.players.length} offen</div></div>
@@ -1527,9 +1905,10 @@ function monthTable(sec){
       return `<td>${statusEl('misc',pd?'paid':'open',num(c.e.amount),`data-act="entryPaid" data-id="${r.p.id}" data-v="${c.e.id}"`)}</td>`;
     }).join('');
     const url=r.open>0?paypalUrl(r.open):'';
+    /* Offen und Status in einer Spalte: der offene Betrag ist gleichzeitig der Knopf bezahlt/offen */
+    const st=r.soll>0?statusEl(sec,r.open===0?'paid':'open',r.open===0?'✓':num(r.open),`data-act="cell" data-id="${r.p.id}" data-v="${k}" aria-label="${esc(r.p.name)}: ${r.open===0?'bezahlt':'offen '+num(r.open)}"`):'<span class="dash">–</span>';
     return `<tr><td class="nm">${nameBtn(r.p)}</td>${cells}<td class="sep">${num(r.soll)}</td>
-      <td class="tot">${r.open>0?`<span style="color:var(--due)">${num(r.open)}</span>${url?`<a href="${url}" target="_blank" rel="noopener">PayPal</a>`:''}`:`<span style="color:var(--ok)">0,00</span>`}</td>
-      <td>${r.soll>0?statusEl(sec,r.open===0?'paid':'open',r.open===0?'✓ bezahlt':'offen',`data-act="cell" data-id="${r.p.id}" data-v="${k}"`):'–'}</td></tr>`;
+      <td class="tot">${st}${url?`<a class="pp" href="${url}" target="_blank" rel="noopener">PayPal</a>`:''}</td></tr>`;
   }).join('');
   const emptyMsg=sec==='drinks'?'Keine Getränketage':'Keine Posten';
   return `<div class="panel">
@@ -1538,11 +1917,11 @@ function monthTable(sec){
     ${periodBar()}
     ${sec!=='team'&&!cols.length?`<p class="hint">${emptyMsg} im ${periodLabel()}.</p>`:`
     <div class="tablewrap"><table class="grid">
-      <thead><tr><th class="nm">Name</th>${cols.map(c=>`<th class="ent" title="${esc(c.h)}">${esc(c.h)}<small>${esc(c.s)}</small></th>`).join('')}<th class="sep">Soll</th><th class="tot">Offen</th><th>Status</th></tr></thead>
+      <thead><tr><th class="nm">Name</th>${cols.map(c=>`<th class="ent" title="${esc(c.h)}">${esc(c.h)}<small>${esc(c.s)}</small></th>`).join('')}<th class="sep">Soll</th><th class="tot">Offen</th></tr></thead>
       <tbody>${rows}</tbody>
-      <tfoot><tr><td class="nm">${sec==='drinks'?'Personen':sec==='misc'?'Beteiligt':'Summe'}</td>${colCount.map(n=>`<td>${n}</td>`).join('')}<td class="sep">${num(sumSoll)}</td><td class="tot" style="color:var(--due)">${num(sumOpen)}</td><td></td></tr></tfoot>
+      <tfoot><tr><td class="nm">${sec==='drinks'?'Personen':sec==='misc'?'Beteiligt':'Summe'}</td>${colCount.map(n=>`<td>${n}</td>`).join('')}<td class="sep">${num(sumSoll)}</td><td class="tot" style="color:var(--due)">${num(sumOpen)}</td></tr></tfoot>
     </table></div>
-    <div class="legend">${sec==='drinks'?'<span><span class="on">●</span> anwesend</span>':''}${can(sec)?'<span>Status antippen = bezahlt/offen</span>':''}${hidden?`<span>${hidden} Personen ohne Betrag ausgeblendet</span>`:''}</div>`}
+    <div class="legend">${sec==='drinks'?'<span><span class="on">●</span> anwesend</span>':''}${can(sec)?'<span>Betrag unter „Offen“ antippen = bezahlt/offen</span>':''}${hidden?`<span>${hidden} Personen ohne Betrag ausgeblendet</span>`:''}</div>`}
   </div>`;
 }
 
@@ -1649,13 +2028,21 @@ function shiftsPanel(e){
     ${list.length?`<div class="shifts">${rows}</div>`:''}
   </div>`;
 }
+/* Training: Halle/Draußen und „fällt aus“ */
+const trBadges=e=>e.type!=='training'?'':`${e.cancel?'<span class="badge cx">Fällt aus</span>':''}<span class="badge ${e.venue==='in'?'vin':''}">${e.venue==='in'?'Halle':'Draußen'}</span>`;
+function trQuick(e){
+  if(e.type!=='training'||!can('events')||e.date<TODAY) return '';
+  return `<div class="tquick"><div class="seg" role="group" aria-label="Ort"><button data-act="trVenue" data-v="${e.id}" data-x="out" aria-pressed="${e.venue!=='in'}">Draußen</button><button data-act="trVenue" data-v="${e.id}" data-x="in" aria-pressed="${e.venue==='in'}">Halle</button></div>
+    <button class="chip" data-act="trCancel" data-v="${e.id}" aria-pressed="${!!e.cancel}">${e.cancel?'Findet doch statt':'Fällt aus'}</button></div>`;
+}
 function evCard(e,cls,isNext){
   const key='event:'+e.id, adm=can('events');
+  if(e.cancel) cls=(cls||'')+' cancel';
   const [,m,d]=e.date.split('-');
   const typeBadge=e.type==='game'?(e.home?'Spiel · Heim':'Spiel · Auswärts'):ETYPE[e.type];
   if(isPublic()) return `<div class="ev ${cls}"><div class="cal"><span>${wd(e.date)}</span><b>${+d}</b><span>${MONTHS[+m-1].slice(0,3)}</span></div>
     <div style="min-width:0"><div class="t">${esc(evTitle(e))}</div><div class="s">${[e.time?e.time+' Uhr':'',esc(e.place)].filter(Boolean).join(' · ')}</div>
-    <div class="tags">${isNext?'<span class="badge nx">Nächster</span>':''}<span class="badge ${e.type==='training'?'tr':''}">${typeBadge}</span>${reportOf(e.id)&&reportOf(e.id).result?`<span class="badge">${esc(reportOf(e.id).result)}</span>`:''}</div></div>
+    <div class="tags">${isNext?'<span class="badge nx">Nächster</span>':''}<span class="badge ${e.type==='training'?'tr':''}">${typeBadge}</span>${trBadges(e)}${reportOf(e.id)&&reportOf(e.id).result?`<span class="badge">${esc(reportOf(e.id).result)}</span>`:''}</div></div>
     ${reportOf(e.id)?`<details class="pubrep"><summary>${e.type==='game'?'Spielbericht':'Bericht'}</summary><div class="report">${esc(reportOf(e.id).text)}</div></details>`:''}</div>`;
   const nc=cmtCount(e.id);
   const foot=[e.result?`Ergebnis ${esc(e.result)}`:'',reportOf(e.id)?'Bericht':'',e.comments||nc?`💬 ${nc}`:''].filter(Boolean).join(' · ');
@@ -1665,8 +2052,8 @@ function evCard(e,cls,isNext){
     <div style="min-width:0"><div class="t">${esc(evTitle(e))}</div>
       <div class="s">${[e.time?e.time+' Uhr':'',esc(e.place)].filter(Boolean).join(' · ')}</div>
       ${e.note?`<div class="s">${esc(e.note)}</div>`:''}
-      <div class="tags">${isNext?'<span class="badge nx">Nächster</span>':''}<span class="badge ${e.type==='training'?'tr':''}">${typeBadge}</span></div></div>
-    ${acts}${ui.confirmDel===key?confirmBox(key,'',e.poll&&Object.keys(e.poll.votes||{}).length?'Termin löschen? Die Umfrage wird vorher gespeichert.':'Termin löschen?'):''}${squadLine(e)}${shiftLine(e)}${pollBox(e,false)}
+      <div class="tags">${isNext?'<span class="badge nx">Nächster</span>':''}<span class="badge ${e.type==='training'?'tr':''}">${typeBadge}</span>${trBadges(e)}</div></div>
+    ${acts}${ui.confirmDel===key?confirmBox(key,'',e.poll&&Object.keys(e.poll.votes||{}).length?'Termin löschen? Die Umfrage wird vorher gespeichert.':'Termin löschen?'):''}${trQuick(e)}${squadLine(e)}${shiftLine(e)}${e.cancel?'<div class="cxnote">Dieses Training fällt aus.</div>':pollBox(e,false)}
     <div class="evfoot"><button class="btn ghost sm" data-act="evOpen" data-v="${e.id}">${foot?foot+' · ':''}Details ›</button></div></div>`;
 }
 const VIS={team:'Nur Mannschaft',all:'Alle (auch öffentlich)',admin:'Nur Admins'};
@@ -1695,13 +2082,13 @@ function evDetailView(){
       <button class="back" data-act="evBack">‹ Termine</button>
       <div class="row" style="flex-wrap:nowrap;align-items:center;gap:12px"><div class="cal" style="width:56px;flex:none"><span>${wd(e.date)}</span><b>${+d}</b><span>${MONTHS[+m-1].slice(0,3)}</span></div>
         <div style="min-width:0"><h2>${esc(evTitle(e))}</h2><div class="hint">${[e.time?e.time+' Uhr':'',esc(e.place)].filter(Boolean).join(' · ')}</div></div></div>
-      <div class="row tight"><span class="badge ${e.type==='training'?'tr':''}">${typeBadge}</span>${adm?`<button class="edit" data-act="editEvent" data-v="${e.id}">Termin bearbeiten</button>`:''}${adm&&e.type!=='event'&&!shiftsOf(e).length&&!ui.shiftEdit?`<button class="edit" data-act="shiftEdit" data-v="new">+ Einteilung</button>`:''}</div>
+      <div class="row tight"><span class="badge ${e.type==='training'?'tr':''}">${typeBadge}</span>${trBadges(e)}${adm?`<button class="edit" data-act="editEvent" data-v="${e.id}">Termin bearbeiten</button>`:''}${adm&&e.type!=='event'&&!shiftsOf(e).length&&!ui.shiftEdit?`<button class="edit" data-act="shiftEdit" data-v="new">+ Einteilung</button>`:''}</div>
       ${e.note?`<p style="margin:0">${esc(e.note)}</p>`:''}
       ${squadLine(e)}
     </div>
     ${shiftsPanel(e)}
     ${reportPanel}
-    ${e.poll?`<div class="panel">${pollBox(e,true)}</div>`:''}
+    ${e.cancel?'<div class="panel"><p class="cxnote" style="margin:0">Dieses Training fällt aus.</p></div>':e.poll?`<div class="panel">${pollBox(e,true)}</div>`:''}
     ${e.comments?`<div class="panel">${commentsBlock(e,'event')}</div>`:(adm?'<p class="hint">Kommentare sind für diesen Termin ausgeschaltet (Termin bearbeiten → „Kommentare erlauben“).</p>':'')}`;
 }
 function eventForm(){
@@ -1724,8 +2111,11 @@ function eventForm(){
     ${t==='game'?`<div class="seg wide" role="group" aria-label="Heim oder Auswärts"><button data-act="evHome" data-v="1" aria-pressed="${f.home}">Heimspiel</button><button data-act="evHome" data-v="0" aria-pressed="${!f.home}">Auswärts</button></div>`:''}
     <label class="f">Ort<input type="text" id="ePlace" value="${esc(f.place)}" placeholder="${t==='event'?'z. B. Vereinsheim':'z. B. Sportplatz'}"></label>
     <label class="f">Notiz<input type="text" id="eNote" value="${esc(f.note)}" placeholder="z. B. Treffpunkt, Fahrgemeinschaften"></label>
-    ${t==='training'&&!ui.editKey?`<label class="check"><input type="checkbox" id="eRepeat" ${f.repeat?'checked':''}> Wöchentlich wiederholen</label>
-      ${f.repeat?`<label class="f" style="max-width:220px">Anzahl Wochen (inkl. dieser)<input type="number" id="eWeeks" min="2" max="40" inputmode="numeric" value="${f.weeks}"></label>`:''}`:''}
+    ${t==='training'?`<div class="f" style="font-size:12.5px;color:var(--muted);font-weight:600">Ort<div class="seg wide" role="group" aria-label="Halle oder draußen"><button data-act="evVenue" data-v="out" aria-pressed="${f.venue!=='in'}">Draußen</button><button data-act="evVenue" data-v="in" aria-pressed="${f.venue==='in'}">Halle</button></div></div>`:''}
+    ${t==='training'&&ui.editKey?`<label class="check"><input type="checkbox" id="eCancel" ${f.cancel?'checked':''}> Training fällt aus</label>`:''}
+    ${t==='training'&&!ui.editKey?`<label class="check"><input type="checkbox" id="eRepeat" ${f.repeat?'checked':''}> Jede Woche wiederholen (Serie)</label>
+      ${f.repeat?`<label class="f" style="max-width:240px">Bis einschließlich<input type="date" id="eUntil" value="${esc(f.until||shiftDate(ui.date||TODAY,364))}"></label>
+        <p class="hint">Legt jede Woche am selben Wochentag ein Training an (${seriesDates(ui.date||TODAY,f.until||shiftDate(ui.date||TODAY,364)).length} Termine, höchstens 60). Einzelne Trainings kannst du danach mit einem Tipp absagen oder in die Halle verlegen.</p>`:''}`:''}
     ${t==='game'?'<p class="hint">Kader, Aufstellung, Ergebnis und Spielbericht legst du nach dem Speichern über den Termin an.</p>':''}
     <label class="check"><input type="checkbox" id="eComments" ${f.comments?'checked':''}> Kommentare erlauben</label>
     <label class="check"><input type="checkbox" id="ePoll" ${f.poll?'checked':''}> Umfrage hinzufügen</label>
@@ -1734,15 +2124,16 @@ function eventForm(){
   </div>`;
 }
 const canSeeStats=()=>!isPublic()&&(S.statsPublic||can('events'));
-function seasonStart(){const y=NOW.getFullYear();return (NOW.getMonth()>=6?y:y-1)+'-07-01';}
-function seasonLabel(){const y=+seasonStart().slice(0,4);return `Saison ${String(y).slice(2)}/${String(y+1).slice(2)}`;}
+/* Auswertungszeitraum: Kalenderjahr (Standard) oder Saison Juli–Juni, einstellbar unter Optionen → Verein */
+function seasonStart(){const y=NOW.getFullYear(); return S.statPeriod==='season'?(NOW.getMonth()>=6?y:y-1)+'-07-01':y+'-01-01';}
+function seasonLabel(){const y=+seasonStart().slice(0,4); return S.statPeriod==='season'?`Saison ${String(y).slice(2)}/${String(y+1).slice(2)}`:`${y}`;}
 function evTabs(){
   if(!canSeeStats()) return '';
   return `<div class="seg wide" role="group" aria-label="Ansicht"><button data-act="evView" data-v="list" aria-pressed="${ui.evView==='list'}">Termine</button><button data-act="evView" data-v="stats" aria-pressed="${ui.evView==='stats'}">Teilnahme</button></div>`;
 }
 function statsView(){
   const type=ui.statType, from=ui.statAll?'0000':seasonStart(), g=type==='game';
-  const evs=S.events.filter(e=>e.type===type&&e.date<=TODAY&&e.date>=from&&isRsvp(e)).sort((a,b)=>a.date.localeCompare(b.date));
+  const evs=S.events.filter(e=>e.type===type&&!e.cancel&&e.date<=TODAY&&e.date>=from&&isRsvp(e)).sort((a,b)=>a.date.localeCompare(b.date));
   const n=evs.length;
   const rows=sorted().map(p=>{let zu=0,ab=0,vl=0,no=0,kader=0,start=0;
     evs.forEach(e=>{const v=(e.poll.votes||{})[p.id]; if(v===0)zu++; else if(v===1)ab++; else if(v===2)vl++; else no++;
@@ -1890,7 +2281,7 @@ function adminsPanel(){
       const key='admin:'+a.uid;
       if(ui.confirmDel===key) return confirmBox(key,esc(a.name),'Admin entfernen?','Entfernen');
       const lastFull=a.role!=='part'&&fullCount()<=1;
-      return `<div class="adm"><span class="lb">${esc(a.name)}${(me()||{}).uid===a.uid?' <span class="badge">du</span>':''}<small>${esc(rightsText(a))}${a.email?' · '+esc(a.email):''}</small></span>
+      return `<div class="adm"><span class="lb">${esc(a.name)}${(me()||{}).uid===a.uid?' <span class="badge">du</span>':''}<small>${esc(rightsText(a))}${a.p&&pById(a.p)?' · Spieler: '+esc(pname(a.p)):''}${a.email?' · '+esc(a.email):''}</small></span>
         ${live?`<button class="btn ghost sm" data-act="rightsEdit" data-v="${a.uid}">Rechte</button>${!lastFull&&a.uid!==(me()||{}).uid?`<button class="x" data-act="askDel" data-v="${key}" aria-label="${esc(a.name)} entfernen">×</button>`:''}`:''}</div>`;}).join('')}
       ${inv.map(i=>{const key='invite:'+i.email; if(ui.confirmDel===key) return confirmBox(key,esc(i.email),'Einladung zurückziehen?','Zurückziehen');
         return `<div class="adm"><span class="lb">${esc(i.name)} <span class="badge">eingeladen</span><small>${esc(rightsText(i))} · ${esc(i.email)}</small></span><button class="x" data-act="askDel" data-v="${key}" aria-label="Einladung zurückziehen">×</button></div>`;}).join('')}</div>
@@ -1976,7 +2367,8 @@ function settings(){
       <label class="f grow">Name der App<input type="text" id="sAppName" maxlength="30" value="${esc(S.appName)}" placeholder="Mannschaftskasse"></label>
       <label class="f grow">Name der Mannschaft<input type="text" id="sTeam" value="${esc(S.teamName)}"></label>
     </div>
-    <label class="check"><input type="checkbox" id="sSeason" ${S.showSeason?'checked':''}> Saison im Kopf anzeigen (z. B. „Saison ${(()=>{const y=NOW.getFullYear(),sy=NOW.getMonth()>=6?y:y-1;return sy+'/'+String(sy+1).slice(2);})()}“)</label>
+${FEAT.events?`<div class="f" style="font-size:12.5px;color:var(--muted);font-weight:600">Zeitraum für Auswertungen<div class="seg wide" role="group" aria-label="Zeitraum"><button data-act="statPeriod" data-v="year" aria-pressed="${S.statPeriod!=='season'}">Kalenderjahr</button><button data-act="statPeriod" data-v="season" aria-pressed="${S.statPeriod==='season'}">Saison (Juli–Juni)</button></div></div>`:''}
+    <label class="check"><input type="checkbox" id="sSeason" ${S.showSeason?'checked':''}> Zeitraum im Kopf anzeigen (z. B. „${seasonLabel()}“)</label>
     <p class="hint">Der App-Name erscheint im Kopf, im Browser-Tab, unter dem Symbol auf dem Home-Bildschirm, in Einladungen und in den Namen der Sicherungen.</p>
     <h3>Vereinsfarben</h3>
     <div class="presets">${PRESETS.map((p,i)=>`<button class="preset" data-act="preset" data-v="${i}"><span class="stripes">${p.c.slice(0,3).map(x=>`<i style="background:${x}"></i>`).join('')}</span>${p.n}</button>`).join('')}</div>
@@ -1999,6 +2391,11 @@ function settings(){
       <button class="icon" data-act="up" data-v="${i}" ${i?'':'disabled'} aria-label="${SEC[k].label} nach vorne">↑</button><button class="icon" data-act="down" data-v="${i}" ${i<S.order.length-1?'':'disabled'} aria-label="${SEC[k].label} nach hinten">↓</button></div>`).join('')}</div>
   </div>
 `:''}
+  ${FEAT.money?`<div class="panel" style="${secStyle('team')}"><h2>Einnahmen &amp; Ausgaben</h2>
+    <label class="check"><input type="checkbox" id="sFinOn" ${S.financeOn?'checked':''}> Einnahmen &amp; Ausgaben (Kassenbuch) verwenden</label>
+    ${S.financeOn?`<label class="f" style="max-width:220px">Anfangsbestand (€)<input type="number" id="sFinStart" step="0.01" inputmode="decimal" value="${+(S.finance||{}).start||0}"></label>`:''}
+    <label class="check"><input type="checkbox" id="sPayreq" ${S.payreqOn?'checked':''}> Spieler können geleistete Zahlungen melden</label>
+    <p class="hint">Sehen und bearbeiten dürfen das Kassenbuch nur Admins mit dem Recht „Einnahmen &amp; Ausgaben“ (z. B. Vorlage „Kassenwart“). Gemeldete Zahlungen prüfen Admins mit Recht auf eine der Kassen und verrechnen sie mit den offenen Beträgen; ist das Kassenbuch an, wird die Zahlung dort als Einnahme gebucht.</p></div>`:''}
   ${FEAT.events?archivePanel():''}
   ${backupPanel()}
   ${logPanel()}
@@ -2012,8 +2409,14 @@ function settings(){
 }
 
 /* ---------- Dialoge ---------- */
+function playerLinkField(cur){
+  return `<label class="f">Ist auch Spieler<select id="mPlayer"><option value="">– kein Spieler –</option>${sorted().map(p=>`<option value="${p.id}" ${cur===p.id?'selected':''}>${p.nr?p.nr+' · ':''}${esc(p.name)}</option>`).join('')}</select></label>
+    <p class="hint" style="margin-top:-4px">Dann ist dieser Admin auf jedem Gerät automatisch auch als dieser Spieler angemeldet: eigener Stand, abstimmen, eintragen.</p>`;
+}
 function rightsFields(role,areas){
-  return `<div class="checks"><label class="check"><input type="radio" name="mRole" value="full" ${role!=='part'?'checked':''}> Alles (inkl. Optionen)</label>
+  const pre=Object.entries(ROLE_PRESETS).filter(([k])=>k==='full'||(k==='cash'?FEAT.money:FEAT.events));
+  return `<div class="row tight"><span class="hint">Vorlage:</span>${pre.map(([k,x])=>`<button type="button" class="chip" data-act="rightsPreset" data-v="${k}">${x.label}</button>`).join('')}</div>
+    <div class="checks"><label class="check"><input type="radio" name="mRole" value="full" ${role!=='part'?'checked':''}> Alles (inkl. Optionen)</label>
     <label class="check"><input type="radio" name="mRole" value="part" ${role==='part'?'checked':''}> Einzelne Bereiche</label></div>
     <div class="checks">${areasOn().map(([k,l])=>`<label class="check"><input type="checkbox" name="mArea" value="${k}" ${areas.includes(k)?'checked':''}> ${l}</label>`).join('')}</div>
     <p class="hint">Die Bereiche gelten nur bei „Einzelne Bereiche“.</p>`;
@@ -2048,13 +2451,18 @@ function renderModal(){
   }else if(m.kind==='invite'){
     body=`<h2>Admin einladen</h2><label class="f">Name in der App<input type="text" id="mName" maxlength="30" placeholder="z. B. Trainer"></label>
       <label class="f">E-Mail<input type="email" id="mEmail"></label>
+      ${playerLinkField('')}
       <h3 style="margin:0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Rechte</h3>${rightsFields('part',['events'])}`; submit='Einladen';
   }else if(m.kind==='rights'){
     const a=adminList().find(x=>x.uid===m.who)||{role:'full',areas:[]};
-    body=`<h2>Rechte</h2><p class="hint">${esc(a.name)}</p>${rightsFields(a.role,a.areas||[])}`;
+    body=`<h2>Rechte</h2><p class="hint">${esc(a.name)}</p>${playerLinkField(a.p||'')}${rightsFields(a.role,a.areas||[])}`;
   }else if(m.kind==='code'){
     body=`<h2>Mit Code anmelden</h2><p class="hint">Den Code findest du in deiner Einladung.</p>
       <label class="f">Dein Code<input type="text" id="gateCode" class="codein" placeholder="XXXX-XXXX" maxlength="9" autocapitalize="characters" autocomplete="off" autocorrect="off"></label>`; submit='Weiter';
+  }else if(m.kind==='prNew'){ body=payreqNewBody(); submit='Melden';
+  }else if(m.kind==='prCheck'){ body=payreqCheckBody(m); submit='Bestätigen & verrechnen'; extra='<button type="button" class="linkbtn" data-act="prReject" style="justify-self:start">Meldung ablehnen</button>';
+  }else if(m.kind==='push'){
+    body=pushModalBody(); submit=['on','off','demo'].includes(pushState().k)?'Speichern':'';
   }else if(m.kind==='qr'){
     const p=pById(m.who), code=codeOf(m.who);
     body=`<h2>QR-Code · ${esc(p?p.name:'')}</h2><div class="qrbox" id="qrBox"></div><p class="hint" style="text-align:center">Code: <b class="code">${fmtCode(code)}</b><br>Nur dieser Person zeigen.</p>`;
@@ -2084,7 +2492,7 @@ async function claimAdmin(){
   if(!inv||!inv.exists()) return 'noinvite';
   if(!u.emailVerified) return 'verify';
   const d=inv.data(); const b=FB.writeBatch(FB.db);
-  b.set(D('admins',u.uid),{name:d.name,role:d.role,areas:d.areas||[],email});
+  b.set(D('admins',u.uid),{name:d.name,role:d.role,areas:d.areas||[],email,...(d.p?{p:d.p}:{})});
   b.delete(D('invites',email)); await b.commit(); return 'ok';
 }
 async function afterClaim(r){
@@ -2101,6 +2509,9 @@ async function submitModal(){
   m.err=''; m.info='';
   try{
     if(m.kind==='code'){ ui.modal=null; renderModal(); return enterCode(v('gateCode')); }
+    if(m.kind==='prNew'){ return payreqSubmit(); }
+    if(m.kind==='prCheck'){ return payreqResolve(m,true); }
+    if(m.kind==='push'){ const prefs={}; document.querySelectorAll('input[name="pPref"]').forEach(x=>prefs[x.value]=x.checked); ui.modal=null; renderModal(); return savePushPrefs(prefs); }
     if(m.kind==='demo'){ ui.demoAdmin=v('mDemo'); ui.adminView=true; ui.modal=null; renderModal(); render(); toast(`Admin-Ansicht: ${me().name}`); return; }
     if(m.kind==='login'){
       const st=m.step||'login'; m.email=v('mEmail').toLowerCase()||m.email;
@@ -2127,7 +2538,7 @@ async function submitModal(){
       if(r.role==='part'&&!r.areas.length) return fail('Bitte mindestens einen Bereich wählen.');
       if(LIVE.admins.length+LIVE.invites.length>=4) return fail('Es gibt bereits 4 Admins oder Einladungen.');
       m.busy=true; renderModal();
-      await FB.setDoc(D('invites',email),{name,role:r.role,areas:r.role==='part'?r.areas:[]});
+      const lp=v('mPlayer'); await FB.setDoc(D('invites',email),{name,role:r.role,areas:r.role==='part'?r.areas:[],...(lp?{p:lp}:{})});
       logAction(`Admin ${name} eingeladen`); ui.modal=null; renderModal(); toast('Einladung angelegt'); return;
     }
     if(m.kind==='rights'){
@@ -2135,7 +2546,7 @@ async function submitModal(){
       if(r.role==='part'&&a.role!=='part'&&fullCount()<=1) return fail('Mindestens ein Admin muss alle Rechte behalten.');
       if(r.role==='part'&&!r.areas.length) return fail('Bitte mindestens einen Bereich wählen.');
       m.busy=true; renderModal();
-      await FB.setDoc(D('admins',a.uid),{role:r.role,areas:r.role==='part'?r.areas:[]},{merge:true});
+      await FB.setDoc(D('admins',a.uid),{role:r.role,areas:r.role==='part'?r.areas:[],p:v('mPlayer')},{merge:true});
       logAction(`Rechte von ${a.name} geändert`); ui.modal=null; renderModal(); toast('Rechte gespeichert'); return;
     }
   }catch(e){ console.warn(e); fail(AUTH_ERR[e&&e.code]||(e&&e.code==='permission-denied'?'Keine Berechtigung.':'Das hat nicht geklappt. Bitte erneut versuchen.')); }
@@ -2163,14 +2574,16 @@ function render(){
   const v=document.getElementById('view');
   if(AUTH.mode==='live'&&(!AUTH.ready||AUTH.gate)){ v.innerHTML=gateView(); renderChrome(); return; }
   if(isPublic()){ v.setAttribute('style',secStyle('events')); v.innerHTML=publicView(); renderChrome(); return; }
-  const note=AUTH.mode==='demo'?`<div class="demo">Demo-Modus${VARIANT!=='a'?` · Variante ${VARIANT.toUpperCase()}`:''}: Beispieldaten nur auf diesem Gerät.${/[?&]v=/.test(location.search)?' <a href="index.html" style="color:inherit;font-weight:700">Variante wechseln</a>':''}${!me()?` <label class="voter" style="margin-top:6px">Ansicht als<select class="voterSel"><option value="">Besucher</option>${sorted().map(x=>`<option value="${x.id}" ${myPlayer()===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></label>`:''}</div>`:'';
-  const bar=isAdmin()?`<div class="adminbar"><span>Admin-Ansicht · ${esc(me().name)}<small>${esc(rightsText(me()))}</small></span><span class="row tight"><button class="btn ghost sm" data-act="readMode">Lesemodus</button>${AUTH.mode==='live'?'<button class="btn ghost sm" data-act="signOut">Abmelden</button>':''}</span></div>`:'';
+  const note=AUTH.mode==='demo'?`<div class="demo">Demo-Modus${VARIANT!=='a'?` · Variante ${VARIANT.toUpperCase()}`:''}: Beispieldaten nur auf diesem Gerät.${/[?&]v=/.test(location.search)?' <a href="index.html" style="color:inherit;font-weight:700">Variante wechseln</a>':''}${true?` <label class="voter" style="margin-top:6px">${me()?'Admin ist auch Spieler':'Ansicht als'}<select class="voterSel"><option value="">${me()?'– kein Spieler –':'Besucher'}</option>${sorted().map(x=>`<option value="${x.id}" ${myPlayer()===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></label>`:''}</div>`:'';
+  const bar=isAdmin()?`<div class="adminbar"><span>Admin-Ansicht · ${esc(me().name)}${myPlayer()?` (${esc(pname(myPlayer()))})`:''}<small>${esc(rightsText(me()))}</small></span><span class="row tight"><button class="btn ghost sm" data-act="readMode">${myPlayer()?'Spieleransicht':'Lesemodus'}</button>${AUTH.mode==='live'?'<button class="btn ghost sm" data-act="signOut">Abmelden</button>':''}</span></div>`:'';
   v.setAttribute('style',secStyle(ui.person?'home':((ui.lineup||ui.evDetail)?'events':(['settings','roster'].includes(ui.tab)?'team':ui.tab))));
   let html;
   if(ui.lineup) html=lineupView();
   else if(ui.person) html=personView();
-  else if(ui.tab==='settings') html=settings();
+  else if(ui.tab==='settings') html=settings()+`<p class="hint" style="text-align:center;margin:4px 0 0">${esc(S.appName||'App')} · Version ${APP_VERSION}</p>`;
   else if(ui.tab==='home') html=note+homeView();
+  else if(ui.tab==='finance') html=finOn()?financeView():(ui.tab='home',note+homeView());
+  else if(ui.tab==='payreqs') html=moneyAdmin()?`<div class="panel"><button class="back" data-act="goto" data-v="home">‹ Übersicht</button></div>${payreqPanel()||'<div class="panel"><p class="hint">Keine gemeldeten Zahlungen.</p></div>'}`:(ui.tab='home',note+homeView());
   else if(ui.tab==='events') html=eventsView();
   else if(ui.tab==='roster') html=teamView();
   else{
@@ -2180,7 +2593,18 @@ function render(){
   }
   v.innerHTML=bar+html;
   renderChrome();
+  markWideTables();
 }
+/* Hinweis „seitlich wischen“, wenn eine Tabelle breiter als der Bildschirm ist */
+function markWideTables(){
+  document.querySelectorAll('#view .tablewrap').forEach(w=>{
+    const prev=w.previousElementSibling, has=prev&&prev.classList.contains('swipe');
+    const wide=w.scrollWidth>w.clientWidth+4;
+    if(wide&&!has) w.insertAdjacentHTML('beforebegin','<div class="swipe" aria-hidden="true">Weitere Spalten: seitlich wischen ⇢</div>');
+    if(!wide&&has) prev.remove();
+  });
+}
+window.addEventListener('resize',()=>{clearTimeout(markWideTables.t); markWideTables.t=setTimeout(markWideTables,150);});
 function toast(t){const e=document.getElementById('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2600);}
 function closeForm(){ui.form=false;ui.shiftPick=null;ui.shiftEdit=null;ui.editKey=null;ui.sel.clear();ui.draft={title:'',amount:''};ui.ev=blankEv();}
 function toTop(){try{window.scrollTo({top:0,behavior:'smooth'})}catch(e){window.scrollTo(0,0)}}
@@ -2221,9 +2645,11 @@ async function deleteComment(id,withNote,reason){
     save(); render(); toast(c.rm?'Hinweis entfernt':'Kommentar gelöscht');
   }
 }
-function exportJson(){const o=JSON.parse(JSON.stringify(S)); delete o.demoCodes; delete o.demoMembers; delete o.demoLog; delete o.demoComments; return JSON.stringify({app:'mannschaftskasse',name:S.appName,exported:new Date().toISOString(),data:o},null,1);}
+function exportJson(){const o=JSON.parse(JSON.stringify(S)); delete o.demoPayreq; delete o.demoPolls; delete o.demoNews; delete o.demoCodes; delete o.demoMembers; delete o.demoLog; delete o.demoComments; return JSON.stringify({app:'mannschaftskasse',name:S.appName,exported:new Date().toISOString(),data:o},null,1);}
 function parseImport(txt){const o=JSON.parse(txt); const d=o&&o.data?o.data:o; if(!d||!Array.isArray(d.players)||!d.paid) throw new Error('format'); return d;}
 
+/* Serie: jede Woche am selben Wochentag bis einschließlich „bis“, höchstens 60 Termine */
+function seriesDates(from,until){ const out=[]; if(!from) return out; for(let d=from;d<=(until||from)&&out.length<60;d=shiftDate(d,7)) out.push(d); return out.length?out:[from]; }
 function saveEvent(){
   const f=ui.ev, t=f.type, title=f.title.trim();
   if(!ui.date) return toast('Bitte ein Datum wählen');
@@ -2240,17 +2666,21 @@ function saveEvent(){
   }
   if(poll) poll.comments=!!f.pcomments;
   const base={type:t,time:f.time,title,home:f.home,place:f.place.trim(),note:f.note.trim(),comments:!!f.comments};
+  if(t==='training'){ base.venue=f.venue==='in'?'in':'out'; }
   let n=1;
   if(ui.editKey){
     const e=S.events.find(x=>x.id===ui.editKey); const old=e.poll;
     Object.assign(e,base,{date:ui.date});
     if(t!=='game') delete e.squad;
+    if(t==='training'&&f.cancel) e.cancel=true; else delete e.cancel;
+    if(t!=='training') delete e.venue;
     if(!poll){ if(old&&Object.keys(old.votes||{}).length) archivePoll({...e,poll:old}); delete e.poll; }
     else if(old&&old.q===poll.q&&JSON.stringify(old.opts)===JSON.stringify(poll.opts)){ e.poll=old; e.poll.comments=poll.comments; }
     else e.poll={...poll,votes:{},open:true};
   }else{
-    n=t==='training'&&f.repeat?Math.min(40,Math.max(2,parseInt(f.weeks)||2)):1;
-    for(let i=0;i<n;i++) S.events.push({id:uid(),...base,date:shiftDate(ui.date,i*7),...(poll?{poll:{...poll,opts:[...poll.opts],votes:{},open:true}}:{})});
+    const dates=t==='training'&&f.repeat?seriesDates(ui.date,f.until||shiftDate(ui.date,364)):[ui.date];
+    n=dates.length;
+    dates.forEach(d=>S.events.push({id:uid(),...base,date:d,...(poll?{poll:{...poll,opts:[...poll.opts],votes:{},open:true}}:{})}));
   }
   closeForm(); commit(); toast(n>1?`${n} Trainings angelegt`:'Termin gespeichert');
 }
@@ -2311,7 +2741,7 @@ document.addEventListener('pointerdown',ev=>{
 });
 
 /* ---------- Bedienung ---------- */
-const READER=new Set(['nx','cmtDelNo','cmtDelGo','shiftsOpen','shiftJoin','shiftLeave','playersFold','evOpen','evBack','cmtSend','cmtDel','codeModal','demoPublicEnd','adminBtn','modalBg','modalClose','goto','person','back','pyPrev','pyNext','allDebtors','mode','view','onlyOpen','prev','next','copy','efilter','showPast','vote','pollNames','lineup','lineupBack','noDel','evView','statType','statAll','gateGo','reload','signOut','mStep','mResend','readMode']);
+const READER=new Set(['prNew','prMethod','tpNew','tpCancel','tpSave','tvote','tpClose','tpOpen','tpOld','askDel','noDel','doDel','pushModal','pushOn','pushOff','newsAll','nx','cmtDelNo','cmtDelGo','shiftsOpen','shiftJoin','shiftLeave','playersFold','evOpen','evBack','cmtSend','cmtDel','codeModal','demoPublicEnd','adminBtn','modalBg','modalClose','goto','person','back','pyPrev','pyNext','allDebtors','mode','view','onlyOpen','prev','next','copy','efilter','showPast','vote','pollNames','lineup','lineupBack','noDel','evView','statType','statAll','gateGo','reload','signOut','mStep','mResend','readMode']);
 document.addEventListener('submit',ev=>{if(ev.target.id==='mForm'){ev.preventDefault();submitModal();}});
 document.addEventListener('click',async ev=>{
   const tab=ev.target.closest('[data-tab]'); if(tab){goTab(tab.dataset.tab);return;}
@@ -2321,7 +2751,7 @@ document.addEventListener('click',async ev=>{
   if(!READER.has(a)&&!isAdmin()) return;
   switch(a){
   case 'adminBtn':
-    if(isAdmin()){ui.adminView=false; closeForm(); render(); toast('Lesemodus');}
+    if(isAdmin()){ui.adminView=false; closeForm(); render(); toast(myPlayer()?`Spieleransicht: ${pname(myPlayer())}`:'Lesemodus');}
     else if(me()){ui.adminView=true; render(); toast(`Admin-Ansicht: ${me().name}`);}
     else if(AUTH.mode==='demo'){ui.modal={kind:'demo'}; renderModal();}
     else { const u=FB.auth&&FB.auth.currentUser; ui.modal={kind:'login',step:'login'};
@@ -2352,12 +2782,41 @@ document.addEventListener('click',async ev=>{
     const e=S.events.find(x=>x.id===ui.evDetail), t=S.events.find(x=>x.id===v); if(!e||!t||!can('events')) return;
     e.shifts={self:!!(t.shifts&&t.shifts.self),list:shiftsOf(t).map(s=>({id:uid(),name:s.name,from:s.from||'',to:s.to||'',need:s.need||0,ids:[],self:[]}))};
     commit(); toast(`${e.shifts.list.length} Aufgaben übernommen – jetzt zuteilen`); break;}
-  case 'readMode': ui.adminView=false; closeForm(); render(); toast('Lesemodus'); break;
+  case 'readMode': ui.adminView=false; closeForm(); render(); toast(myPlayer()?`Spieleransicht: ${pname(myPlayer())}`:'Lesemodus'); break;
   case 'evOpen': ui.evDetail=v; ui.lineup=null; ui.tab='events'; ui.reportEdit=false; closeForm(); render(); window.scrollTo(0,0); break;
   case 'evBack': ui.evDetail=null; ui.reportEdit=false; render(); break;
   case 'cmtSend': sendComment(v,b.dataset.k); break;
   case 'cmtDel': ui.cmtDel=ui.cmtDel===v?null:v; render(); break;
   case 'cmtDelNo': ui.cmtDel=null; render(); break;
+  case 'pushModal': ui.modal={kind:'push'}; renderModal(); break;
+  case 'prNew': if(!myPlayer()) return toast('Zum Melden deinen persönlichen Spieler-Link öffnen'); ui.modal={kind:'prNew',method:'paypal'}; renderModal(); break;
+  case 'prMethod': if(ui.modal){ const a2=document.getElementById('prAmt'), n2=document.getElementById('prNote'); ui.modal.method=v; const keepA=a2&&a2.value, keepN=n2&&n2.value; renderModal(); const a3=document.getElementById('prAmt'), n3=document.getElementById('prNote'); if(a3) a3.value=keepA; if(n3) n3.value=keepN; } break;
+  case 'prCheck': if(moneyAdmin()){ ui.modal={kind:'prCheck',id:v}; renderModal(); } break;
+  case 'prReject': if(ui.modal&&ui.modal.kind==='prCheck') payreqResolve(ui.modal,false); break;
+  case 'rightsPreset': {const x=ROLE_PRESETS[v]; if(!x) return; document.querySelectorAll('input[name="mRole"]').forEach(r=>r.checked=r.value===x.role); document.querySelectorAll('input[name="mArea"]').forEach(c=>c.checked=x.areas.includes(c.value)); break;}
+  case 'statPeriod': if(isFull()){ S.statPeriod=v==='season'?'season':'year'; commit(); toast(v==='season'?'Auswertung nach Saison (Juli–Juni)':'Auswertung nach Kalenderjahr'); } break;
+  case 'finNew': if(finOn()){ ui.finForm={kind:v,date:TODAY}; ui.confirmDel=null; render(); toTop(); } break;
+  case 'finKind': if(ui.finForm){ ['fnDate','fnAmt','fnTitle','fnCat','fnNote'].forEach(k=>{const el=document.getElementById(k); if(el) ui.finForm[{fnDate:'date',fnAmt:'amount',fnTitle:'title',fnCat:'cat',fnNote:'note'}[k]]=el.value;}); ui.finForm.kind=v; render(); } break;
+  case 'finEdit': {const x=finList().find(y=>y.id===v); if(x&&finOn()){ ui.finForm={...x}; ui.confirmDel=null; render(); toTop(); } break;}
+  case 'finSave': finSave(); break;
+  case 'finCancel': ui.finForm=null; ui.confirmDel=null; render(); break;
+  case 'fyPrev': ui.fy=(ui.fy||NOW.getFullYear())-1; render(); break;
+  case 'fyNext': ui.fy=(ui.fy||NOW.getFullYear())+1; render(); break;
+  case 'tpNew': if(!myPlayer()&&!isAdmin()) return toast(AUTH.mode==='live'?'Zum Erstellen deinen persönlichen Spieler-Link öffnen':'Bitte oben zuerst deinen Namen wählen'); ui.tpForm=true; render(); setTimeout(()=>{const q=document.getElementById('tpQ'); if(q) q.focus();},40); break;
+  case 'tpCancel': ui.tpForm=false; render(); break;
+  case 'tpSave': tpSave(); break;
+  case 'tvote': {const x=tpolls().find(y=>y.id===v); if(x) tpVote(x,+b.dataset.i); break;}
+  case 'tpClose': case 'tpOpen': {const x=tpolls().find(y=>y.id===v); if(x) tpSetOpen(x,a==='tpOpen'); break;}
+  case 'tpOld': ui.tpOld=!ui.tpOld; render(); break;
+  case 'pushOn': enablePush(); break;
+  case 'pushOff': disablePush(); break;
+  case 'newsNew': ui.newsForm=true; render(); setTimeout(()=>{const t=document.getElementById('newsText'); if(t) t.focus();},40); break;
+  case 'newsCancel': ui.newsForm=false; render(); break;
+  case 'newsSend': sendNews(); break;
+  case 'newsAll': ui.allNews=!ui.allNews; render(); break;
+  case 'newsDel': ui.newsDel=v; render(); break;
+  case 'newsDelNo': ui.newsDel=null; render(); break;
+  case 'newsDelGo': delNews(v); break;
   case 'nx': {ui.nx=ui.nx||{}; ui.nx[v]=Math.max(0,(ui.nx[v]||0)+(+b.dataset.d)); render(); break;}
   case 'cmtDelGo': {const n=document.getElementById('cdNote'), t=document.getElementById('cdText'); deleteComment(v,b.dataset.n==='1'&&!!(n&&n.checked),t?t.value:''); break;}
   case 'codeModal': ui.modal={kind:'code'}; renderModal(); break;
@@ -2445,10 +2904,13 @@ document.addEventListener('click',async ev=>{
   case 'showPast': ui.showPast=!ui.showPast; render(); break;
   case 'evType': ui.ev.type=v; render(); break;
   case 'evHome': ui.ev.home=v==='1'; render(); break;
+  case 'evVenue': ui.ev.venue=v; render(); break;
+  case 'trVenue': {const e=S.events.find(x=>x.id===v); if(!e||!can('events')) return; e.venue=b.dataset.x==='in'?'in':'out'; commit(); toast(`${fmtShort(e.date)}: Training ${e.venue==='in'?'in der Halle':'draußen'}`); break;}
+  case 'trCancel': {const e=S.events.find(x=>x.id===v); if(!e||!can('events')) return; if(e.cancel) delete e.cancel; else e.cancel=true; commit(); toast(e.cancel?`Training am ${fmtShort(e.date)} fällt aus`:`Training am ${fmtShort(e.date)} findet statt`); break;}
   case 'ptype': ui.ev.ptype=v; render(); break;
   case 'editEvent': {const e=S.events.find(x=>x.id===v); if(!e||!can('events')) return; closeForm(); ui.form=true; ui.editKey=v; ui.date=e.date;
     const custom=e.poll&&!(e.poll.q===RSVPQ[e.type]&&JSON.stringify(e.poll.opts)===JSON.stringify(RSVP));
-    ui.ev={...blankEv(),type:e.type,time:e.time||'',title:e.title||'',home:e.home!==false,place:e.place||'',note:e.note||'',poll:!!e.poll,ptype:custom?'custom':'rsvp',pq:custom?e.poll.q:'',popts:custom?e.poll.opts.join('\n'):'',comments:!!e.comments,pcomments:!!(e.poll&&e.poll.comments)};
+    ui.ev={...blankEv(),venue:e.venue==='in'?'in':'out',cancel:!!e.cancel,type:e.type,time:e.time||'',title:e.title||'',home:e.home!==false,place:e.place||'',note:e.note||'',poll:!!e.poll,ptype:custom?'custom':'rsvp',pq:custom?e.poll.q:'',popts:custom?e.poll.opts.join('\n'):'',comments:!!e.comments,pcomments:!!(e.poll&&e.poll.comments)};
     ui.evDetail=null;
     ui.confirmDel=null; render(); toTop(); break;}
   case 'saveEvent': if(can('events')) saveEvent(); break;
@@ -2473,10 +2935,13 @@ document.addEventListener('click',async ev=>{
   case 'closePoll': {const e=S.events.find(x=>x.id===v); if(e&&e.poll&&can('events')){e.poll.open=false; archivePoll(e); commit(); toast('Umfrage beendet und unter Optionen gespeichert');} break;}
   case 'reopenPoll': {const e=S.events.find(x=>x.id===v); if(e&&e.poll&&can('events')){e.poll.open=true; commit(); toast('Umfrage wieder geöffnet');} break;}
   case 'archNames': ui.openArch=ui.openArch===v?null:v; render(); break;
-  case 'askDel': ui.confirmDel=v; render(); break;
+  case 'askDel': if(!isAdmin()&&!v.startsWith('tp:')) return; ui.confirmDel=v; render(); break;
   case 'noDel': ui.confirmDel=null; render(); break;
   case 'doDel': {
     const i=v.indexOf(':'), t=v.slice(0,i), k=v.slice(i+1);
+    if(t==='tp'){ tpDelete(k); return; }
+    if(t==='fin'){ if(!finOn()) return; S.finance.list=S.finance.list.filter(x=>x.id!==k); ui.finForm=null; ui.confirmDel=null; commit(); toast('Buchung gelöscht'); return; }
+    if(!isAdmin()) return;
     const need={day:'drinks',misc:'misc',event:'events',squad:'events',shift:'events'}[t];
     if(need?!can(need):!isFull()) return;
     ui.confirmDel=null;
@@ -2551,8 +3016,12 @@ document.addEventListener('change',ev=>{
   if(t.id==='ePoll'){ui.ev.poll=t.checked; render(); return;}
   if(t.id==='eComments'){ui.ev.comments=t.checked; return;}
   if(t.id==='ePollCmt'){ui.ev.pcomments=t.checked; return;}
-  if(t.id==='eRepeat'){ui.ev.repeat=t.checked; render(); return;}
+  if(t.id==='eRepeat'){ui.ev.repeat=t.checked; if(t.checked&&!ui.ev.until) ui.ev.until=shiftDate(ui.date||TODAY,364); render(); return;}
+  if(t.id==='eUntil'){ui.ev.until=t.value; render(); return;}
+  if(t.id==='eCancel'){ui.ev.cancel=t.checked; return;}
   if(t.id==='fDate'){ui.date=t.value; return;}
+  if(t.name==='prItem'&&ui.modal&&ui.modal.kind==='prCheck'){ const i=+t.value; if(t.checked) ui.modal.sel.add(i); else ui.modal.sel.delete(i); const sc=document.querySelector('.sheet').scrollTop; renderModal(); const sh=document.querySelector('.sheet'); if(sh) sh.scrollTop=sc; return; }
+  if(t.id==='sFinStart'&&can('finance')){ S.finance=S.finance||{start:0,list:[]}; S.finance.start=r2(parseFloat(String(t.value).replace(',','.'))||0); commit(); return; }
   if(t.id==='shSelf'&&can('events')){const e=S.events.find(x=>x.id===ui.evDetail); if(e){e.shifts=e.shifts||{self:true,list:[]}; e.shifts.self=t.checked; commit(); toast(t.checked?'Spieler können sich selbst eintragen':'Nur das Orga-Team teilt ein');} return;}
   if(t.id==='lFormation'&&can('events')){const e=S.events.find(x=>x.id===ui.lineup); if(e){e.squad=e.squad||{ids:[],formation:'4-4-2',slots:{}}; const sq=e.squad, prev=sq.formation; sq.formation=t.value; ui.freeSel=null;
     if(t.value===FREE){ /* Start mit den Positionen des bisherigen Systems */
@@ -2569,6 +3038,8 @@ document.addEventListener('change',ev=>{
   if(!isFull()) return;
   if(t.id==='sTeam'){S.teamName=t.value.trim();commit();}
   else if(t.id==='sSeason'){S.showSeason=t.checked;commit();}
+  else if(t.id==='sFinOn'){S.financeOn=t.checked;commit();}
+  else if(t.id==='sPayreq'){S.payreqOn=t.checked;commit();}
   else if(t.id==='sAppName'){S.appName=t.value.trim().slice(0,30)||'Mannschaftskasse';commit();}
   else if(t.id==='sFee'){S.fee=Math.max(0,parseFloat(t.value)||0);commit();}
   else if(t.id==='sRate'){S.rate=Math.max(0,parseFloat(t.value)||0);commit();}
@@ -2622,7 +3093,7 @@ if(LIVE_MODE){
   initFirebase().catch(e=>{console.error(e); AUTH.ready=true; AUTH.gate='error'; AUTH.error='Die App konnte nicht geladen werden. Bitte Internetverbindung prüfen.'; render();});
 }else{
   try{S=JSON.parse(ls.get(KEY))}catch(e){}
-  if(!S||!S.players||(S.sample&&S.sampleV!==44)) S=sample();
+  if(!S||!S.players||(S.sample&&S.sampleV!==47)) S=sample();
   normalize(); lastSaved=JSON.stringify(S); render();
 }
 </script>
