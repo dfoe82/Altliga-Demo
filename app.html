@@ -76,6 +76,38 @@ h1 em{font-style:normal;color:var(--c2)}
 .nitem .who{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;font-weight:700}
 .nitem .who small{font-weight:500;color:var(--muted)}
 .nitem .tx{white-space:pre-wrap;overflow-wrap:anywhere}
+.nitem.pin{border-left-color:var(--due);background:color-mix(in srgb,var(--c2) 8%,var(--surface))}
+.nact{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:2px}
+.nact .chip{padding:4px 10px;font-size:13px}
+.nact .chip.on{background:color-mix(in srgb,var(--c2) 30%,var(--surface));border-color:var(--c2);color:var(--ink);font-weight:700}
+.nitem .cmts{margin-top:6px;border-top:1px dashed var(--line);padding-top:8px}
+/* Chat */
+.chat{display:grid;gap:3px;min-width:0}
+.cday{justify-self:center;font-size:11.5px;font-weight:700;color:var(--muted);background:var(--chip);border-radius:999px;padding:2px 10px;margin:8px 0 4px}
+.msg{max-width:84%;justify-self:start;background:var(--surface);border:1px solid var(--line);border-radius:14px 14px 14px 4px;padding:6px 10px 4px;min-width:0;text-align:left;font:inherit;color:inherit}
+.msg.me{justify-self:end;background:color-mix(in srgb,var(--c2) 20%,var(--surface));border-color:color-mix(in srgb,var(--c2) 40%,var(--line));border-radius:14px 14px 4px 14px}
+.msg.sel{outline:2px solid var(--c2);outline-offset:1px}
+.msg .mn{font-size:12.5px;font-weight:700;color:var(--c1)}
+.msg .mt{white-space:pre-wrap;overflow-wrap:anywhere}
+.msg .mm{font-size:10.5px;color:var(--muted);text-align:right;margin-top:1px}
+.msg img{display:block;max-width:100%;max-height:340px;border-radius:9px;margin:3px 0}
+.msg .ph{display:grid;place-items:center;width:200px;max-width:100%;height:120px;border-radius:9px;background:var(--chip);color:var(--muted);font-size:13px;margin:3px 0}
+.msg .q{border-left:3px solid var(--c2);padding:2px 7px;font-size:12.5px;color:var(--muted);background:var(--bg);border-radius:4px;margin:2px 0 3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg .rx{display:inline-block;font-size:12px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:0 7px;margin-top:2px}
+.msg .tpoll{margin:4px 0;border-left-width:3px}
+.macts{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 6px}
+.macts.me{justify-self:end}
+.composer{position:sticky;bottom:var(--tb,0px);z-index:6;background:var(--bg);padding:8px 0;margin-top:4px;display:grid;gap:6px;border-top:1px solid var(--line)}
+.composer .crow{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:6px;align-items:end}
+.composer textarea{min-height:42px;max-height:140px;resize:none;border-radius:20px;padding:10px 14px}
+.composer .icon{width:42px;height:42px;border-radius:50%;font-size:19px;display:grid;place-items:center;position:relative;overflow:hidden}
+.composer .icon input{position:absolute;inset:0;opacity:0}
+.composer .send{border-radius:50%;width:42px;height:42px;padding:0;font-size:18px}
+.creply{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:12.5px;background:var(--surface);border-left:3px solid var(--c2);border-radius:4px;padding:4px 8px}
+.tabbar button .tbn,nav.top button .tbn{display:inline-grid;place-items:center;min-width:17px;height:17px;padding:0 4px;border-radius:999px;background:var(--due);color:#fff;font-size:10.5px;font-weight:800;line-height:1;position:absolute;transform:translate(13px,-12px)}
+nav.top button .tbn{position:static;transform:none;margin-left:5px}
+.tabbar button{position:relative}
+.imgview{max-width:100%;max-height:75vh;border-radius:8px;justify-self:center}
 .pstate{border-radius:6px;padding:8px 10px;font-weight:600;font-size:14px;background:var(--chip)}
 .pstate.ok{background:var(--ok-bg);color:var(--ok)}
 .pstate.warn{background:var(--warn-bg);color:var(--warn)}
@@ -531,7 +563,7 @@ const FIREBASE_CONFIG = {
 /* Schlüssel für Push-Nachrichten (Firebase → Projekteinstellungen → Cloud Messaging → Web-Push-Zertifikate). Leer = Push aus. */
 const FIREBASE_VAPID_KEY = "";
 const FIREBASE_VERSION = "10.12.2";
-const APP_VERSION = "1.5"; /* Version der App – steht auch im Namen der ZIP-Dateien */
+const APP_VERSION = "1.7"; /* Version der App – steht auch im Namen der ZIP-Dateien */
 
 const LIVE_MODE=false; /* Demo-Repository: läuft immer als Demo mit Beispieldaten */
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
@@ -551,7 +583,8 @@ const ICON={
   roster:'<path d="M8 3 3 6l2 5 3-1v11h8V10l3 1 2-5-5-3a4 4 0 0 1-8 0z"/>',
   lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
   unlock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.6-1.7"/>',
-  bell:'<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2.5h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/>'
+  bell:'<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2.5h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/>',
+  chat:'<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 4V16h0A1.5 1.5 0 0 1 4 14.5z"/>'
 };
 const PRESETS=[
   {n:'Blau · Gelb',c:['#0E2F7A','#FFD21F','#D7263D','#0F8580']},
@@ -684,7 +717,7 @@ function readImg(file,cb){
 
 /* ---------- Grunddaten ---------- */
 function emptyState(){
-  return {sample:false,appName:'Mannschaftskasse',teamName:'Unsere Mannschaft',showSeason:false,statPeriod:'year',financeOn:false,payreqOn:true,finance:{start:0,list:[]},fee:10,rate:3,paypal:'',statsPublic:false,amountsPublic:false,publicView:false,birth:{},reports:{},
+  return {sample:false,appName:'Mannschaftskasse',teamName:'Unsere Mannschaft',showSeason:false,boardOpen:true,chatOn:false,statPeriod:'year',financeOn:false,payreqOn:true,finance:{start:0,list:[]},fee:10,rate:3,paypal:'',statsPublic:false,amountsPublic:false,publicView:false,birth:{},reports:{},
     club:{c:[...PRESETS[0].c],use3:true,use4:true,crest:'',logo:''},order:['drinks','team','misc'],
     players:[],days:[],misc:[],paid:{team:{},drinks:{}},events:[],archive:[]};
 }
@@ -741,7 +774,7 @@ function sample(){
     {id:uid(),e:kohl.id,k:'event',a:'demo-cash',an:'Kassenwart',t:'Busanteil bitte bis Ende des Monats überweisen.',ts:Date.now()-170e6}];
   const members=ids.filter((id,i)=>codes[id]&&i%4!==1).map((id,i)=>({p:id,code:codes[id],seen:Date.now()-(i%6)*86400000*(1+i%3)}));
   const out={
-    ...emptyState(), reports:{}, sample:true, sampleV:47,
+    ...emptyState(), reports:{}, sample:true, sampleV:49,
     players,
     days:[
       {date:prev2+'-12',att:pickN(8,26)},{date:prev2+'-26',att:pickN(9,29)},
@@ -779,7 +812,11 @@ function sample(){
   /* Beispieldaten je Demo-Variante */
   if(!FEAT.money){ out.appName='Mannschafts-App'; out.days=[]; out.misc=[]; out.paid={team:{},drinks:{}}; }
   if(!FEAT.events){ out.events=[]; out.archive=[]; out.reports={}; out.demoComments=[]; }
-  out.demoNews=[{id:uid(),t:FEAT.events?'Am Samstag bitte alle um 13:45 Uhr am Vereinsheim sein – wir fahren gemeinsam.':'Bitte die offenen Beträge bis Monatsende überweisen. Danke!',a:FEAT.money?'demo-cash':'demo-full',an:FEAT.money?'Kassenwart':'Teamleiter',ts:Date.now()-26*3600e3}];
+  out.demoNews=[
+    {id:uid(),pin:true,t:FEAT.money?'Bankverbindung für die Mannschaftskasse: bitte nur per PayPal oder bar beim Kassenwart. Danke!':'Hallenzeiten im Winter: Dienstag 19 Uhr Sporthalle am Schulzentrum.',a:FEAT.money?'demo-cash':'demo-full',an:FEAT.money?'Kassenwart':'Teamleiter',ts:Date.now()-9*864e5,likes:ids.slice(0,12)},
+    {id:uid(),t:FEAT.events?'Am Samstag bitte alle um 13:45 Uhr am Vereinsheim sein – wir fahren gemeinsam.':'Bitte die offenen Beträge bis Monatsende überweisen. Danke!',a:FEAT.money?'demo-cash':'demo-full',an:FEAT.money?'Kassenwart':'Teamleiter',ts:Date.now()-26*3600e3,likes:ids.slice(3,20)},
+    {id:uid(),t:'Hat jemand nach dem Training eine schwarze Trinkflasche gefunden?',p:ids[9],ts:Date.now()-5*3600e3,likes:[ids[2]]}];
+  out.demoComments=(out.demoComments||[]).concat([{id:uid(),e:'__nb__',k:'news',p:ids[14],t:'Liegt in der Kabine auf der Bank 👍',ts:Date.now()-4*3600e3}]);
   out.demoPayreq=FEAT.money?[{id:uid(),p:ids[2],amount:21,method:'paypal',note:'Getränke September',ts:Date.now()-3*3600e3,status:'open'}]:[];
   if(FEAT.money){ out.financeOn=true; out.finance={start:350,list:[
     {id:uid(),ts:1,date:addDays(-40),kind:'out',amount:60,title:'Schiedsrichter',cat:'Schiedsrichter',note:''},
@@ -789,6 +826,21 @@ function sample(){
     {id:uid(),ts:5,date:addDays(-5),kind:'out',amount:35,title:'Startgeld Hallenturnier',cat:'Startgeld',note:''}]}; }
   out.demoPolls=FEAT.events?[{id:uid(),q:'Grillen nach dem letzten Heimspiel vor der Winterpause?',opts:['Ja, bin dabei','Nein','Ich bringe Salat mit'],open:true,p:ids[5],ts:Date.now()-5*3600e3,
     votes:Object.fromEntries(ids.slice(0,23).map((id,i)=>[id,i%5===4?1:(i%4===3?2:0)]))}]:[];
+  { const fl=out.demoNews[2]; out.demoComments.forEach(c=>{if(c.e==='__nb__') c.e=fl.id;}); }
+  out.chatOn=true;
+  { const H=3600e3, now=Date.now(), m=(i,t,ago,extra)=>({id:uid(),ch:'team',p:ids[i],t,ts:now-ago,likes:[],...(extra||{})});
+    const team=[
+      m(4,'Moin zusammen! Wer hat am Samstag noch Platz im Auto?',27*H),
+      m(7,'Ich habe zwei Plätze frei, Abfahrt 13:30 am Vereinsheim.',26.5*H,{likes:[ids[4],ids[25]]}),
+      m(25,'Super, ich komme mit 👍',26*H),
+      m(11,'Denkt an die schwarzen Stutzen, wir spielen in Weiß.',20*H,{likes:ids.slice(0,9)}),
+      m(3,'Wo ist eigentlich der Schlüssel für den Ballraum?',5*H),
+      m(18,'Hängt im Kabinengang hinter der Tür.',4.6*H),
+      m(9,'Gerade die Trikots gewaschen, liegen ab morgen in der Kabine.',1.2*H,{likes:[ids[2],ids[5],ids[30]]})];
+    team[5].re=team[4].id;
+    if(!FEAT.events) team.splice(0,3);
+    out.demoChat={team,admins:[{id:uid(),ch:'admins',a:'demo-full',an:FEAT.money?'Admin':'Teamleiter',t:'Bitte bis Freitag die Aufstellung für Samstag eintragen.',ts:now-30*H,likes:[]}]};
+  }
   out.variant=VARIANT;
   return out;
 }
@@ -917,9 +969,14 @@ function subscribeAll(){
   const err=e=>{console.warn(e);};
   partList().forEach(k=>LIVE.unsubs.push(FB.onSnapshot(D('team',k),s=>{LIVE.parts[k]=s.exists()?s.data():null; LIVE.loaded.add(k); onLiveData();},e=>{if(!['drinks','fees','misc'].includes(k)) err(e); LIVE.parts[k]=null; LIVE.loaded.add(k); onLiveData();})));
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'votes'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); (v[x.e]=v[x.e]||{})[x.p]=x.i;}); LIVE.votes=v; onLiveData();},err));
-  LIVE.unsubs.push(FB.onSnapshot(FB.query(FB.collection(FB.db,'news'),FB.orderBy('ts','desc'),FB.limit(20)),qs=>{LIVE.news=qs.docs.map(d=>{const x=d.data(); return {id:d.id,...x,ts:x.ts&&x.ts.toMillis?x.ts.toMillis():Date.now()};}); schedule();},err));
+  LIVE.unsubs.push(FB.onSnapshot(FB.query(FB.collection(FB.db,'news'),FB.orderBy('ts','desc'),FB.limit(60)),qs=>{LIVE.news=qs.docs.map(d=>{const x=d.data(); return {id:d.id,...x,ts:x.ts&&x.ts.toMillis?x.ts.toMillis():Date.now()};}); schedule();},err));
   { const pq=AUTH.admin&&(AUTH.admin.role!=='part'||(AUTH.admin.areas||[]).some(x=>['drinks','team','misc','finance'].includes(x)))?FB.collection(FB.db,'payreq'):(AUTH.member?FB.query(FB.collection(FB.db,'payreq'),FB.where('p','==',AUTH.member.p)):null);
     if(pq) LIVE.unsubs.push(FB.onSnapshot(pq,qs=>{LIVE.payreq=qs.docs.map(d=>{const x=d.data(); return {id:d.id,...x,ts:x.ts&&x.ts.toMillis?x.ts.toMillis():Date.now()};}); schedule();},()=>{})); }
+  const chatSub=(col,key)=>LIVE.unsubs.push(FB.onSnapshot(FB.query(FB.collection(FB.db,col),FB.orderBy('ts','desc'),FB.limit(300)),qs=>{
+    LIVE.chat=LIVE.chat||{}; LIVE.chat[key]=qs.docs.map(d=>{const x=d.data(); return {id:d.id,...x,ts:x.ts&&x.ts.toMillis?x.ts.toMillis():Date.now()};}); schedule();},()=>{}));
+  chatSub('chat','team'); if(AUTH.admin) chatSub('chatadm','admins');
+  LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'creact'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); (v[x.m]=v[x.m]||{})[x.p]=true;}); LIVE.creact=v; schedule();},()=>{}));
+  LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'nlikes'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); (v[x.n]=v[x.n]||{})[x.p]=true;}); LIVE.nlikes=v; schedule();},err));
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'polls'),qs=>{LIVE.polls=qs.docs.map(d=>{const x=d.data(); return {id:d.id,...x,ts:x.ts&&x.ts.toMillis?x.ts.toMillis():Date.now()};}); schedule();},err));
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'pvotes'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); (v[x.q]=v[x.q]||{})[x.p]=x.i;}); LIVE.pvotes=v; schedule();},err));
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'signups'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); const m=(v[x.e]=v[x.e]||{}); (m[x.s]=m[x.s]||[]).push(x.p);}); LIVE.signups=v; onLiveData();},err));
@@ -953,7 +1010,7 @@ function maybeSyncDerived(){
 }
 function buildS(){
   const P=LIVE.parts, d=emptyState(), m=P.main||{};
-  S={...d,appName:m.appName||d.appName,showSeason:!!m.showSeason,statPeriod:m.statPeriod==='season'?'season':'year',financeOn:!!m.financeOn,payreqOn:m.payreqOn!==false,finance:{start:(P.finance&&P.finance.start)||0,list:(P.finance&&P.finance.list)||[]},teamName:m.teamName??d.teamName,fee:m.fee??d.fee,rate:m.rate??d.rate,paypal:m.paypal??'',club:{...d.club,...(m.club||{})},order:m.order||d.order,
+  S={...d,appName:m.appName||d.appName,showSeason:!!m.showSeason,boardOpen:m.boardOpen!==false,chatOn:!!m.chatOn,statPeriod:m.statPeriod==='season'?'season':'year',financeOn:!!m.financeOn,payreqOn:m.payreqOn!==false,finance:{start:(P.finance&&P.finance.start)||0,list:(P.finance&&P.finance.list)||[]},teamName:m.teamName??d.teamName,fee:m.fee??d.fee,rate:m.rate??d.rate,paypal:m.paypal??'',club:{...d.club,...(m.club||{})},order:m.order||d.order,
     amountsPublic:!!m.amountsPublic,publicView:!!m.publicView,birth:(P.private&&P.private.birth)||{},
     statsPublic:!!(P.events&&P.events.statsPublic),
     players:(P.players&&P.players.list)||[],
@@ -982,7 +1039,7 @@ function withSignups(e){
 }
 function partsOf(s){
   return {
-    main:clean({appName:s.appName,showSeason:!!s.showSeason,statPeriod:s.statPeriod==='season'?'season':'year',financeOn:!!s.financeOn,payreqOn:s.payreqOn!==false,teamName:s.teamName,fee:s.fee,rate:s.rate,paypal:s.paypal,club:s.club,order:s.order,amountsPublic:!!s.amountsPublic,publicView:!!s.publicView}),
+    main:clean({appName:s.appName,showSeason:!!s.showSeason,boardOpen:s.boardOpen!==false,chatOn:!!s.chatOn,statPeriod:s.statPeriod==='season'?'season':'year',financeOn:!!s.financeOn,payreqOn:s.payreqOn!==false,teamName:s.teamName,fee:s.fee,rate:s.rate,paypal:s.paypal,club:s.club,order:s.order,amountsPublic:!!s.amountsPublic,publicView:!!s.publicView}),
     private:clean({birth:s.birth||{}}),
     players:clean({list:s.players}),
     drinks:clean({days:s.days,paid:s.paid.drinks}),
@@ -1036,6 +1093,7 @@ function logAction(text){
 }
 const isTyping=()=>{const a=document.activeElement; return !!a&&['INPUT','TEXTAREA','SELECT'].includes(a.tagName)&&document.getElementById('view').contains(a)&&a.type!=='checkbox'&&a.type!=='radio'&&a.type!=='file';};
 function schedule(){ if(isTyping()||ui.modal){LIVE.pending=true;return;} render(); }
+document.addEventListener('input',ev=>{ if(ev.target.id==='chatText'){ const t=ev.target; t.style.height='auto'; t.style.height=Math.min(140,t.scrollHeight)+'px'; } });
 document.addEventListener('focusout',()=>setTimeout(()=>{if(LIVE.pending&&!isTyping()&&!ui.modal){LIVE.pending=false;render();}},0));
 
 /* ---------- Speichern ---------- */
@@ -1052,7 +1110,7 @@ const MAXB=10, AUTO_GAP=30*60*1000;
 const slug=t=>String(t||'Mannschaftskasse').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ß/g,'ss').replace(/[^A-Za-z0-9]+/g,'-').replace(/^-+|-+$/g,'').toLowerCase()||'mannschaftskasse';
 const stamp=(d=new Date())=>`${iso(d)}_${String(d.getHours()).padStart(2,'0')}-${String(d.getMinutes()).padStart(2,'0')}`;
 function loadBackups(){ if(AUTH.mode==='live') return LIVE.backups; try{return JSON.parse(ls.get(BKEY))||[]}catch(e){return []} }
-function stripImages(json){const o=JSON.parse(json); if(o.club){o.club.crest='';o.club.logo='';} delete o.demoPayreq; delete o.demoPolls; delete o.demoNews; delete o.demoCodes; delete o.demoMembers; delete o.demoLog; delete o.demoComments; return JSON.stringify(o);}
+function stripImages(json){const o=JSON.parse(json); if(o.club){o.club.crest='';o.club.logo='';} delete o.demoChat; delete o.demoPayreq; delete o.demoPolls; delete o.demoNews; delete o.demoCodes; delete o.demoMembers; delete o.demoLog; delete o.demoComments; return JSON.stringify(o);}
 function addBackup(json,label){
   const b={ts:Date.now(),name:S.appName||'Mannschaftskasse',label,data:stripImages(json)};
   if(AUTH.mode==='live'){ if(!AUTH.admin) return; FB.setDoc(D('backups',String(b.ts)),{...b,by:AUTH.admin.name}).catch(e=>console.warn(e)); return; }
@@ -1067,11 +1125,11 @@ function autoBackup(){
 }
 function restoreFrom(json,label){
   addBackup(JSON.stringify(S),'Vor '+label);
-  const o=JSON.parse(json); const keep={crest:S.club.crest,logo:S.club.logo,demoPayreq:S.demoPayreq,demoPolls:S.demoPolls,demoNews:S.demoNews,demoCodes:S.demoCodes,demoMembers:S.demoMembers,demoLog:S.demoLog,demoComments:S.demoComments};
+  const o=JSON.parse(json); const keep={crest:S.club.crest,logo:S.club.logo,demoChat:S.demoChat,demoPayreq:S.demoPayreq,demoPolls:S.demoPolls,demoNews:S.demoNews,demoCodes:S.demoCodes,demoMembers:S.demoMembers,demoLog:S.demoLog,demoComments:S.demoComments};
   const votes=Object.fromEntries(S.events.filter(e=>e.poll).map(e=>[e.id,e.poll.votes]));
   S=o; normalize();
   if(!S.club.crest) S.club.crest=keep.crest; if(!S.club.logo) S.club.logo=keep.logo;
-  if(AUTH.mode==='demo') Object.assign(S,{demoPayreq:keep.demoPayreq,demoPolls:keep.demoPolls,demoNews:keep.demoNews,demoCodes:keep.demoCodes,demoMembers:keep.demoMembers,demoLog:keep.demoLog,demoComments:keep.demoComments});
+  if(AUTH.mode==='demo') Object.assign(S,{demoChat:keep.demoChat,demoPayreq:keep.demoPayreq,demoPolls:keep.demoPolls,demoNews:keep.demoNews,demoCodes:keep.demoCodes,demoMembers:keep.demoMembers,demoLog:keep.demoLog,demoComments:keep.demoComments});
   else S.events.forEach((e,i)=>{if(e.poll) e.poll.votes=votes[e.id]||{}; if(e.shifts) S.events[i]=withSignups(e);});
   S.sample=false; save(); closeForm(); render(); logAction(label+' durchgeführt');
 }
@@ -1195,9 +1253,9 @@ function pollBox(e,full){
 
 /* ---------- Push-Nachrichten ---------- */
 /* Pro Gerät: Erlaubnis + Token in push/{uid}; der Versand läuft über die Cloud Functions im Ordner functions/ */
-const PUSH_PREFS={ev:'Termine, Umfragen & Trainingsänderungen',news:'Nachrichten an alle',cmt:'Neue Kommentare'};
+const PUSH_PREFS={chat:'Chat-Nachrichten',ev:'Termine, Umfragen & Trainingsänderungen',news:'Pinnwand',cmt:'Neue Kommentare'};
 const pushLocal=()=>{try{return JSON.parse(ls.get('mk-push'))||{}}catch(e){return {}}};
-const pushPrefs=()=>({ev:true,news:true,cmt:true,...(pushLocal().prefs||{})});
+const pushPrefs=()=>({chat:true,ev:true,news:true,cmt:true,...(pushLocal().prefs||{})});
 const isIOS=()=>/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 const isStandalone=()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}};
 const pushCapable=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
@@ -1266,7 +1324,7 @@ async function pushRefresh(){
 }
 function pushModalBody(){
   const st=pushState(), pr=pushPrefs(), on=st.k==='on'||(st.k==='demo'&&pushActive());
-  const prefs=`<div style="display:grid;gap:4px"><b style="font-size:13px">Benachrichtigen bei</b>${Object.entries(PUSH_PREFS).map(([k,l])=>`<label class="check"><input type="checkbox" name="pPref" value="${k}" ${pr[k]?'checked':''}> ${l}</label>`).join('')}</div>`;
+  const prefs=`<div style="display:grid;gap:4px"><b style="font-size:13px">Benachrichtigen bei</b>${Object.entries(PUSH_PREFS).filter(([k])=>k!=='chat'||S.chatOn).map(([k,l])=>`<label class="check"><input type="checkbox" name="pPref" value="${k}" ${pr[k]?'checked':''}> ${l}</label>`).join('')}</div>`;
   const state={on:['ok','Aktiv auf diesem Gerät'],off:['','Auf diesem Gerät aus'],demo:[pushActive()?'ok':'',pushActive()?'Demo: aktiv':'Demo: aus'],
     nokey:['warn','Push ist für diese App noch nicht eingerichtet'],ios:['warn','Zuerst zum Home-Bildschirm hinzufügen'],unsupported:['warn','Dieser Browser kann keine Push-Nachrichten'],denied:['warn','Benachrichtigungen sind blockiert']}[st.k];
   let help='';
@@ -1467,38 +1525,191 @@ async function tpDelete(id){
   render(); toast('Umfrage gelöscht');
 }
 
-/* ---------- Nachrichten an alle ---------- */
-const newsList=()=>(AUTH.mode==='live'?(LIVE.news||[]):(S.demoNews||[])).slice().sort((a,b)=>b.ts-a.ts);
+/* ---------- Mannschafts-Chat (optional, ersetzt die WhatsApp-Gruppe) ---------- */
+/* Kanäle: „team“ (alle) und „admins“ (nur Admins). Fotos liegen getrennt (chatimg) und werden erst bei Bedarf geladen. */
+const chatCh=()=>ui.chatCh==='admins'&&isAdminAny()?'admins':'team';
+const isAdminAny=()=>!!me();
+function chatMsgs(ch){
+  if(AUTH.mode!=='live') return ((S.demoChat||{})[ch]||[]).slice().sort((a,b)=>a.ts-b.ts);
+  const rx=LIVE.creact||{};
+  return ((LIVE.chat||{})[ch]||[]).map(m=>({...m,likes:ch==='team'?Object.keys(rx[m.id]||{}):(m.likes||[])})).sort((a,b)=>a.ts-b.ts);
+}
+const chatReadKey=ch=>'mk-chat-read-'+ch;
+function chatUnread(){
+  if(!S.chatOn||isPublic()||(AUTH.mode==='live'&&!AUTH.member&&!AUTH.admin)) return 0;
+  const au=myAuthor(); let n=0;
+  ['team',...(isAdminAny()?['admins']:[])].forEach(ch=>{const r=+(ls.get(chatReadKey(ch))||0); chatMsgs(ch).forEach(m=>{ if(m.ts>r&&!(au&&((m.p&&m.p===au.p)||(m.a&&m.a===au.a)))) n++; });});
+  return n;
+}
+function chatMarkRead(){ const l=chatMsgs(chatCh()); ls.set(chatReadKey(chatCh()),String(l.length?Math.max(Date.now(),l[l.length-1].ts):Date.now())); }
+const chatMine=m=>{const a=myAuthor(); return !!a&&((m.p&&a.p===m.p)||(m.a&&a.a===m.a));};
+const chatWho=m=>m.p?pname(m.p):(m.an||'Admin');
+const dayLabel=ts=>{const d=new Date(ts), k=iso(d); return k===TODAY?'Heute':k===shiftDate(TODAY,-1)?'Gestern':`${wd(k)}, ${fmtDate(k)}`;};
+const hm=ts=>new Date(ts).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+const linkify=t=>esc(t).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
+function chatImg(m){
+  if(AUTH.mode!=='live') return m.img;
+  LIVE.cimg=LIVE.cimg||{}; if(LIVE.cimg[m.id]) return LIVE.cimg[m.id];
+  if(!LIVE.cimgLoading) LIVE.cimgLoading={};
+  if(!LIVE.cimgLoading[m.id]){ LIVE.cimgLoading[m.id]=true; FB.getDoc(D(chatCh()==='admins'?'chatimgadm':'chatimg',m.id)).then(d=>{ if(d.exists()){ LIVE.cimg[m.id]=d.data().d; schedule(); } }).catch(()=>{}); }
+  return '';
+}
+function chatView(){
+  const ch=chatCh(), list=chatMsgs(ch), au=myAuthor(), canWrite=!!au;
+  const lim=ui.chatLim||120, shown=list.slice(-lim);
+  let lastDay='', lastWho='';
+  const byId=Object.fromEntries(list.map(m=>[m.id,m]));
+  const rows=shown.map(m=>{
+    const day=dayLabel(m.ts), mine=chatMine(m), who=chatWho(m);
+    let h=''; if(day!==lastDay){ h+=`<div class="cday">${day}</div>`; lastDay=day; lastWho=''; }
+    const showName=!mine&&who!==lastWho; lastWho=who;
+    const q=m.re&&byId[m.re]?`<div class="q"><b>${esc(chatWho(byId[m.re]))}:</b> ${esc(byId[m.re].t||(byId[m.re].img?'📷 Foto':'📊 Umfrage'))}</div>`:'';
+    const img=m.img?(()=>{const src=chatImg(m); return src?`<img src="${src}" alt="Foto von ${esc(who)}" data-act="chatImg" data-v="${m.id}">`:'<span class="ph">📷 Foto wird geladen …</span>';})():'';
+    const poll=m.poll?(()=>{const x=tpolls().find(y=>y.id===m.poll); return x?tpollCard(x):'<div class="hint">Umfrage wurde gelöscht</div>';})():'';
+    const sel=ui.chatSel===m.id, liked=!!au&&!!au.p&&(m.likes||[]).includes(au.p);
+    h+=`<div class="msg ${mine?'me':''} ${sel?'sel':''}" data-act="chatSel" data-v="${m.id}" role="button" tabindex="0">${showName?`<div class="mn">${esc(who)}${m.a?' · Admin':''}</div>`:''}${q}${img}${poll}${m.t?`<div class="mt">${linkify(m.t)}</div>`:''}
+      <div class="mm">${(m.likes||[]).length?`<span class="rx">👍 ${(m.likes||[]).length}</span> `:''}${hm(m.ts)}</div></div>`;
+    if(sel) h+=`<div class="macts ${mine?'me':''}"><button class="chip" data-act="chatReply" data-v="${m.id}">↩︎ Antworten</button>${ch==='team'&&au&&au.p?`<button class="chip" data-act="chatLike" data-v="${m.id}" aria-pressed="${liked}">👍${liked?' zurück':''}</button>`:''}${m.t?`<button class="chip" data-act="copy" data-v="${esc(m.t)}">Kopieren</button>`:''}${mine||isAdmin()?`<button class="chip" data-act="chatDel" data-v="${m.id}" style="color:var(--due)">Löschen</button>`:''}</div>`;
+    return h;}).join('');
+  const reply=ui.chatRe&&byId[ui.chatRe]?`<div class="creply"><span><b>Antwort an ${esc(chatWho(byId[ui.chatRe]))}:</b> ${esc((byId[ui.chatRe].t||'Foto').slice(0,60))}</span><button class="x" data-act="chatReplyX" aria-label="Antwort abbrechen">×</button></div>`:'';
+  return `${isAdminAny()?`<div class="seg wide" role="group" aria-label="Chat"><button data-act="chatCh" data-v="team" aria-pressed="${ch==='team'}">Mannschaft</button><button data-act="chatCh" data-v="admins" aria-pressed="${ch==='admins'}">Nur Admins</button></div>`:''}
+    <div class="chat" id="chatList">${list.length>shown.length?`<button class="chip" data-act="chatMore" style="justify-self:center">Ältere Nachrichten</button>`:''}
+      ${rows||`<p class="hint" style="text-align:center">Noch keine Nachrichten. Schreib die erste!</p>`}</div>
+    ${canWrite?`<div class="composer">${reply}<div class="crow">
+      <label class="btn ghost icon" title="Foto senden" aria-label="Foto senden">📷<input type="file" id="chatFile" accept="image/*"></label>
+      ${ch==='team'&&FEAT.events?`<button class="btn ghost icon" data-act="chatPoll" title="Umfrage starten" aria-label="Umfrage starten">📊</button>`:'<span></span>'}
+      <textarea id="chatText" rows="1" maxlength="1000" placeholder="Nachricht"></textarea>
+      <button class="btn send" data-act="chatSend" aria-label="Senden">➤</button></div></div>`
+      :`<p class="hint">Zum Schreiben deinen persönlichen Spieler-Link öffnen.</p>`}`;
+}
+function chatScroll(force){
+  const l=document.getElementById('chatList'); if(!l) return;
+  const nearBottom=window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-160;
+  if(force||nearBottom||ui.chatJump){ ui.chatJump=false; requestAnimationFrame(()=>window.scrollTo(0,document.documentElement.scrollHeight)); }
+}
+async function chatSend(extra){
+  const ta=document.getElementById('chatText'), t=(ta&&ta.value||'').trim().slice(0,1000), au=myAuthor();
+  if(!au) return toast('Zum Schreiben deinen persönlichen Spieler-Link öffnen');
+  if(!t&&!(extra&&(extra.img||extra.poll))) return;
+  const ch=chatCh(), who=au.p?{p:au.p}:{a:au.a,an:au.an}, re=ui.chatRe||'';
+  const msg={ch,t:extra&&extra.img?(t||''):t,...who,...(re?{re}:{})};
+  if(ta) ta.value=''; ui.chatRe=null; ui.chatSel=null;
+  if(AUTH.mode==='live'){
+    try{
+      const col=ch==='admins'?'chatadm':'chat', ref=FB.doc(FB.collection(FB.db,col)), b=FB.writeBatch(FB.db);
+      b.set(ref,{...msg,ts:FB.serverTimestamp(),...(extra&&extra.img?{img:true}:{}),...(extra&&extra.poll?{poll:extra.poll}:{})}); delete msg.ch;
+      if(extra&&extra.img){ b.set(D(ch==='admins'?'chatimgadm':'chatimg',ref.id),{d:extra.img}); LIVE.cimg=LIVE.cimg||{}; LIVE.cimg[ref.id]=extra.img; }
+      await b.commit();
+    }catch(e){console.warn(e); toast('Nachricht konnte nicht gesendet werden'); if(ta&&t) ta.value=t; return;}
+  }else{
+    S.demoChat=S.demoChat||{team:[],admins:[]}; (S.demoChat[ch]=S.demoChat[ch]||[]).push({id:uid(),...msg,ts:Date.now(),likes:[],...(extra&&extra.img?{img:extra.img}:{}),...(extra&&extra.poll?{poll:extra.poll}:{})}); delete msg.ch; save();
+  }
+  ui.chatJump=true; chatMarkRead(); render();
+}
+function chatPhoto(file){
+  if(!file) return; const r=new FileReader();
+  r.onload=()=>{const img=new Image(); img.onload=()=>{
+    let max=1280, q=.72, out='';
+    for(let i=0;i<5;i++){ const s=Math.min(1,max/Math.max(img.width,img.height)); const cv=document.createElement('canvas'); cv.width=Math.round(img.width*s); cv.height=Math.round(img.height*s);
+      cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height); out=cv.toDataURL('image/jpeg',q); if(out.length<700000) break; max=Math.round(max*.8); q=Math.max(.5,q-.08); }
+    if(out.length>=900000) return toast('Foto ist zu groß');
+    chatSend({img:out}); };
+    img.onerror=()=>toast('Foto konnte nicht gelesen werden'); img.src=r.result;};
+  r.readAsDataURL(file);
+}
+async function chatDelete(id){
+  const ch=chatCh(), m=chatMsgs(ch).find(x=>x.id===id); if(!m||!(chatMine(m)||isAdmin())) return; ui.chatSel=null;
+  if(AUTH.mode==='live'){
+    try{ const b=FB.writeBatch(FB.db); b.delete(D(ch==='admins'?'chatadm':'chat',id)); if(m.img) b.delete(D(ch==='admins'?'chatimgadm':'chatimg',id)); await b.commit(); }
+    catch(e){console.warn(e); return toast('Keine Berechtigung');}
+    if(!chatMine(m)) logAction('Chat-Nachricht entfernt');
+  }else{ S.demoChat[ch]=S.demoChat[ch].filter(x=>x.id!==id); if(!chatMine(m)) logAction('Chat-Nachricht entfernt'); save(); }
+  render(); toast('Nachricht gelöscht');
+}
+async function chatLike(id){
+  const au=myAuthor(); if(!au||!au.p) return; const m=chatMsgs('team').find(x=>x.id===id); if(!m) return; const on=!(m.likes||[]).includes(au.p);
+  if(AUTH.mode==='live'){ LIVE.creact=LIVE.creact||{}; const r=(LIVE.creact[id]=LIVE.creact[id]||{}); if(on) r[au.p]=true; else delete r[au.p]; render();
+    try{ const ref=D('creact',`${id}_${au.p}`); if(on) await FB.setDoc(ref,{m:id,p:au.p}); else await FB.deleteDoc(ref); }catch(e){console.warn(e);} }
+  else { const d=S.demoChat.team.find(x=>x.id===id); d.likes=d.likes||[]; if(on) d.likes.push(au.p); else d.likes=d.likes.filter(x=>x!==au.p); save(); render(); }
+  ui.chatSel=null; render();
+}
+/* Umfrage aus dem Chat starten: legt eine Mannschafts-Umfrage an und zeigt sie im Chat */
+async function chatPollCreate(q,opts){
+  const mp=myPlayer(), a=me(), who=mp?{p:mp}:{a:a.uid,an:a.name};
+  let id;
+  if(AUTH.mode==='live'){ try{ const ref=await FB.addDoc(FB.collection(FB.db,'polls'),{q,opts,open:true,ts:FB.serverTimestamp(),...who}); id=ref.id; }catch(e){console.warn(e); return toast('Umfrage konnte nicht gestartet werden');} }
+  else { id=uid(); S.demoPolls=S.demoPolls||[]; S.demoPolls.push({id,q,opts,open:true,ts:Date.now(),votes:{},...who}); save(); }
+  chatSend({poll:id});
+}
+
+/* ---------- Pinnwand (Beiträge von Admins und – wenn erlaubt – Spielern) ---------- */
+const newsList=()=>{
+  const raw=AUTH.mode==='live'?(LIVE.news||[]):(S.demoNews||[]), lk=AUTH.mode==='live'?(LIVE.nlikes||{}):null;
+  return raw.map(n=>({...n,likes:lk?Object.keys(lk[n.id]||{}):(n.likes||[])})).sort((x,y)=>(!!y.pin-!!x.pin)||y.ts-x.ts);
+};
+const boardWrite=()=>isAdmin()||(S.boardOpen!==false&&!!myPlayer());
+const newsMine=n=>{const a=myAuthor(); return !!a&&((n.p&&a.p===n.p&&!isAdmin())||(n.a&&a.a===n.a));};
+const newsAuthor=n=>n.p?pname(n.p):(n.an||'Admin');
+function newsItem(n){
+  if(ui.newsDel===n.id) return `<div class="nitem">${confirmBoxNews(n)}</div>`;
+  const mp=myPlayer(), liked=!!mp&&n.likes.includes(mp), nc=cmtCount(n.id,'news'), open=ui.newsOpen===n.id;
+  const canDel=isAdmin()||newsMine(n);
+  return `<div class="nitem ${n.pin?'pin':''}"><div class="who"><span>${n.pin?'📌 ':''}${esc(newsAuthor(n))}${n.a?' <span class="badge">Admin</span>':''}</span>
+      <span class="row tight"><small>${fmtTs(n.ts)}</small>${canDel?`<button class="x" data-act="newsDel" data-v="${n.id}" aria-label="Beitrag löschen">×</button>`:''}</span></div>
+    <div class="tx">${esc(n.t)}</div>
+    <div class="nact"><button class="chip ${liked?'on':''}" data-act="newsLike" data-v="${n.id}" aria-pressed="${liked}">👍 ${n.likes.length||''}</button>
+      <button class="chip" data-act="newsCmt" data-v="${n.id}" aria-expanded="${open}">💬 ${open?'ausblenden':nc===1?'1 Kommentar':nc?nc+' Kommentare':'Kommentieren'}</button>
+      ${isAdmin()?`<button class="edit" data-act="newsPin" data-v="${n.id}">${n.pin?'Lösen':'Anheften'}</button>`:''}</div>
+    ${open?commentsBlock(n,'news'):''}</div>`;
+}
 function newsBlock(){
   if(isPublic()) return '';
-  const all=newsList(), adm=isAdmin(), recent=all.filter(n=>Date.now()-n.ts<30*864e5);
-  const shown=ui.allNews?all:recent.slice(0,3);
-  if(!shown.length&&!adm) return '';
-  const form=ui.newsForm&&adm?`<div class="panel form nobar"><h2>Nachricht an alle</h2>
-      <p class="hint">Erscheint hier auf der Übersicht und kommt als Push-Nachricht bei allen an, die Benachrichtigungen aktiviert haben.</p>
-      <label class="f">Text<textarea id="newsText" maxlength="500" placeholder="z. B. Training fällt heute wegen Platzsperre aus."></textarea></label>
-      <div class="row"><button class="btn" data-act="newsSend">Senden</button><button class="btn ghost" data-act="newsCancel">Abbrechen</button></div></div>`:'';
-  const items=shown.map(n=>ui.newsDel===n.id?`<div class="nitem">${confirmBoxNews(n)}</div>`
-    :`<div class="nitem"><div class="who"><span>${esc(n.an||'Admin')}</span><span class="row tight"><small>${fmtTs(n.ts)}</small>${adm?`<button class="x" data-act="newsDel" data-v="${n.id}" aria-label="Nachricht löschen">×</button>`:''}</span></div><div class="tx">${esc(n.t)}</div></div>`).join('');
-  return `<div class="hd">Infos ${adm&&!ui.newsForm?'<button class="chip" data-act="newsNew" style="font-family:var(--body);text-transform:none;letter-spacing:0">+ Nachricht an alle</button>':''}</div>
-    ${form}${items?`<div class="news">${items}</div>`:(adm&&!ui.newsForm?'<p class="hint" style="margin:0">Noch keine Nachrichten. Mit „Nachricht an alle“ erreichst du die ganze Mannschaft.</p>':'')}
-    ${all.length>shown.length||ui.allNews?`<button class="chip" data-act="newsAll" style="justify-self:start">${ui.allNews?'Weniger anzeigen':`Ältere Nachrichten (${all.length-shown.length})`}</button>`:''}`;
+  const all=newsList(), pinned=all.filter(n=>n.pin), rest=all.filter(n=>!n.pin);
+  const recent=rest.filter(n=>Date.now()-n.ts<30*864e5).slice(0,5);
+  const shown=[...pinned,...(ui.allNews?rest:recent)], hidden=rest.length-(ui.allNews?rest.length:recent.length);
+  const canW=boardWrite();
+  if(!shown.length&&!canW) return '';
+  const form=ui.newsForm&&canW?`<div class="panel form nobar"><h2>${isAdmin()?'Beitrag / Nachricht an alle':'Neuer Beitrag'}</h2>
+      <p class="hint">Erscheint auf der Pinnwand. Wer Benachrichtigungen aktiviert hat, bekommt eine Nachricht.</p>
+      <label class="f">Text<textarea id="newsText" maxlength="500" placeholder="${isAdmin()?'z. B. Training fällt heute wegen Platzsperre aus.':'z. B. Suche Mitfahrgelegenheit zum Auswärtsspiel am Samstag.'}"></textarea></label>
+      ${isAdmin()?'<label class="check"><input type="checkbox" id="newsPin"> Oben anheften</label>':''}
+      <div class="row"><button class="btn" data-act="newsSend">Veröffentlichen</button><button class="btn ghost" data-act="newsCancel">Abbrechen</button></div></div>`:'';
+  return `<div class="hd">Pinnwand ${canW&&!ui.newsForm?'<button class="chip" data-act="newsNew" style="font-family:var(--body);text-transform:none;letter-spacing:0">+ Beitrag</button>':''}</div>
+    ${form}${shown.length?`<div class="news">${shown.map(newsItem).join('')}</div>`:(canW&&!ui.newsForm?'<p class="hint" style="margin:0">Noch keine Beiträge. Hier steht, was alle wissen sollen – und nicht im Chat untergehen soll.</p>':'')}
+    ${hidden>0||ui.allNews?`<button class="chip" data-act="newsAll" style="justify-self:start">${ui.allNews?'Weniger anzeigen':`Ältere Beiträge (${hidden})`}</button>`:''}`;
 }
-const confirmBoxNews=n=>`<div class="row tight">Nachricht löschen? <button class="btn danger sm" data-act="newsDelGo" data-v="${n.id}">Löschen</button><button class="btn ghost sm" data-act="newsDelNo">Abbrechen</button></div>`;
+const confirmBoxNews=n=>`<div class="row tight">Beitrag löschen? <button class="btn danger sm" data-act="newsDelGo" data-v="${n.id}">Löschen</button><button class="btn ghost sm" data-act="newsDelNo">Abbrechen</button></div>`;
 async function sendNews(){
-  const ta=document.getElementById('newsText'), t=(ta&&ta.value||'').trim().slice(0,500), a=me();
-  if(!t) return toast('Bitte einen Text eingeben'); if(!a||!isAdmin()) return;
+  const ta=document.getElementById('newsText'), t=(ta&&ta.value||'').trim().slice(0,500); if(!t) return toast('Bitte einen Text eingeben');
+  if(!boardWrite()) return toast('Zum Schreiben deinen persönlichen Spieler-Link öffnen');
+  const a=me(), asAdmin=isAdmin(), pin=asAdmin&&!!(document.getElementById('newsPin')||{}).checked;
+  const who=asAdmin?{a:a.uid,an:a.name}:{p:myPlayer()};
   if(AUTH.mode==='live'){
-    try{ await FB.addDoc(FB.collection(FB.db,'news'),{t,a:a.uid,an:a.name,ts:FB.serverTimestamp()}); logAction('Nachricht an alle gesendet'); }
-    catch(e){console.warn(e); return toast('Senden fehlgeschlagen');}
-  }else{ S.demoNews=S.demoNews||[]; S.demoNews.push({id:uid(),t,a:a.uid,an:a.name,ts:Date.now()}); logAction('Nachricht an alle gesendet'); save(); }
-  ui.newsForm=false; render(); toast(AUTH.mode==='live'?'Nachricht gesendet':'Demo: Nachricht gespeichert – Push gibt es nur in der echten App');
+    try{ await FB.addDoc(FB.collection(FB.db,'news'),{t,ts:FB.serverTimestamp(),...who,...(pin?{pin:true}:{})}); if(asAdmin) logAction('Pinnwand-Beitrag veröffentlicht'); }
+    catch(e){console.warn(e); return toast('Veröffentlichen fehlgeschlagen');}
+  }else{ S.demoNews=S.demoNews||[]; S.demoNews.push({id:uid(),t,ts:Date.now(),likes:[],...who,...(pin?{pin:true}:{})}); if(asAdmin) logAction('Pinnwand-Beitrag veröffentlicht'); save(); }
+  ui.newsForm=false; render(); toast(AUTH.mode==='live'?'Beitrag veröffentlicht':'Demo: Beitrag gespeichert – Push gibt es nur in der echten App');
 }
 async function delNews(id){
-  ui.newsDel=null;
-  if(AUTH.mode==='live'){ try{await FB.deleteDoc(D('news',id));}catch(e){return toast('Keine Berechtigung');} }
-  else { S.demoNews=(S.demoNews||[]).filter(n=>n.id!==id); save(); }
-  render(); toast('Nachricht gelöscht');
+  ui.newsDel=null; const n=newsList().find(x=>x.id===id); if(!n||!(isAdmin()||newsMine(n))) return;
+  if(AUTH.mode==='live'){ try{await FB.deleteDoc(D('news',id)); if(isAdmin()) Object.keys((LIVE.nlikes||{})[id]||{}).forEach(pid=>FB.deleteDoc(D('nlikes',`${id}_${pid}`)).catch(()=>{}));}catch(e){return toast('Keine Berechtigung');} }
+  else { S.demoNews=(S.demoNews||[]).filter(x=>x.id!==id); save(); }
+  if(isAdmin()&&!newsMine(n)) logAction('Pinnwand-Beitrag entfernt');
+  render(); toast('Beitrag gelöscht');
+}
+async function likeNews(id){
+  const p=myPlayer(); if(!p) return toast(AUTH.mode==='live'?'Dafür deinen persönlichen Spieler-Link öffnen':'Bitte oben zuerst deinen Namen wählen');
+  const n=newsList().find(x=>x.id===id); if(!n) return; const on=!n.likes.includes(p);
+  if(AUTH.mode==='live'){
+    LIVE.nlikes=LIVE.nlikes||{}; const m=(LIVE.nlikes[id]=LIVE.nlikes[id]||{}); if(on) m[p]=true; else delete m[p]; render();
+    try{ const ref=D('nlikes',`${id}_${p}`); if(on) await FB.setDoc(ref,{n:id,p}); else await FB.deleteDoc(ref); }catch(e){console.warn(e); toast('Konnte nicht gespeichert werden');}
+  }else{ const d=S.demoNews.find(x=>x.id===id); d.likes=d.likes||[]; if(on) d.likes.push(p); else d.likes=d.likes.filter(x=>x!==p); save(); render(); }
+}
+async function pinNews(id){
+  if(!isAdmin()) return; const n=newsList().find(x=>x.id===id); if(!n) return;
+  if(AUTH.mode==='live'){ try{await FB.updateDoc(D('news',id),{pin:!n.pin});}catch(e){return toast('Keine Berechtigung');} }
+  else { const d=S.demoNews.find(x=>x.id===id); if(d.pin) delete d.pin; else d.pin=true; save(); render(); }
+  toast(n.pin?'Beitrag gelöst':'Beitrag oben angeheftet');
 }
 
 /* ---------- Kommentare ---------- */
@@ -1506,6 +1717,7 @@ function commentsOf(eid,k){
   const all=AUTH.mode==='live'?LIVE.comments:(S.demoComments||[]);
   return all.filter(c=>c.e===eid&&(!k||c.k===k)).sort((a,b)=>(a.o||a.ts)-(b.o||b.ts));
 }
+const modCan=k=>k==='news'?isAdmin():can('events');
 /* Anzahl echter Kommentare (ohne Hinweise „Kommentar entfernt“) */
 const cmtCount=(eid,k)=>commentsOf(eid,k).filter(c=>!c.rm).length;
 function myAuthor(){const p=myPlayer(); if(p) return {p}; const a=me(); return a?{a:a.uid,an:a.name}:null;}
@@ -1515,13 +1727,13 @@ function commentsBlock(e,k){
   const delBox=c=>{
     if(ui.cmtDel!==c.id) return '';
     if(c.rm) return `<div class="cmtdel"><div class="row tight">Hinweis entfernen? <button class="btn danger sm" data-act="cmtDelGo" data-v="${c.id}" data-n="0">Entfernen</button><button class="btn ghost sm" data-act="cmtDelNo">Abbrechen</button></div></div>`;
-    if(own(c)&&!can('events')) return `<div class="cmtdel"><div class="row tight">Kommentar löschen? <button class="btn danger sm" data-act="cmtDelGo" data-v="${c.id}" data-n="0">Löschen</button><button class="btn ghost sm" data-act="cmtDelNo">Abbrechen</button></div></div>`;
+    if(own(c)&&!modCan(k)) return `<div class="cmtdel"><div class="row tight">Kommentar löschen? <button class="btn danger sm" data-act="cmtDelGo" data-v="${c.id}" data-n="0">Löschen</button><button class="btn ghost sm" data-act="cmtDelNo">Abbrechen</button></div></div>`;
     return `<div class="cmtdel">
       <label class="check"><input type="checkbox" id="cdNote" ${own(c)?'':'checked'}> Hinweis „Kommentar entfernt“ stehen lassen</label>
       <label class="f">Begründung (optional, für alle sichtbar)<textarea id="cdText" maxlength="300" placeholder="z. B. Bitte sachlich bleiben."></textarea></label>
       <div class="row tight"><button class="btn danger sm" data-act="cmtDelGo" data-v="${c.id}" data-n="1">Entfernen</button><button class="btn ghost sm" data-act="cmtDelNo">Abbrechen</button></div></div>`;
   };
-  const delBtn=c=>(own(c)&&!c.rm)||can('events')?`<button class="x" data-act="cmtDel" data-v="${c.id}" aria-label="${c.rm?'Hinweis entfernen':'Kommentar löschen'}">×</button>`:'';
+  const delBtn=c=>(own(c)&&!c.rm)||modCan(k)?`<button class="x" data-act="cmtDel" data-v="${c.id}" aria-label="${c.rm?'Hinweis entfernen':'Kommentar löschen'}">×</button>`:'';
   return `<div class="cmts"><h3>${k==='poll'?'Kommentare zur Umfrage':'Kommentare'} · ${list.filter(c=>!c.rm).length}</h3>
     ${list.map(c=>c.rm
       ?`<div class="cmt rm"><div class="who"><span>Kommentar entfernt</span><span class="row tight"><small>${fmtTs(c.o||c.ts)}</small>${delBtn(c)}</span></div>
@@ -1553,12 +1765,13 @@ function renderChrome(){
   ab.className='adminbtn'+(isAdmin()?' on':(me()?' half':''));
   ab.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true">${isAdmin()?ICON.unlock:ICON.lock}</svg>`;
   ab.setAttribute('aria-label',isAdmin()?(myPlayer()?'Zur Spieleransicht wechseln':'Zum Lesemodus wechseln'):(me()?'Zur Admin-Ansicht wechseln':'Admin-Anmeldung'));
-  const tabs=(gated?[]:isPublic()?['home','events']:(isFull()?['home','events','roster','settings']:['home','events','roster']))
-    .filter(k=>(k!=='events'||FEAT.events)&&(k!=='roster'||FEAT.roster));
+  const tabs=(gated?[]:isPublic()?['home','events']:(isFull()?['home','events','chat','roster','settings']:['home','events','chat','roster']))
+    .filter(k=>(k!=='events'||FEAT.events)&&(k!=='roster'||FEAT.roster)&&(k!=='chat'||!!S.chatOn));
   const cur=(ui.person||MONEY.includes(ui.tab)||ui.tab==='finance'||ui.tab==='payreqs')?'home':((ui.lineup||ui.evDetail)?'events':ui.tab);
-  const lbl=k=>k==='settings'?'Optionen':k==='roster'?'Team':SEC[k].label;
-  document.getElementById('tabs').innerHTML=tabs.map(k=>`<button role="tab" data-tab="${k}" aria-selected="${cur===k}">${lbl(k)}</button>`).join('');
-  document.getElementById('tabbar').innerHTML=(tabs.length>1?tabs:[]).map(k=>`<button data-tab="${k}" aria-selected="${cur===k}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg><span>${lbl(k)}</span></button>`).join('');
+  const lbl=k=>k==='settings'?'Optionen':k==='roster'?'Team':k==='chat'?'Chat':SEC[k].label;
+  const nUnread=chatUnread(), badge=k=>k==='chat'&&nUnread&&ui.tab!=='chat'?`<span class="tbn">${nUnread>99?'99+':nUnread}</span>`:'';
+  document.getElementById('tabs').innerHTML=tabs.map(k=>`<button role="tab" data-tab="${k}" aria-selected="${cur===k}">${lbl(k)}${badge(k)}</button>`).join('');
+  document.getElementById('tabbar').innerHTML=(tabs.length>1?tabs:[]).map(k=>`<button data-tab="${k}" aria-selected="${cur===k}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg><span>${lbl(k)}</span>${badge(k)}</button>`).join('');
 }
 
 function periodBar(){
@@ -2348,6 +2561,12 @@ function visibilityPanel(){
 `:''}
     ${FEAT.events?`    <div class="vis"><b>Teilnahme-Auswertung</b>
       <div class="seg wide" role="group" aria-label="Teilnahme"><button data-act="statsVis" data-v="admin" aria-pressed="${!S.statsPublic}">Nur Trainer &amp; Admins</button><button data-act="statsVis" data-v="all" aria-pressed="${!!S.statsPublic}">Alle Spieler</button></div></div>
+    <div class="vis"><b>Mannschafts-Chat</b>
+      <div class="seg wide" role="group" aria-label="Chat"><button data-act="chatOn" data-v="off" aria-pressed="${!S.chatOn}">Aus</button><button data-act="chatOn" data-v="on" aria-pressed="${!!S.chatOn}">An – ersetzt die WhatsApp-Gruppe</button></div>
+      <p class="hint">Gruppenchat für alle mit Fotos, Antworten, 👍 und Umfragen, dazu ein Chat nur für Admins. Neue Nachrichten kommen per Push (Glocke → „Chat“).</p></div>
+    <div class="vis"><b>Pinnwand</b>
+      <div class="seg wide" role="group" aria-label="Pinnwand"><button data-act="boardOpen" data-v="all" aria-pressed="${S.boardOpen!==false}">Alle dürfen schreiben</button><button data-act="boardOpen" data-v="admin" aria-pressed="${S.boardOpen===false}">Nur Admins</button></div>
+      <p class="hint">Kommentieren und 👍 können immer alle. Admins können Beiträge anheften und jeden Beitrag löschen.</p></div>
     <div class="vis"><b>Öffentlicher Zugang</b>
       <div class="seg wide" role="group" aria-label="Öffentlicher Zugang"><button data-act="publicVis" data-v="off" aria-pressed="${!S.publicView}">Aus</button><button data-act="publicVis" data-v="on" aria-pressed="${!!S.publicView}">An</button></div>
       <p class="hint">Wer die App ohne Code öffnet, sieht nur die Termine (Datum, Uhrzeit, Ort) und auf der Übersicht die nächsten Termine – bei Spiel und Training mit Umfragestand als Zahl. Keine Namen, ${FEAT.money?'keine Beträge, ':''}keine Notizen.</p>
@@ -2459,6 +2678,12 @@ function renderModal(){
   }else if(m.kind==='code'){
     body=`<h2>Mit Code anmelden</h2><p class="hint">Den Code findest du in deiner Einladung.</p>
       <label class="f">Dein Code<input type="text" id="gateCode" class="codein" placeholder="XXXX-XXXX" maxlength="9" autocapitalize="characters" autocomplete="off" autocorrect="off"></label>`; submit='Weiter';
+  }else if(m.kind==='chatPoll'){
+    body=`<h2>Umfrage im Chat</h2><label class="f">Frage<input type="text" id="tpQ" maxlength="200" placeholder="z. B. Wer kommt mit zum Kohlessen?"></label>
+      <label class="f">Antworten (eine pro Zeile, 2 bis 6)<textarea id="tpO">Ja\nNein</textarea></label>`; submit='Umfrage senden';
+  }else if(m.kind==='img'){
+    const msg=chatMsgs(chatCh()).find(x=>x.id===m.v), src=msg?chatImg(msg):'';
+    body=src?`<img class="imgview" src="${src}" alt="Foto">`:'<p class="hint">Foto nicht verfügbar.</p>'; submit='';
   }else if(m.kind==='prNew'){ body=payreqNewBody(); submit='Melden';
   }else if(m.kind==='prCheck'){ body=payreqCheckBody(m); submit='Bestätigen & verrechnen'; extra='<button type="button" class="linkbtn" data-act="prReject" style="justify-self:start">Meldung ablehnen</button>';
   }else if(m.kind==='push'){
@@ -2510,6 +2735,9 @@ async function submitModal(){
   try{
     if(m.kind==='code'){ ui.modal=null; renderModal(); return enterCode(v('gateCode')); }
     if(m.kind==='prNew'){ return payreqSubmit(); }
+    if(m.kind==='chatPoll'){ const q=v('tpQ').slice(0,200), opts=[...new Set(document.getElementById('tpO').value.split('\n').map(x=>x.trim().slice(0,60)).filter(Boolean))];
+      if(!q) return fail('Bitte eine Frage eingeben.'); if(opts.length<2||opts.length>6) return fail('Bitte 2 bis 6 Antworten eintragen.');
+      ui.modal=null; renderModal(); return chatPollCreate(q,opts); }
     if(m.kind==='prCheck'){ return payreqResolve(m,true); }
     if(m.kind==='push'){ const prefs={}; document.querySelectorAll('input[name="pPref"]').forEach(x=>prefs[x.value]=x.checked); ui.modal=null; renderModal(); return savePushPrefs(prefs); }
     if(m.kind==='demo'){ ui.demoAdmin=v('mDemo'); ui.adminView=true; ui.modal=null; renderModal(); render(); toast(`Admin-Ansicht: ${me().name}`); return; }
@@ -2582,6 +2810,7 @@ function render(){
   else if(ui.person) html=personView();
   else if(ui.tab==='settings') html=settings()+`<p class="hint" style="text-align:center;margin:4px 0 0">${esc(S.appName||'App')} · Version ${APP_VERSION}</p>`;
   else if(ui.tab==='home') html=note+homeView();
+  else if(ui.tab==='chat') html=S.chatOn?chatView():(ui.tab='home',note+homeView());
   else if(ui.tab==='finance') html=finOn()?financeView():(ui.tab='home',note+homeView());
   else if(ui.tab==='payreqs') html=moneyAdmin()?`<div class="panel"><button class="back" data-act="goto" data-v="home">‹ Übersicht</button></div>${payreqPanel()||'<div class="panel"><p class="hint">Keine gemeldeten Zahlungen.</p></div>'}`:(ui.tab='home',note+homeView());
   else if(ui.tab==='events') html=eventsView();
@@ -2592,6 +2821,7 @@ function render(){
     html=(ui.form?'':secHead())+top+(ui.form?'':bottom);
   }
   v.innerHTML=bar+html;
+  if(ui.tab==='chat'&&S.chatOn){ chatMarkRead(); chatScroll(ui.chatFirst); ui.chatFirst=false; }
   renderChrome();
   markWideTables();
 }
@@ -2608,7 +2838,7 @@ window.addEventListener('resize',()=>{clearTimeout(markWideTables.t); markWideTa
 function toast(t){const e=document.getElementById('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2600);}
 function closeForm(){ui.form=false;ui.shiftPick=null;ui.shiftEdit=null;ui.editKey=null;ui.sel.clear();ui.draft={title:'',amount:''};ui.ev=blankEv();}
 function toTop(){try{window.scrollTo({top:0,behavior:'smooth'})}catch(e){window.scrollTo(0,0)}}
-function goTab(t){ui.freeEditing=false; if(t==='settings') ui.playersOpen=false; ui.tab=t;ui.person=null;ui.lineup=null;ui.evDetail=null;ui.reportEdit=false;closeForm();ui.confirmDel=null;render();window.scrollTo(0,0);}
+function goTab(t){ui.freeEditing=false; if(t==='chat'){ui.chatFirst=true; ui.chatSel=null;} if(t==='settings') ui.playersOpen=false; ui.tab=t;ui.person=null;ui.lineup=null;ui.evDetail=null;ui.reportEdit=false;closeForm();ui.confirmDel=null;render();window.scrollTo(0,0);}
 function enterCode(raw){
   const c=normCode(raw); if(c.length<8){toast('Bitte den vollständigen Code eingeben');return;}
   ls.set('mk-code',c); AUTH.ready=false; render();
@@ -2626,9 +2856,9 @@ async function sendComment(eid,k){
 /* Löschen; Admins können optional einen Hinweis mit Begründung an derselben Stelle stehen lassen */
 async function deleteComment(id,withNote,reason){
   const all=AUTH.mode==='live'?LIVE.comments:(S.demoComments||[]), c=all.find(x=>x.id===id); if(!c) return;
-  const a=me(), note=withNote&&!c.rm&&can('events')&&a;
+  const a=me(), note=withNote&&!c.rm&&modCan(c.k)&&a;
   const ph=note?{e:c.e,k:c.k,a:a.uid,an:a.name,t:(reason||'').trim().slice(0,300),rm:true,o:c.o||c.ts}:null;
-  const ev=S.events.find(x=>x.id===c.e), what=`Kommentar bei „${ev?evTitle(ev):'Termin'}“ entfernt${ph&&ph.t?' – '+ph.t:''}`;
+  const ev=S.events.find(x=>x.id===c.e), what=`Kommentar ${c.k==='news'?'an der Pinnwand':`bei „${ev?evTitle(ev):'Termin'}“`} entfernt${ph&&ph.t?' – '+ph.t:''}`;
   ui.cmtDel=null;
   if(AUTH.mode==='live'){
     try{
@@ -2645,7 +2875,7 @@ async function deleteComment(id,withNote,reason){
     save(); render(); toast(c.rm?'Hinweis entfernt':'Kommentar gelöscht');
   }
 }
-function exportJson(){const o=JSON.parse(JSON.stringify(S)); delete o.demoPayreq; delete o.demoPolls; delete o.demoNews; delete o.demoCodes; delete o.demoMembers; delete o.demoLog; delete o.demoComments; return JSON.stringify({app:'mannschaftskasse',name:S.appName,exported:new Date().toISOString(),data:o},null,1);}
+function exportJson(){const o=JSON.parse(JSON.stringify(S)); delete o.demoChat; delete o.demoPayreq; delete o.demoPolls; delete o.demoNews; delete o.demoCodes; delete o.demoMembers; delete o.demoLog; delete o.demoComments; return JSON.stringify({app:'mannschaftskasse',name:S.appName,exported:new Date().toISOString(),data:o},null,1);}
 function parseImport(txt){const o=JSON.parse(txt); const d=o&&o.data?o.data:o; if(!d||!Array.isArray(d.players)||!d.paid) throw new Error('format'); return d;}
 
 /* Serie: jede Woche am selben Wochentag bis einschließlich „bis“, höchstens 60 Termine */
@@ -2741,7 +2971,7 @@ document.addEventListener('pointerdown',ev=>{
 });
 
 /* ---------- Bedienung ---------- */
-const READER=new Set(['prNew','prMethod','tpNew','tpCancel','tpSave','tvote','tpClose','tpOpen','tpOld','askDel','noDel','doDel','pushModal','pushOn','pushOff','newsAll','nx','cmtDelNo','cmtDelGo','shiftsOpen','shiftJoin','shiftLeave','playersFold','evOpen','evBack','cmtSend','cmtDel','codeModal','demoPublicEnd','adminBtn','modalBg','modalClose','goto','person','back','pyPrev','pyNext','allDebtors','mode','view','onlyOpen','prev','next','copy','efilter','showPast','vote','pollNames','lineup','lineupBack','noDel','evView','statType','statAll','gateGo','reload','signOut','mStep','mResend','readMode']);
+const READER=new Set(['chatSel','chatSend','chatReply','chatReplyX','chatLike','chatDel','chatMore','chatCh','chatPoll','chatImg','newsNew','newsCancel','newsSend','newsDel','newsDelNo','newsDelGo','newsLike','newsCmt','prNew','prMethod','tpNew','tpCancel','tpSave','tvote','tpClose','tpOpen','tpOld','askDel','noDel','doDel','pushModal','pushOn','pushOff','newsAll','nx','cmtDelNo','cmtDelGo','shiftsOpen','shiftJoin','shiftLeave','playersFold','evOpen','evBack','cmtSend','cmtDel','codeModal','demoPublicEnd','adminBtn','modalBg','modalClose','goto','person','back','pyPrev','pyNext','allDebtors','mode','view','onlyOpen','prev','next','copy','efilter','showPast','vote','pollNames','lineup','lineupBack','noDel','evView','statType','statAll','gateGo','reload','signOut','mStep','mResend','readMode']);
 document.addEventListener('submit',ev=>{if(ev.target.id==='mForm'){ev.preventDefault();submitModal();}});
 document.addEventListener('click',async ev=>{
   const tab=ev.target.closest('[data-tab]'); if(tab){goTab(tab.dataset.tab);return;}
@@ -2810,13 +3040,28 @@ document.addEventListener('click',async ev=>{
   case 'tpOld': ui.tpOld=!ui.tpOld; render(); break;
   case 'pushOn': enablePush(); break;
   case 'pushOff': disablePush(); break;
-  case 'newsNew': ui.newsForm=true; render(); setTimeout(()=>{const t=document.getElementById('newsText'); if(t) t.focus();},40); break;
+  case 'newsNew': if(!boardWrite()) return toast(AUTH.mode==='live'?'Zum Schreiben deinen persönlichen Spieler-Link öffnen':'Bitte oben zuerst deinen Namen wählen'); ui.newsForm=true; render(); setTimeout(()=>{const t=document.getElementById('newsText'); if(t) t.focus();},40); break;
   case 'newsCancel': ui.newsForm=false; render(); break;
   case 'newsSend': sendNews(); break;
   case 'newsAll': ui.allNews=!ui.allNews; render(); break;
   case 'newsDel': ui.newsDel=v; render(); break;
   case 'newsDelNo': ui.newsDel=null; render(); break;
   case 'newsDelGo': delNews(v); break;
+  case 'newsLike': likeNews(v); break;
+  case 'chatSel': if(ev.target.closest('a')) return; ui.chatSel=ui.chatSel===v?null:v; render(); break;
+  case 'chatImg': ui.modal={kind:'img',v}; renderModal(); break;
+  case 'chatSend': chatSend(); break;
+  case 'chatReply': ui.chatRe=v; ui.chatSel=null; render(); setTimeout(()=>{const t=document.getElementById('chatText'); if(t) t.focus();},30); break;
+  case 'chatReplyX': ui.chatRe=null; render(); break;
+  case 'chatLike': chatLike(v); break;
+  case 'chatDel': chatDelete(v); break;
+  case 'chatMore': ui.chatLim=(ui.chatLim||120)+120; render(); break;
+  case 'chatCh': ui.chatCh=v; ui.chatSel=null; ui.chatRe=null; ui.chatFirst=true; render(); break;
+  case 'chatPoll': if(!myAuthor()) return toast('Zum Schreiben deinen persönlichen Spieler-Link öffnen'); ui.modal={kind:'chatPoll'}; renderModal(); break;
+  case 'chatOn': if(isFull()){ S.chatOn=v==='on'; commit(); toast(S.chatOn?'Chat eingeschaltet':'Chat ausgeschaltet'); } break;
+  case 'newsCmt': ui.newsOpen=ui.newsOpen===v?null:v; render(); break;
+  case 'newsPin': pinNews(v); break;
+  case 'boardOpen': if(isFull()){ S.boardOpen=v==='all'; commit(); toast(S.boardOpen?'Alle dürfen an die Pinnwand schreiben':'Nur Admins schreiben an die Pinnwand'); } break;
   case 'nx': {ui.nx=ui.nx||{}; ui.nx[v]=Math.max(0,(ui.nx[v]||0)+(+b.dataset.d)); render(); break;}
   case 'cmtDelGo': {const n=document.getElementById('cdNote'), t=document.getElementById('cdText'); deleteComment(v,b.dataset.n==='1'&&!!(n&&n.checked),t?t.value:''); break;}
   case 'codeModal': ui.modal={kind:'code'}; renderModal(); break;
@@ -3007,6 +3252,7 @@ document.addEventListener('input',ev=>{
   else if(t.dataset.col&&isFull()){S.club.c[+t.dataset.col]=t.value; applyTheme();}
 });
 document.addEventListener('keydown',ev=>{
+  if(ev.target.id==='chatText'&&ev.key==='Enter'&&(ev.metaKey||ev.ctrlKey||(!('ontouchstart' in window)&&!ev.shiftKey))){ev.preventDefault(); chatSend(); return;}
   if(ev.key==='Escape'&&ui.modal){ui.modal=null;renderModal();}
   if(ev.key==='Enter'&&ev.target.id==='gateCode'&&!ui.modal){ev.preventDefault();const g=document.querySelector('[data-act="gateGo"]'); if(g) g.click();}
 });
@@ -3020,6 +3266,7 @@ document.addEventListener('change',ev=>{
   if(t.id==='eUntil'){ui.ev.until=t.value; render(); return;}
   if(t.id==='eCancel'){ui.ev.cancel=t.checked; return;}
   if(t.id==='fDate'){ui.date=t.value; return;}
+  if(t.id==='chatFile'){ chatPhoto(t.files&&t.files[0]); t.value=''; return; }
   if(t.name==='prItem'&&ui.modal&&ui.modal.kind==='prCheck'){ const i=+t.value; if(t.checked) ui.modal.sel.add(i); else ui.modal.sel.delete(i); const sc=document.querySelector('.sheet').scrollTop; renderModal(); const sh=document.querySelector('.sheet'); if(sh) sh.scrollTop=sc; return; }
   if(t.id==='sFinStart'&&can('finance')){ S.finance=S.finance||{start:0,list:[]}; S.finance.start=r2(parseFloat(String(t.value).replace(',','.'))||0); commit(); return; }
   if(t.id==='shSelf'&&can('events')){const e=S.events.find(x=>x.id===ui.evDetail); if(e){e.shifts=e.shifts||{self:true,list:[]}; e.shifts.self=t.checked; commit(); toast(t.checked?'Spieler können sich selbst eintragen':'Nur das Orga-Team teilt ein');} return;}
@@ -3079,6 +3326,7 @@ if(!LIVE_MODE) window.addEventListener('message',ev=>{
     case 'stats': ui.tab='events'; ui.evView='stats'; ui.statType=d.stat||'training'; break;
     case 'report': ui.tab='events'; ui.evDetail=reported?reported.id:null; break;
     case 'lineup': ui.tab='events'; ui.lineup=nextGame?nextGame.id:null; break;
+    case 'chat': ui.tab='chat'; ui.chatFirst=true; break;
     case 'shifts': {ui.tab='events'; const ev=S.events.filter(e=>e.date>=TODAY&&shiftsOf(e).length).sort((a,b)=>a.date.localeCompare(b.date))[0]; ui.evDetail=ev?ev.id:null; break;}
     case 'person': ui.person=ui.voter||debtor(); break;
     default: ui.tab='home';
@@ -3093,7 +3341,7 @@ if(LIVE_MODE){
   initFirebase().catch(e=>{console.error(e); AUTH.ready=true; AUTH.gate='error'; AUTH.error='Die App konnte nicht geladen werden. Bitte Internetverbindung prüfen.'; render();});
 }else{
   try{S=JSON.parse(ls.get(KEY))}catch(e){}
-  if(!S||!S.players||(S.sample&&S.sampleV!==47)) S=sample();
+  if(!S||!S.players||(S.sample&&S.sampleV!==49)) S=sample();
   normalize(); lastSaved=JSON.stringify(S); render();
 }
 </script>
