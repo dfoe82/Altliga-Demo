@@ -535,6 +535,7 @@ table.grid{border-collapse:separate;border-spacing:0;font-size:13.5px;width:100%
 @media (max-width:440px){.hd span{display:none}}
 @media (max-width:360px){.kassen{grid-template-columns:1fr}.gesamt{grid-template-columns:1fr}.gesamt .side{text-align:left}}
 @media (prefers-reduced-motion:no-preference){.pick,.seg button,nav.top button,.pick .box,.chip,.tabbar button,.vopt{transition:background .12s,color .12s,border-color .12s}}
+.calopt{display:grid;gap:6px;padding:10px 0;border-top:1px solid var(--line)}.calopt .btn{justify-self:start}
 </style>
 </head>
 <body>
@@ -571,7 +572,7 @@ const FIREBASE_CONFIG = {
 /* Schlüssel für Push-Nachrichten (Firebase → Projekteinstellungen → Cloud Messaging → Web-Push-Zertifikate). Leer = Push aus. */
 const FIREBASE_VAPID_KEY = "";
 const FIREBASE_VERSION = "10.12.2";
-const APP_VERSION = "1.8"; /* Version der App – steht auch im Namen der ZIP-Dateien */
+const APP_VERSION = "1.12"; /* Version der App – steht auch im Namen der ZIP-Dateien */
 
 const LIVE_MODE=false; /* Demo-Repository: läuft immer als Demo mit Beispieldaten */
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
@@ -582,8 +583,8 @@ const SEC={
   misc:{label:'Sonstiges',short:'Sonstiges'},
   events:{label:'Termine',short:'Termine'}
 };
-const AREAS={drinks:'Getränke',team:'Beiträge',misc:'Sonstiges',finance:'Einnahmen & Ausgaben',events:'Termine & Kader'};
-const PART_LABEL={finance:'Einnahmen & Ausgaben',private:'Geburtsdaten',main:'Einstellungen',players:'Spielerliste',drinks:'Getränkekasse',fees:'Mannschaftskasse',misc:'Sonstiges',events:'Termine',archive:'Auswertungen'};
+const AREAS={drinks:'Getränke',team:'Beiträge',misc:'Sonstiges',finance:'Einnahmen & Ausgaben',events:'Termine & Kader',players:'Spieler & Zugänge'};
+const PART_LABEL={fines:'Strafenkatalog',finance:'Einnahmen & Ausgaben',private:'Geburtsdaten',main:'Einstellungen',players:'Spielerliste',drinks:'Getränkekasse',fees:'Mannschaftskasse',misc:'Sonstiges',events:'Termine',archive:'Auswertungen'};
 const ICON={
   home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
   events:'<rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/>',
@@ -650,17 +651,20 @@ const MONEY=['drinks','team','misc'];
 /* Demo-Varianten (nur ohne Firebase): ?v=a alles, ?v=b ohne Geld-Themen, ?v=c nur Kassen. Die echte App hat immer alles. */
 const VARIANT=(()=>{ if(FIREBASE_CONFIG.apiKey) return 'a'; const m=location.search.match(/[?&]v=([abc])/i); return m?m[1].toLowerCase():'a'; })();
 const FEAT={money:VARIANT!=='b',events:VARIANT!=='c',roster:VARIANT!=='c'};
-const areasOn=()=>Object.entries(AREAS).filter(([k])=>k==='events'?FEAT.events:FEAT.money);
+const areasOn=()=>Object.entries(AREAS).filter(([k])=>k==='players'?true:k==='events'?FEAT.events:FEAT.money);
 /* Vorlagen für Rechte */
 const ROLE_PRESETS={cash:{label:'Kassenwart',role:'part',areas:['drinks','team','misc','finance']},trainer:{label:'Trainer',role:'part',areas:['events']},full:{label:'Alles',role:'full',areas:[]}};
+const ADMIN_MAX_DEF=6;
+const adminMax=()=>Math.min(8,Math.max(2,+S.adminMax||ADMIN_MAX_DEF));
 const DEMO_ADMINS=VARIANT==='b'
-  ?[{uid:'demo-full',name:'Teamleiter',role:'full',areas:[],email:'team@example.org'},{uid:'demo-part',name:'Trainer',role:'part',areas:['events'],email:'trainer@example.org'}]
+  ?[{uid:'demo-full',name:'Teamleiter',role:'full',areas:[],email:'team@example.org'},{uid:'demo-part',name:'Trainer',role:'part',areas:['events','players'],email:'trainer@example.org'}]
   :VARIANT==='c'
   ?[{uid:'demo-full',name:'Admin',role:'full',areas:[],email:'admin@example.org'},{uid:'demo-cash',name:'Kassenwart',role:'part',areas:['drinks','team','misc','finance'],email:'kasse@example.org'},{uid:'demo-part',name:'Getränkewart',role:'part',areas:['drinks'],email:'getraenke@example.org'}]
-  :[{uid:'demo-full',name:'Admin',role:'full',areas:[],email:'admin@example.org'},{uid:'demo-cash',name:'Kassenwart',role:'part',areas:['drinks','team','misc','finance'],email:'kasse@example.org'},{uid:'demo-part',name:'Trainer',role:'part',areas:['events'],email:'trainer@example.org'}];
+  :[{uid:'demo-full',name:'Admin',role:'full',areas:[],email:'admin@example.org'},{uid:'demo-cash',name:'Kassenwart',role:'part',areas:['drinks','team','misc','finance'],email:'kasse@example.org'},{uid:'demo-part',name:'Trainer',role:'part',areas:['events','players'],email:'trainer@example.org'}];
 const KEY='mannschaftskasse-demo'+(VARIANT==='a'?'':'-'+VARIANT), BKEY=KEY+'-sicherungen';
 const CODE_ABC='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const uid=()=>Math.random().toString(36).slice(2,9);
+const newToken=()=>{const a=new Uint8Array(18); crypto.getRandomValues(a); return [...a].map(x=>'abcdefghijkmnpqrstuvwxyz23456789'[x%32]).join('');};
 const eur=n=>n.toLocaleString('de-DE',{style:'currency',currency:'EUR'});
 const num=n=>n.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -725,7 +729,7 @@ function readImg(file,cb){
 
 /* ---------- Grunddaten ---------- */
 function emptyState(){
-  return {sample:false,appName:'Mannschaftskasse',teamName:'Unsere Mannschaft',showSeason:false,boardOpen:true,chatOn:false,privacy:{who:'',contact:'',authority:'',retention:0},statPeriod:'year',financeOn:false,payreqOn:true,finance:{start:0,list:[]},fee:10,rate:3,paypal:'',statsPublic:false,amountsPublic:false,publicView:false,birth:{},reports:{},
+  return {sample:false,appName:'Mannschaftskasse',teamName:'Unsere Mannschaft',showSeason:false,boardOpen:true,chatOn:false,cmtAll:true,privacy:{who:'',contact:'',authority:'',retention:0},statPeriod:'year',financeOn:false,payreqOn:true,finesOn:false,fines:[],calOn:false,calToken:'',remRsvp:false,remDebt:false,remBday:false,finance:{start:0,list:[]},fee:10,rate:3,paypal:'',statsPublic:false,amountsPublic:false,publicView:false,birth:{},reports:{},
     club:{c:[...PRESETS[0].c],use3:true,use4:true,crest:'',logo:''},order:['drinks','team','misc'],
     players:[],days:[],misc:[],paid:{team:{},drinks:{}},events:[],archive:[]};
 }
@@ -873,13 +877,18 @@ const ui={tab:'home',person:null,lineup:null,evView:'list',statType:'game',statA
 const isPublic=()=>AUTH.mode==='live'?!!AUTH.public:ui.demoPublic;
 function me(){if(isPublic()) return null; return AUTH.mode==='live'?AUTH.admin:(ui.demoAdmin?DEMO_ADMINS.find(a=>a.uid===ui.demoAdmin):null);}
 /* Beträge aller Spieler: nur Admins oder wenn freigegeben */
-const seeAllAmounts=()=>!isPublic()&&(!!S.amountsPublic||!!me());
+const hasArea=k=>{const a=me(); return !!a&&(a.role!=='part'||(a.areas||[]).includes(k));};
+/* Beträge einer Kasse: Admins mit Recht für diese Kasse, sonst nur wenn freigegeben */
+const seeArea=k=>!isPublic()&&(!!S.amountsPublic||hasArea(k));
+const visSecs=()=>S.order.filter(seeArea);
+const seeAllAmounts=()=>MONEY.some(seeArea);
 function ageFrom(d){if(!d) return null; const b=new Date(d+'T12:00'); if(isNaN(b)) return null; let a=NOW.getFullYear()-b.getFullYear(); const m=NOW.getMonth()-b.getMonth(); if(m<0||(m===0&&NOW.getDate()<b.getDate())) a--; return a>=0&&a<120?a:null;}
 const ageOf=p=>{const b=(S.birth||{})[p.id]; const a=b?ageFrom(b):null; return a!=null?a:(typeof p.age==='number'?p.age:null);};
 function updateAges(){S.players.forEach(p=>{const a=ageFrom((S.birth||{})[p.id]); if(a==null) delete p.age; else p.age=a;});}
 const isAdmin=()=>!!me()&&ui.adminView;
 const isFull=()=>isAdmin()&&me().role!=='part';
 const can=area=>isAdmin()&&(me().role!=='part'||(me().areas||[]).includes(area));
+const canPlayers=()=>can('players');
 const myPlayer=()=>AUTH.mode==='live'?(AUTH.member&&pById(AUTH.member.p)?AUTH.member.p:''):(pById(ui.voter)?ui.voter:'');
 const rightsText=a=>a.role==='part'?((a.areas||[]).length?a.areas.map(k=>AREAS[k]).join(', '):'keine Bereiche'):'Alles inkl. Optionen';
 const adminList=()=>AUTH.mode==='live'?LIVE.admins:DEMO_ADMINS;
@@ -892,8 +901,13 @@ ui.ev=blankEv();
 const FB={};
 const LIVE={parts:{},loaded:new Set(),votes:{},signups:{},synced:{},unsubs:[],admins:[],invites:[],codes:{},members:[],backups:[],log:[],pending:false,
   comments:[],balance:null,balances:{},balLoaded:false,pubJson:undefined,derivedDone:false,derivedTimer:null,rep:{},migrate:{}};
-const BASE_PARTS=['main','players','drinks','fees','misc','events','archive'];
-const partList=()=>{ const a=AUTH.admin; if(!a) return BASE_PARTS; if(a.role!=='part') return [...BASE_PARTS,'finance','private']; return (a.areas||[]).includes('finance')?[...BASE_PARTS,'finance']:BASE_PARTS; };
+const BASE_PARTS=['main','players','drinks','fees','misc','fines','events','archive'];
+const MONEY_PART={drinks:'drinks',team:'fees',misc:'misc'};
+const partList=()=>{ const a=AUTH.admin; if(!a) return BASE_PARTS; if(a.role!=='part') return [...BASE_PARTS,'finance','private'];
+  const ar=a.areas||[], skip=MONEY.filter(k=>!ar.includes(k)).map(k=>MONEY_PART[k]);
+  return [...BASE_PARTS.filter(k=>!skip.includes(k)),...(ar.includes('finance')?['finance']:[]),...(ar.includes('players')?['private']:[])]; };
+const allMoneyRight=a=>!!a&&(a.role!=='part'||MONEY.every(k=>(a.areas||[]).includes(k)));
+const liveArea=k=>!!AUTH.admin&&(AUTH.admin.role!=='part'||(AUTH.admin.areas||[]).includes(k));
 /* Vergleich unabhängig von der Reihenfolge der Felder */
 const stable=o=>Array.isArray(o)?'['+o.map(stable).join(',')+']':(o&&typeof o==='object')?'{'+Object.keys(o).sort().map(k=>JSON.stringify(k)+':'+stable(o[k])).join(',')+'}':JSON.stringify(o);
 
@@ -984,24 +998,25 @@ function subscribeAll(){
   const chatSub=(col,key)=>LIVE.unsubs.push(FB.onSnapshot(FB.query(FB.collection(FB.db,col),FB.orderBy('ts','desc'),FB.limit(300)),qs=>{
     LIVE.chat=LIVE.chat||{}; LIVE.chat[key]=qs.docs.map(d=>{const x=d.data(); return {id:d.id,...x,ts:x.ts&&x.ts.toMillis?x.ts.toMillis():Date.now()};}); schedule();},()=>{}));
   chatSub('chat','team'); if(AUTH.admin) chatSub('chatadm','admins');
-  LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'creact'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); (v[x.m]=v[x.m]||{})[x.p]=true;}); LIVE.creact=v; schedule();},()=>{}));
+  LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'creact'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); (v[x.m]=v[x.m]||{})[x.p]=x.e==='down'?'down':'up';}); LIVE.creact=v; schedule();},()=>{}));
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'nlikes'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); (v[x.n]=v[x.n]||{})[x.p]=true;}); LIVE.nlikes=v; schedule();},err));
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'polls'),qs=>{LIVE.polls=qs.docs.map(d=>{const x=d.data(); return {id:d.id,...x,ts:x.ts&&x.ts.toMillis?x.ts.toMillis():Date.now()};}); schedule();},err));
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'pvotes'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); (v[x.q]=v[x.q]||{})[x.p]=x.i;}); LIVE.pvotes=v; schedule();},err));
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'signups'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); const m=(v[x.e]=v[x.e]||{}); (m[x.s]=m[x.s]||[]).push(x.p);}); LIVE.signups=v; onLiveData();},err));
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'comments'),qs=>{LIVE.comments=qs.docs.map(d=>{const x=d.data(); return {id:d.id,...x,ts:x.ts&&x.ts.toMillis?x.ts.toMillis():Date.now()};}); schedule();},err));
-  if(AUTH.member&&!AUTH.admin) LIVE.unsubs.push(FB.onSnapshot(D('balances',AUTH.member.p),s=>{LIVE.balance=s.exists()?s.data():null; onLiveData();},()=>{}));
+  if(AUTH.member&&!allMoneyRight(AUTH.admin)) LIVE.unsubs.push(FB.onSnapshot(D('balances',AUTH.member.p),s=>{LIVE.balance=s.exists()?s.data():null; onLiveData();},()=>{}));
   subscribeReports(AUTH.admin?'all':['all','team'],()=>onLiveData());
   const a=AUTH.admin; if(!a) return;
   LIVE.unsubs.push(FB.onSnapshot(D('team','privacy'),s=>{LIVE.privJson=s.exists()?stable(s.data()):'null';},()=>{LIVE.privJson='null';}));
   LIVE.unsubs.push(FB.onSnapshot(D('team','public'),s=>{LIVE.pubJson=s.exists()?stable(s.data()):'null'; maybeSyncDerived();},err));
-  LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'balances'),qs=>{const b={}; qs.forEach(d=>{b[d.id]=stable(d.data());}); LIVE.balances=b; LIVE.balLoaded=true; maybeSyncDerived();},err));
+  if(allMoneyRight(a)) LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'balances'),qs=>{const b={}; qs.forEach(d=>{b[d.id]=stable(d.data());}); LIVE.balances=b; LIVE.balLoaded=true; maybeSyncDerived();},err));
+  else LIVE.balLoaded=true;
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'admins'),qs=>{LIVE.admins=qs.docs.map(d=>({uid:d.id,...d.data()})); const mine=LIVE.admins.find(x=>x.uid===a.uid); if(mine){ AUTH.admin={...AUTH.admin,...mine}; linkAdminPlayer(); } schedule();},err));
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'members'),qs=>{LIVE.members=qs.docs.map(d=>{const x=d.data(); return {p:x.p,code:x.code,seen:x.seen&&x.seen.toMillis?x.seen.toMillis():0};}); schedule();},err));
   LIVE.unsubs.push(FB.onSnapshot(FB.query(FB.collection(FB.db,'log'),FB.orderBy('ts','desc'),FB.limit(40)),qs=>{LIVE.log=qs.docs.map(d=>{const x=d.data(); return {ts:x.ts&&x.ts.toMillis?x.ts.toMillis():Date.now(),name:x.name,text:x.text};}); schedule();},err));
+  if(liveArea('players')) LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'codes'),qs=>{const c={}; qs.forEach(d=>{c[d.data().p]=d.id;}); LIVE.codes=c; schedule();},err));
   if(a.role!=='part'){
     LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'invites'),qs=>{LIVE.invites=qs.docs.map(d=>({email:d.id,...d.data()})); schedule();},err));
-    LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'codes'),qs=>{const c={}; qs.forEach(d=>{c[d.data().p]=d.id;}); LIVE.codes=c; schedule();},err));
     LIVE.unsubs.push(FB.onSnapshot(FB.query(FB.collection(FB.db,'backups'),FB.orderBy('ts')),qs=>{
       LIVE.backups=qs.docs.map(d=>({id:d.id,...d.data()}));
       if(LIVE.backups.length>MAXB) LIVE.backups.slice(0,LIVE.backups.length-MAXB).forEach(b=>FB.deleteDoc(D('backups',b.id)).catch(()=>{}));
@@ -1016,11 +1031,11 @@ function onLiveData(){
 function maybeSyncDerived(){
   if(!AUTH.admin||LIVE.derivedDone||!LIVE.balLoaded||LIVE.pubJson===undefined||partList().some(k=>!LIVE.loaded.has(k))) return;
   LIVE.derivedDone=true; clearTimeout(LIVE.derivedTimer);
-  LIVE.derivedTimer=setTimeout(()=>{ if(AUTH.admin.role!=='part'){ updateAges(); purgeOld(); } persistLive(); },1200);
+  LIVE.derivedTimer=setTimeout(()=>{ if(liveArea('players')) updateAges(); if(AUTH.admin.role!=='part') purgeOld(); persistLive(); },1200);
 }
 function buildS(){
   const P=LIVE.parts, d=emptyState(), m=P.main||{};
-  S={...d,appName:m.appName||d.appName,showSeason:!!m.showSeason,boardOpen:m.boardOpen!==false,chatOn:!!m.chatOn,privacy:{...d.privacy,...(m.privacy||{})},statPeriod:m.statPeriod==='season'?'season':'year',financeOn:!!m.financeOn,payreqOn:m.payreqOn!==false,finance:{start:(P.finance&&P.finance.start)||0,list:(P.finance&&P.finance.list)||[]},teamName:m.teamName??d.teamName,fee:m.fee??d.fee,rate:m.rate??d.rate,paypal:m.paypal??'',club:{...d.club,...(m.club||{})},order:m.order||d.order,
+  S={...d,adminMax:+m.adminMax||ADMIN_MAX_DEF,appName:m.appName||d.appName,showSeason:!!m.showSeason,boardOpen:m.boardOpen!==false,chatOn:!!m.chatOn,cmtAll:m.cmtAll!==false,privacy:{...d.privacy,...(m.privacy||{})},statPeriod:m.statPeriod==='season'?'season':'year',financeOn:!!m.financeOn,payreqOn:m.payreqOn!==false,finance:{start:(P.finance&&P.finance.start)||0,list:(P.finance&&P.finance.list)||[]},teamName:m.teamName??d.teamName,fee:m.fee??d.fee,rate:m.rate??d.rate,paypal:m.paypal??'',club:{...d.club,...(m.club||{})},order:m.order||d.order,
     amountsPublic:!!m.amountsPublic,publicView:!!m.publicView,birth:(P.private&&P.private.birth)||{},
     statsPublic:!!(P.events&&P.events.statsPublic),
     players:(P.players&&P.players.list)||[],
@@ -1029,12 +1044,14 @@ function buildS(){
     events:Object.values((P.events&&P.events.map)||{}).map(e=>withSignups(e.poll?{...e,poll:{...e.poll,votes:{...(LIVE.votes[e.id]||{})}}}:e)),
     archive:((P.archive&&P.archive.list)||[]).map(a=>({...a,names:(a.names||[]).map(x=>Array.isArray(x)?x:(x&&x.l)||[])})),
     reports:liveReports()};
+  Object.assign(S,{finesOn:!!m.finesOn,fines:(P.fines&&P.fines.list)||[],calOn:!!m.calOn,calToken:m.calToken||'',remRsvp:!!m.remRsvp,remDebt:!!m.remDebt,remBday:!!m.remBday});
   /* Spieler ohne Einblick in alle Beträge: eigene Daten aus dem persönlichen Saldo */
-  if(!P.drinks&&!P.fees&&!P.misc&&AUTH.member&&LIVE.balance){
+  /* Jede Kasse ohne Einblick einzeln: eigene Daten aus dem persönlichen Saldo (auch für Admins, die selbst Spieler sind) */
+  if(AUTH.member&&LIVE.balance){
     const b=LIVE.balance, pid=AUTH.member.p;
-    S.days=(b.days||[]).map(date=>({date,att:[pid]}));
-    S.paid={drinks:Object.fromEntries((b.drinksPaid||[]).map(x=>[pid+'|'+x,true])),team:Object.fromEntries((b.teamPaid||[]).map(x=>[pid+'|'+x,true]))};
-    S.misc=(b.misc||[]).map(x=>({id:x.id,date:x.date,title:x.title,amount:x.amount,persons:[pid],paid:x.paid?[pid]:[]}));
+    if(!P.drinks){ S.days=(b.days||[]).map(date=>({date,att:[pid]})); S.paid.drinks=Object.fromEntries((b.drinksPaid||[]).map(x=>[pid+'|'+x,true])); }
+    if(!P.fees) S.paid.team=Object.fromEntries((b.teamPaid||[]).map(x=>[pid+'|'+x,true]));
+    if(!P.misc) S.misc=(b.misc||[]).map(x=>({id:x.id,date:x.date,title:x.title,amount:x.amount,persons:[pid],paid:x.paid?[pid]:[]}));
   }
   normalize();
   const parts=partsOf(S); Object.keys(parts).forEach(k=>LIVE.synced[k]=JSON.stringify(parts[k]));
@@ -1049,12 +1066,13 @@ function withSignups(e){
 }
 function partsOf(s){
   return {
-    main:clean({appName:s.appName,showSeason:!!s.showSeason,boardOpen:s.boardOpen!==false,chatOn:!!s.chatOn,privacy:s.privacy||{},statPeriod:s.statPeriod==='season'?'season':'year',financeOn:!!s.financeOn,payreqOn:s.payreqOn!==false,teamName:s.teamName,fee:s.fee,rate:s.rate,paypal:s.paypal,club:s.club,order:s.order,amountsPublic:!!s.amountsPublic,publicView:!!s.publicView}),
+    main:clean({adminMax:adminMax(),finesOn:!!s.finesOn,calOn:!!s.calOn,calToken:s.calToken||'',remRsvp:!!s.remRsvp,remDebt:!!s.remDebt,remBday:!!s.remBday,appName:s.appName,showSeason:!!s.showSeason,boardOpen:s.boardOpen!==false,chatOn:!!s.chatOn,cmtAll:s.cmtAll!==false,privacy:s.privacy||{},statPeriod:s.statPeriod==='season'?'season':'year',financeOn:!!s.financeOn,payreqOn:s.payreqOn!==false,teamName:s.teamName,fee:s.fee,rate:s.rate,paypal:s.paypal,club:s.club,order:s.order,amountsPublic:!!s.amountsPublic,publicView:!!s.publicView}),
     private:clean({birth:s.birth||{}}),
     players:clean({list:s.players}),
     drinks:clean({days:s.days,paid:s.paid.drinks}),
     fees:clean({paid:s.paid.team}),
     misc:clean({items:s.misc}),
+    fines:clean({list:s.fines||[]}),
     finance:clean({start:+((s.finance||{}).start)||0,list:(s.finance||{}).list||[]}),
     events:clean({statsPublic:!!s.statsPublic,map:Object.fromEntries(s.events.map(e=>{const c={...e}; if(c.poll) c.poll={q:c.poll.q,opts:c.poll.opts,open:!!c.poll.open}; if(c.shifts) c.shifts={self:!!c.shifts.self,list:(c.shifts.list||[]).map(({self,...r})=>r)}; return [e.id,c];}))}),
     archive:clean({list:s.archive.map(a=>({...a,names:(a.names||[]).map(l=>({l}))}))}) /* Firestore erlaubt keine verschachtelten Listen */
@@ -1071,12 +1089,13 @@ function publicOf(s){
 function privacyOf(s){
   const pv=s.privacy||{};
   return clean({appName:s.appName,teamName:s.teamName,who:pv.who||'',contact:pv.contact||'',authority:pv.authority||'',retention:+pv.retention||0,
-    mods:{money:FEAT.money,events:FEAT.events,finance:!!s.financeOn,payreq:s.payreqOn!==false,chat:!!s.chatOn,board:true,push:!!FIREBASE_VAPID_KEY,amountsPublic:!!s.amountsPublic,publicView:!!s.publicView,statsPublic:!!s.statsPublic}});
+    mods:{money:FEAT.money,events:FEAT.events,finance:!!s.financeOn,payreq:s.payreqOn!==false,chat:!!s.chatOn,board:true,push:!!FIREBASE_VAPID_KEY,amountsPublic:!!s.amountsPublic,publicView:!!s.publicView,statsPublic:!!s.statsPublic,cal:!!s.calOn,bday:!!s.remBday}});
 }
 /* Persönlicher Saldo: nur die Daten eines Spielers */
 function balanceOf(pid){
   const own=pfx=>Object.keys(pfx).filter(k=>k.startsWith(pid+'|')).map(k=>k.slice(pid.length+1)).sort();
-  return clean({days:S.days.filter(d=>d.att.includes(pid)).map(d=>d.date).sort(),drinksPaid:own(S.paid.drinks),teamPaid:own(S.paid.team),
+  const due=r2(MONEY.reduce((a,k)=>a+calc(k,pid,yearMonths(NOW.getFullYear())).open,0));
+  return clean({due,days:S.days.filter(d=>d.att.includes(pid)).map(d=>d.date).sort(),drinksPaid:own(S.paid.drinks),teamPaid:own(S.paid.team),
     misc:S.misc.filter(e=>e.persons.includes(pid)).map(e=>({id:e.id,date:e.date,title:e.title,amount:e.amount,paid:e.paid.includes(pid)}))});
 }
 async function persistLive(){
@@ -1089,8 +1108,8 @@ async function persistLive(){
     const pub=publicOf(S), pj=stable(pub); if(pj!==LIVE.pubJson) ops.push({ref:D('team','public'),data:pub,pub:pj});
     if(LIVE.privJson!==undefined){ const pv=privacyOf(S), vj=stable(pv); if(vj!==LIVE.privJson) ops.push({ref:D('team','privacy'),data:pv,priv:vj}); }
     const seen=new Set();
-    S.players.forEach(p=>{seen.add(p.id); const b=balanceOf(p.id), bj=stable(b); if(bj!==LIVE.balances[p.id]) ops.push({ref:D('balances',p.id),data:b,bal:p.id,j:bj});});
-    Object.keys(LIVE.balances).forEach(pid=>{if(!seen.has(pid)) ops.push({ref:D('balances',pid),del:true,bal:pid});});
+    if(allMoneyRight(AUTH.admin)) S.players.forEach(p=>{seen.add(p.id); const b=balanceOf(p.id), bj=stable(b); if(bj!==LIVE.balances[p.id]) ops.push({ref:D('balances',p.id),data:b,bal:p.id,j:bj});});
+    if(allMoneyRight(AUTH.admin)) Object.keys(LIVE.balances).forEach(pid=>{if(!seen.has(pid)) ops.push({ref:D('balances',pid),del:true,bal:pid});});
   }
   if(!ops.length) return;
   ops.forEach(o=>{ if(o.mig) delete LIVE.migrate[o.mig]; if(o.k) LIVE.synced[o.k]=o.j; if(o.pub) LIVE.pubJson=o.pub; if(o.priv) LIVE.privJson=o.priv; if(o.bal){ if(o.del) delete LIVE.balances[o.bal]; else LIVE.balances[o.bal]=o.j; } });
@@ -1120,7 +1139,7 @@ function save(){
   if(!ls.set(KEY,str)){toast('Speichern fehlgeschlagen – Speicher voll? Bild verkleinern oder Sicherungen löschen');return false}
   lastSaved=str; return true;
 }
-function commit(){autoBackup();S.sample=false;if(isFull()) updateAges();save();render();}
+function commit(){autoBackup();S.sample=false;if(isFull()||canPlayers()) updateAges();save();render();}
 
 /* ---------- Sicherungen ---------- */
 const MAXB=10, AUTO_GAP=30*60*1000;
@@ -1130,7 +1149,7 @@ function loadBackups(){ if(AUTH.mode==='live') return LIVE.backups; try{return J
 function stripImages(json){const o=JSON.parse(json); if(o.club){o.club.crest='';o.club.logo='';} delete o.demoChat; delete o.demoPayreq; delete o.demoPolls; delete o.demoNews; delete o.demoCodes; delete o.demoMembers; delete o.demoLog; delete o.demoComments; return JSON.stringify(o);}
 function addBackup(json,label){
   const b={ts:Date.now(),name:S.appName||'Mannschaftskasse',label,data:stripImages(json)};
-  if(AUTH.mode==='live'){ if(!AUTH.admin) return; FB.setDoc(D('backups',String(b.ts)),{...b,by:AUTH.admin.name}).catch(e=>console.warn(e)); return; }
+  if(AUTH.mode==='live'){ if(!AUTH.admin||AUTH.admin.role==='part') return; FB.setDoc(D('backups',String(b.ts)),{...b,by:AUTH.admin.name}).catch(e=>console.warn(e)); return; }
   const list=loadBackups(); list.push({id:uid(),...b});
   while(list.length>MAXB) list.shift();
   while(list.length&&!ls.set(BKEY,JSON.stringify(list))) list.shift();
@@ -1270,9 +1289,9 @@ function pollBox(e,full){
 
 /* ---------- Push-Nachrichten ---------- */
 /* Pro Gerät: Erlaubnis + Token in push/{uid}; der Versand läuft über die Cloud Functions im Ordner functions/ */
-const PUSH_PREFS={chat:'Chat-Nachrichten',ev:'Termine, Umfragen & Trainingsänderungen',news:'Pinnwand',cmt:'Neue Kommentare'};
+const PUSH_PREFS={chat:'Chat-Nachrichten',ev:'Termine, Umfragen & Trainingsänderungen',news:'Pinnwand',cmt:'Neue Kommentare',rem:'Erinnerungen (Zu-/Absage, offene Beträge)',bday:'Geburtstage im Team'};
 const pushLocal=()=>{try{return JSON.parse(ls.get('mk-push'))||{}}catch(e){return {}}};
-const pushPrefs=()=>({chat:true,ev:true,news:true,cmt:true,...(pushLocal().prefs||{})});
+const pushPrefs=()=>({chat:true,ev:true,news:true,cmt:true,rem:true,bday:true,...(pushLocal().prefs||{})});
 const isIOS=()=>/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 const isStandalone=()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}};
 const pushCapable=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
@@ -1341,7 +1360,7 @@ async function pushRefresh(){
 }
 function pushModalBody(){
   const st=pushState(), pr=pushPrefs(), on=st.k==='on'||(st.k==='demo'&&pushActive());
-  const prefs=`<div style="display:grid;gap:4px"><b style="font-size:13px">Benachrichtigen bei</b>${Object.entries(PUSH_PREFS).filter(([k])=>k!=='chat'||S.chatOn).map(([k,l])=>`<label class="check"><input type="checkbox" name="pPref" value="${k}" ${pr[k]?'checked':''}> ${l}</label>`).join('')}</div>`;
+  const prefs=`<div style="display:grid;gap:4px"><b style="font-size:13px">Benachrichtigen bei</b>${Object.entries(PUSH_PREFS).filter(([k])=>(k!=='chat'||S.chatOn)&&(k!=='rem'||S.remRsvp||S.remDebt)&&(k!=='bday'||S.remBday)).map(([k,l])=>`<label class="check"><input type="checkbox" name="pPref" value="${k}" ${pr[k]?'checked':''}> ${l}</label>`).join('')}</div>`;
   const state={on:['ok','Aktiv auf diesem Gerät'],off:['','Auf diesem Gerät aus'],demo:[pushActive()?'ok':'',pushActive()?'Demo: aktiv':'Demo: aus'],
     nokey:['warn','Push ist für diese App noch nicht eingerichtet'],ios:['warn','Zuerst zum Home-Bildschirm hinzufügen'],unsupported:['warn','Dieser Browser kann keine Push-Nachrichten'],denied:['warn','Benachrichtigungen sind blockiert']}[st.k];
   let help='';
@@ -1355,6 +1374,68 @@ function pushModalBody(){
     :on?`<button type="button" class="btn ghost sm" data-act="pushOff" style="justify-self:start">Auf diesem Gerät ausschalten</button>`:'';
   return `<h2>Benachrichtigungen</h2><div class="pstate ${state[0]}">${state[1]}</div>${help}${btn}${['on','off','demo'].includes(st.k)?prefs:''}
     <p class="hint">Gilt nur für dieses Gerät. Auf jedem Handy einmal aktivieren.</p>`;
+}
+
+/* ---------- Strafenkatalog (optional) ---------- */
+const FINES_DEFAULT=[['Zu spät zum Training',2],['Zu spät zum Spiel',5],['Unentschuldigt gefehlt',5],['Ausrüstung vergessen',3],['Gelbe Karte (Meckern)',5],['Rote Karte',15]];
+const finesOn=()=>FEAT.money&&!!S.finesOn;
+const finesList=()=>(S.fines||[]).filter(x=>x&&x.name);
+function finesTable(){ const l=finesList(); return l.length?`<div style="display:grid;gap:4px">${l.map(x=>`<div class="mrow"><div style="font-weight:600">${esc(x.name)}</div><span>${eur(+x.amount||0)}</span></div>`).join('')}</div>`:'<p class="hint">Noch keine Strafen angelegt.</p>'; }
+function finesEditor(){
+  return `<div class="panel" style="${secStyle('misc')}"><h2>Strafenkatalog</h2><p class="hint">Alle in der Mannschaft sehen den Katalog. Beim Eintragen einer Strafe übernimmst du Bezeichnung und Betrag mit einem Tipp.</p>
+    <div style="display:grid;gap:6px">${(S.fines||[]).map(x=>`<div class="row" style="flex-wrap:nowrap;gap:6px"><input type="text" data-fname="${x.id}" value="${esc(x.name)}" maxlength="40" aria-label="Bezeichnung" style="flex:1;min-width:0">
+      <input type="number" data-famt="${x.id}" value="${+x.amount||0}" step="0.5" min="0" inputmode="decimal" aria-label="Betrag" style="width:78px"><button class="x" data-act="fineDel" data-v="${x.id}" aria-label="${esc(x.name)} löschen">×</button></div>`).join('')}</div>
+    <button class="btn ghost sm" data-act="fineAdd" style="justify-self:start">+ Strafe zum Katalog</button></div>`;
+}
+
+/* ---------- Kalender (iPhone, Android, Outlook) ---------- */
+const ICS_DUR={game:120,training:90,event:180};
+function icsText(events,name){
+  const esc2=t=>String(t||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n');
+  const fold=l=>{const out=[]; let cur=''; for(const ch of l){ if(new TextEncoder().encode(cur+ch).length>74){out.push(cur); cur=' '+ch;} else cur+=ch; } out.push(cur); return out.join('\r\n');};
+  const loc=(d,t)=>d.replace(/-/g,'')+'T'+t.replace(':','')+'00';
+  const add=(d,t,min)=>{const x=new Date(Date.UTC(+d.slice(0,4),+d.slice(5,7)-1,+d.slice(8,10),+t.slice(0,2),+t.slice(3,5))+min*60000); return x.toISOString().slice(0,16).replace(/[-:]/g,'')+'00';};
+  const stamp=new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';
+  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Mannschafts-App//DE','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:'+esc2(name),'X-WR-TIMEZONE:Europe/Berlin',
+    'BEGIN:VTIMEZONE','TZID:Europe/Berlin','BEGIN:DAYLIGHT','TZOFFSETFROM:+0100','TZOFFSETTO:+0200','TZNAME:CEST','DTSTART:19700329T020000','RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU','END:DAYLIGHT',
+    'BEGIN:STANDARD','TZOFFSETFROM:+0200','TZOFFSETTO:+0100','TZNAME:CET','DTSTART:19701025T030000','RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU','END:STANDARD','END:VTIMEZONE'];
+  events.forEach(e=>{
+    const t=/^\d\d:\d\d$/.test(e.time||'')?e.time:'', tr=e.type==='training';
+    const title=(tr&&e.cancel?'Abgesagt: ':'')+evTitle(e)+(tr&&!e.cancel?(e.venue==='in'?' (Halle)':' (draußen)'):'');
+    L.push('BEGIN:VEVENT','UID:'+e.id+'@mannschafts-app','DTSTAMP:'+stamp);
+    if(t){ L.push('DTSTART;TZID=Europe/Berlin:'+loc(e.date,t),'DTEND;TZID=Europe/Berlin:'+add(e.date,t,ICS_DUR[e.type]||120)); }
+    else { const n=new Date(Date.UTC(+e.date.slice(0,4),+e.date.slice(5,7)-1,+e.date.slice(8,10)+1)).toISOString().slice(0,10).replace(/-/g,''); L.push('DTSTART;VALUE=DATE:'+e.date.replace(/-/g,''),'DTEND;VALUE=DATE:'+n); }
+    L.push('SUMMARY:'+esc2(title));
+    if(e.place) L.push('LOCATION:'+esc2(e.place));
+    if(e.note) L.push('DESCRIPTION:'+esc2(e.note));
+    if(tr&&e.cancel) L.push('STATUS:CANCELLED');
+    L.push('END:VEVENT');
+  });
+  L.push('END:VCALENDAR');
+  return L.map(fold).join('\r\n')+'\r\n';
+}
+function icsDownload(events,file){
+  const blob=new Blob([icsText(events,S.appName||'Mannschaft')],{type:'text/calendar;charset=utf-8'}), url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=file; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),4000);
+}
+const calHttps=()=>FIREBASE_CONFIG&&FIREBASE_CONFIG.projectId&&S.calToken?`https://europe-west3-${FIREBASE_CONFIG.projectId}.cloudfunctions.net/kalender?t=${S.calToken}`:'';
+const isAndroid=()=>/Android/i.test(navigator.userAgent);
+function calModalBody(){
+  const live=AUTH.mode==='live', url=live&&S.calOn?calHttps():'', web=url.replace(/^https:/,'webcal:');
+  const goog=url?'https://calendar.google.com/calendar/r?cid='+encodeURIComponent(web):'';
+  const on=S.calOn||!live;
+  const ios=`<div class="calopt"><b>iPhone &amp; iPad</b>${url?`<a class="btn" href="${esc(web)}">Kalender abonnieren</a>`:`<button type="button" class="btn" data-act="calDemo">Kalender abonnieren</button>`}
+    <p class="hint">Es öffnet sich „Abonnieren“ – bestätigen, fertig. Der Kalender erscheint in der Kalender-App und aktualisiert sich selbst.</p></div>`;
+  const andr=`<div class="calopt"><b>Android</b>${url?`<a class="btn" href="${esc(goog)}" target="_blank" rel="noopener">Zum Google Kalender hinzufügen</a>`:`<button type="button" class="btn" data-act="calDemo">Zum Google Kalender hinzufügen</button>`}
+    <p class="hint">Mit deinem Google-Konto anmelden und „Hinzufügen“ tippen. Erscheint der Kalender nicht in der Google-Kalender-App: dort Menü → Einstellungen → den Kalender „${esc(S.appName||'Mannschaft')}“ antippen → <b>Synchronisieren</b> einschalten. Samsung-Kalender zeigt Google-Kalender automatisch mit an.</p></div>`;
+  return `<h2>Termine im Handy-Kalender</h2>
+    ${on?`<p class="hint">Mit einem Abo stehen alle Spiele, Trainings und Events automatisch in deinem Kalender – auch spätere Änderungen und Absagen. Das kann je nach Kalender ein paar Stunden dauern.</p>
+    ${isAndroid()?andr+ios:ios+andr}
+    <div class="calopt"><b>Andere Kalender (Outlook, ICSx⁵ …)</b>${url?`<button type="button" class="btn ghost sm" data-act="copy" data-v="${esc(url)}">Abo-Link kopieren</button>`:`<button type="button" class="btn ghost sm" data-act="calDemo">Abo-Link kopieren</button>`}</div>
+    ${!live?'<p class="hint"><b>Demo:</b> Das Abo funktioniert nur in der echten App. Die Datei unten kannst du aber schon ausprobieren.</p>':''}`
+    :'<p class="hint">Das Kalender-Abo ist nicht eingeschaltet (ein Admin kann es unter Optionen aktivieren). Du kannst die Termine aber als Datei übernehmen – Änderungen kommen dann nicht automatisch nach.</p>'}
+    <div class="calopt"><b>Einmalig als Datei</b><button type="button" class="btn ghost sm" data-act="icsAll">Alle kommenden Termine (.ics)</button>
+    <p class="hint">Öffnen und „Alle hinzufügen“ wählen. Ohne Abo werden spätere Änderungen nicht übernommen.</p></div>`;
 }
 
 /* ---------- Einnahmen & Ausgaben (Kassenbuch, optional) ---------- */
@@ -1574,7 +1655,7 @@ function privacyBody(info){
   <p><b>Verantwortlich</b><br>${who}${info.contact?`<br>Kontakt: ${esc(info.contact)}`:''}</p>
   <p><b>Wofür?</b> Die App „${esc(info.appName||'Mannschafts-App')}“ dient der Organisation unserer Mannschaft${m.money?' und der Abrechnung von Mannschaftskasse, Getränkekasse und sonstigen Beträgen':''}. Es gibt keine Werbung, kein Tracking und keine Weitergabe an Dritte zu eigenen Zwecken.</p>
   <p><b>Welche Daten?</b>${li([
-    'Spitzname bzw. Kürzel, Rückennummer und – freiwillig – Geburtsdatum (das Datum sehen nur Admins mit allen Rechten, alle anderen nur das Alter)',
+    'Spitzname bzw. Kürzel, Rückennummer und – freiwillig – Geburtsdatum (das Datum sehen nur Admins mit dem Recht „Spieler & Zugänge“, alle anderen nur das Alter'+(m.bday?'; am Geburtstag erhalten alle eine Push-Nachricht mit dem Spitznamen':'')+')',
     'Persönlicher Zugangscode und eine technische Gerätekennung; bei Admins die E-Mail-Adresse',
     m.events&&'Zu- und Absagen, Kader, Aufstellung, Einteilung, Umfrage-Antworten und Kommentare',
     'Beiträge an der Pinnwand mit 👍',
@@ -1587,7 +1668,8 @@ function privacyBody(info){
     'Spieler sehen die Termine, die Team-Liste (Nummer, Spitzname, Alter), Pinnwand'+(m.chat?', Chat':'')+' und Umfragen.',
     m.money&&(m.amountsPublic?'Beträge sind für alle Spieler sichtbar.':'Beträge sieht jeder Spieler nur für sich selbst.'),
     m.events&&(m.statsPublic?'Die Teilnahme-Auswertung ist für alle Spieler sichtbar.':'Die Teilnahme-Auswertung sehen nur Trainer und Admins.'),
-    'Admins (höchstens vier) sehen und bearbeiten die Bereiche, für die sie freigeschaltet sind. Änderungen werden protokolliert.',
+    'Admins sehen und bearbeiten nur die Bereiche, für die sie freigeschaltet sind (jede Kasse einzeln). Änderungen werden protokolliert.',
+    m.cal&&'Kalender-Abo: Wer den Abo-Link hat, sieht die Termine (Datum, Uhrzeit, Ort) ohne Namen.',
     m.publicView?'Ohne Code sind nur die Termine (Datum, Uhrzeit, Ort) öffentlich sichtbar, ohne Namen.':'Ohne Code ist nichts sichtbar.'])}</p>
   <p><b>Rechtsgrundlage</b><br>Organisation des Spielbetriebs bzw. der Mitgliedschaft (Art. 6 Abs. 1 lit. b bzw. f DSGVO). Freiwillige Angaben wie Geburtsdatum, Fotos und Push-Benachrichtigungen beruhen auf deiner Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die du jederzeit widerrufen kannst.</p>
   <p><b>Wo werden die Daten gespeichert?</b><br>Bei Google Firebase (Google Ireland Ltd.) als Auftragsverarbeiter. Die Datenbank liegt in Frankfurt am Main. Die Anmeldung (Firebase Authentication) läuft in den USA${m.push?', Push-Nachrichten werden über Googles weltweites Netz zugestellt':''}. Für Übermittlungen in die USA gelten das EU-US Data Privacy Framework und die Standardvertragsklauseln von Google. Die App selbst wird über GitHub Pages (GitHub Inc., USA) ausgeliefert; dabei wird deine IP-Adresse verarbeitet. Schriften sind in der App enthalten, es werden keine Google Fonts geladen. Im Browser werden nur dein Zugangscode bzw. deine Anmeldung und Einstellungen gespeichert, keine Cookies zu Werbe- oder Analysezwecken.</p>
@@ -1599,8 +1681,8 @@ function privacyBody(info){
 function myData(pid){
   const p=pById(pid)||{name:'(entfernt)'}, out=[], sec=(t,rows)=>{ if(rows.length) out.push({t,rows}); };
   const age=ageOf(p), bd=(S.birth||{})[pid];
-  sec('Stammdaten',[`Spitzname: ${p.name}`,`Rückennummer: ${p.nr||'–'}`,`Geburtsdatum: ${bd&&isFull()?fmtDate(bd):age!=null?`hinterlegt (nur für Admins sichtbar), Alter ${age}`:'nicht hinterlegt'}`,
-    `Zugang: ${AUTH.mode==='live'&&isFull()?(codeOf(pid)?'persönlicher Code aktiv':'kein Code'):'persönlicher Code'}`]);
+  sec('Stammdaten',[`Spitzname: ${p.name}`,`Rückennummer: ${p.nr||'–'}`,`Geburtsdatum: ${bd&&hasArea('players')?fmtDate(bd):age!=null?`hinterlegt (nur für Admins sichtbar), Alter ${age}`:'nicht hinterlegt'}`,
+    `Zugang: ${AUTH.mode==='live'&&hasArea('players')?(codeOf(pid)?'persönlicher Code aktiv':'kein Code'):'persönlicher Code'}`]);
   const adm=adminList().filter(a=>a.p===pid).map(a=>`Admin „${a.name}“ – ${rightsText(a)}`); sec('Admin-Rolle',adm);
   if(FEAT.money){
     const y=NOW.getFullYear(), ms=yearMonths(y);
@@ -1638,7 +1720,8 @@ const isAdminAny=()=>!!me();
 function chatMsgs(ch){
   if(AUTH.mode!=='live') return ((S.demoChat||{})[ch]||[]).slice().sort((a,b)=>a.ts-b.ts);
   const rx=LIVE.creact||{};
-  return ((LIVE.chat||{})[ch]||[]).map(m=>({...m,likes:ch==='team'?Object.keys(rx[m.id]||{}):(m.likes||[])})).sort((a,b)=>a.ts-b.ts);
+  const by=(id,e)=>Object.entries(rx[id]||{}).filter(([,x])=>x===e).map(([k])=>k);
+  return ((LIVE.chat||{})[ch]||[]).map(m=>({...m,likes:ch==='team'?by(m.id,'up'):(m.likes||[]),dislikes:ch==='team'?by(m.id,'down'):(m.dislikes||[])})).sort((a,b)=>a.ts-b.ts);
 }
 const chatReadKey=ch=>'mk-chat-read-'+ch;
 function chatUnread(){
@@ -1672,10 +1755,12 @@ function chatView(){
     const q=m.re&&byId[m.re]?`<div class="q"><b>${esc(chatWho(byId[m.re]))}:</b> ${esc(byId[m.re].t||(byId[m.re].img?'📷 Foto':'📊 Umfrage'))}</div>`:'';
     const img=m.img?(()=>{const src=chatImg(m); return src?`<img src="${src}" alt="Foto von ${esc(who)}" data-act="chatImg" data-v="${m.id}">`:'<span class="ph">📷 Foto wird geladen …</span>';})():'';
     const poll=m.poll?(()=>{const x=tpolls().find(y=>y.id===m.poll); return x?tpollCard(x):'<div class="hint">Umfrage wurde gelöscht</div>';})():'';
-    const sel=ui.chatSel===m.id, liked=!!au&&!!au.p&&(m.likes||[]).includes(au.p);
+    const sel=ui.chatSel===m.id, liked=!!au&&!!au.p&&(m.likes||[]).includes(au.p), disliked=!!au&&!!au.p&&(m.dislikes||[]).includes(au.p);
+    const nUp=(m.likes||[]).length, nDn=(m.dislikes||[]).length;
     h+=`<div class="msg ${mine?'me':''} ${sel?'sel':''}" data-act="chatSel" data-v="${m.id}" role="button" tabindex="0">${showName?`<div class="mn">${esc(who)}${m.a?' · Admin':''}</div>`:''}${q}${img}${poll}${m.t?`<div class="mt">${linkify(m.t)}</div>`:''}
-      <div class="mm">${(m.likes||[]).length?`<span class="rx">👍 ${(m.likes||[]).length}</span> `:''}${hm(m.ts)}</div></div>`;
-    if(sel) h+=`<div class="macts ${mine?'me':''}"><button class="chip" data-act="chatReply" data-v="${m.id}">↩︎ Antworten</button>${ch==='team'&&au&&au.p?`<button class="chip" data-act="chatLike" data-v="${m.id}" aria-pressed="${liked}">👍${liked?' zurück':''}</button>`:''}${m.t?`<button class="chip" data-act="copy" data-v="${esc(m.t)}">Kopieren</button>`:''}${mine||isAdmin()?`<button class="chip" data-act="chatDel" data-v="${m.id}" style="color:var(--due)">Löschen</button>`:''}</div>`;
+      <div class="mm">${nUp?`<span class="rx">👍 ${nUp}</span> `:''}${nDn?`<span class="rx">👎 ${nDn}</span> `:''}${hm(m.ts)}</div></div>`;
+    if(sel&&ui.chatDelAsk===m.id) h+=`<div class="macts ${mine?'me':''}"><span class="hint" style="align-self:center">Nachricht für alle löschen?</span><button class="btn danger sm" data-act="chatDelGo" data-v="${m.id}">Löschen</button><button class="btn ghost sm" data-act="chatDelNo">Abbrechen</button></div>`;
+    else if(sel) h+=`<div class="macts ${mine?'me':''}"><button class="chip" data-act="chatReply" data-v="${m.id}">↩︎ Antworten</button>${ch==='team'&&au&&au.p?`<button class="chip" data-act="chatLike" data-v="${m.id}" data-x="up" aria-pressed="${liked}" aria-label="Daumen hoch">👍${liked?' ✓':''}</button><button class="chip" data-act="chatLike" data-v="${m.id}" data-x="down" aria-pressed="${disliked}" aria-label="Daumen runter">👎${disliked?' ✓':''}</button>`:''}${m.t?`<button class="chip" data-act="copy" data-v="${esc(m.t)}">Kopieren</button>`:''}${mine||isAdmin()?`<button class="chip" data-act="chatDel" data-v="${m.id}" style="color:var(--due)">Löschen</button>`:''}</div>`;
     return h;}).join('');
   const reply=ui.chatRe&&byId[ui.chatRe]?`<div class="creply"><span><b>Antwort an ${esc(chatWho(byId[ui.chatRe]))}:</b> ${esc((byId[ui.chatRe].t||'Foto').slice(0,60))}</span><button class="x" data-act="chatReplyX" aria-label="Antwort abbrechen">×</button></div>`:'';
   return `${isAdminAny()?`<div class="seg wide" role="group" aria-label="Chat"><button data-act="chatCh" data-v="team" aria-pressed="${ch==='team'}">Mannschaft</button><button data-act="chatCh" data-v="admins" aria-pressed="${ch==='admins'}">Nur Admins</button></div>`:''}
@@ -1732,12 +1817,13 @@ async function chatDelete(id){
   }else{ S.demoChat[ch]=S.demoChat[ch].filter(x=>x.id!==id); if(!chatMine(m)) logAction('Chat-Nachricht entfernt'); save(); }
   render(); toast('Nachricht gelöscht');
 }
-async function chatLike(id){
-  const au=myAuthor(); if(!au||!au.p) return; const m=chatMsgs('team').find(x=>x.id===id); if(!m) return; const on=!(m.likes||[]).includes(au.p);
-  if(AUTH.mode==='live'){ LIVE.creact=LIVE.creact||{}; const r=(LIVE.creact[id]=LIVE.creact[id]||{}); if(on) r[au.p]=true; else delete r[au.p]; render();
-    try{ const ref=D('creact',`${id}_${au.p}`); if(on) await FB.setDoc(ref,{m:id,p:au.p}); else await FB.deleteDoc(ref); }catch(e){console.warn(e);} }
-  else { const d=S.demoChat.team.find(x=>x.id===id); d.likes=d.likes||[]; if(on) d.likes.push(au.p); else d.likes=d.likes.filter(x=>x!==au.p); save(); render(); }
-  ui.chatSel=null; render();
+async function chatLike(id,kind){
+  const au=myAuthor(); if(!au||!au.p) return; const m=chatMsgs('team').find(x=>x.id===id); if(!m) return;
+  const cur=(m.likes||[]).includes(au.p)?'up':(m.dislikes||[]).includes(au.p)?'down':null, next=cur===kind?null:kind;
+  if(AUTH.mode==='live'){ LIVE.creact=LIVE.creact||{}; const r=(LIVE.creact[id]=LIVE.creact[id]||{}); if(next) r[au.p]=next; else delete r[au.p]; ui.chatSel=null; render();
+    try{ const ref=D('creact',`${id}_${au.p}`); if(next) await FB.setDoc(ref,{m:id,p:au.p,e:next}); else await FB.deleteDoc(ref); }catch(e){console.warn(e); toast('Reaktion konnte nicht gespeichert werden');} }
+  else { const d=S.demoChat.team.find(x=>x.id===id); d.likes=(d.likes||[]).filter(x=>x!==au.p); d.dislikes=(d.dislikes||[]).filter(x=>x!==au.p);
+    if(next==='up') d.likes.push(au.p); if(next==='down') d.dislikes.push(au.p); save(); ui.chatSel=null; render(); }
 }
 /* Umfrage aus dem Chat starten: legt eine Mannschafts-Umfrage an und zeigt sie im Chat */
 async function chatPollCreate(q,opts){
@@ -1823,6 +1909,8 @@ function commentsOf(eid,k){
   const all=AUTH.mode==='live'?LIVE.comments:(S.demoComments||[]);
   return all.filter(c=>c.e===eid&&(!k||c.k===k)).sort((a,b)=>(a.o||a.ts)-(b.o||b.ts));
 }
+/* Kommentare zu einem Termin: bei allen Terminen (Standard) oder nur, wenn beim Termin erlaubt */
+const evCmtOn=e=>S.cmtAll!==false||!!e.comments;
 const modCan=k=>k==='news'?isAdmin():can('events');
 /* Anzahl echter Kommentare (ohne Hinweise „Kommentar entfernt“) */
 const cmtCount=(eid,k)=>commentsOf(eid,k).filter(c=>!c.rm).length;
@@ -1855,7 +1943,7 @@ function renderChrome(){
   applyTheme();
   const yr=yearMonths(NOW.getFullYear());
   const gated=AUTH.mode==='live'&&(!AUTH.ready||AUTH.gate);
-  document.getElementById('score').innerHTML=gated||!seeAllAmounts()||!FEAT.money?'':S.order.map(s=>`<div><b>${eur(totalOpen(s,yr))}</b><span>${SEC[s].short} offen</span></div>`).join('');
+  document.getElementById('score').innerHTML=gated||!seeAllAmounts()||!FEAT.money?'':visSecs().map(s=>`<div><b>${eur(totalOpen(s,yr))}</b><span>${SEC[s].short} offen</span></div>`).join('');
   const words=(S.teamName||'Unsere Mannschaft').trim().split(/\s+/);
   document.getElementById('teamName').innerHTML=words.length>1?`${esc(words.slice(0,-1).join(' '))} <em>${esc(words[words.length-1])}</em>`:`<em>${esc(words[0])}</em>`;
   const y=NOW.getFullYear(), sy=NOW.getMonth()>=6?y:y-1;
@@ -1871,7 +1959,7 @@ function renderChrome(){
   ab.className='adminbtn'+(isAdmin()?' on':(me()?' half':''));
   ab.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true">${isAdmin()?ICON.unlock:ICON.lock}</svg>`;
   ab.setAttribute('aria-label',isAdmin()?(myPlayer()?'Zur Spieleransicht wechseln':'Zum Lesemodus wechseln'):(me()?'Zur Admin-Ansicht wechseln':'Admin-Anmeldung'));
-  const tabs=(gated?[]:isPublic()?['home','events']:(isFull()?['home','events','chat','roster','settings']:['home','events','chat','roster']))
+  const tabs=(gated?[]:isPublic()?['home','events']:(isFull()||canPlayers()?['home','events','chat','roster','settings']:['home','events','chat','roster']))
     .filter(k=>(k!=='events'||FEAT.events)&&(k!=='roster'||FEAT.roster)&&(k!=='chat'||!!S.chatOn));
   const cur=(ui.person||MONEY.includes(ui.tab)||ui.tab==='finance'||ui.tab==='payreqs')?'home':((ui.lineup||ui.evDetail)?'events':ui.tab);
   const lbl=k=>k==='settings'?'Optionen':k==='roster'?'Team':k==='chat'?'Chat':SEC[k].label;
@@ -2029,7 +2117,7 @@ function myShifts(upcoming){
     return `<button class="mini evt" data-act="shiftsOpen" data-v="${e.id}"><span class="md"><b>${+d}</b><i>${wd(e.date)} · ${MONTHS[+m-1].slice(0,3)}</i></span>
       <span class="mt"><span class="ml">${esc(evTitle(e))}</span><span class="mv">${esc(s.name)}</span><span class="ms">${shiftTime(s)||'Uhrzeit folgt'}</span></span></button>`;}).join('')}</div>`;
 }
-function homeView(){ return newsBlock()+tpollBlock()+homeMain(); }
+function homeView(){ return newsBlock()+tpollBlock()+homeMain()+(finesOn()&&!isPublic()&&finesList().length?'<button class="chip" data-act="finesShow" style="justify-self:start">Strafenkatalog ansehen ›</button>':''); }
 function homeMain(){
   const y=NOW.getFullYear(), yr=yearMonths(y), cm=[mk(y,NOW.getMonth())];
   const upcoming=S.events.filter(e=>e.date>=TODAY).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
@@ -2040,14 +2128,15 @@ function homeMain(){
       ${more.length?`<div class="hd">Danach <span>antippen für Details</span></div><div class="panel" style="${secStyle('events')}"><div style="display:grid;gap:6px">${more.map(e=>`<button class="p" data-act="evOpen" data-v="${e.id}" style="text-align:left"><span class="n">${esc(evTitle(e))}<div>${wd(e.date)}, ${fmtDate(e.date)}${e.time?' · '+e.time+' Uhr':''}</div></span><span class="v" style="font-size:12px;color:var(--muted)">${ETYPE[e.type]}</span></button>`).join('')}</div></div>`:''}
       <button class="chip" data-act="goto" data-v="roster" style="justify-self:start">Mannschaft ansehen ›</button>`;
   }
-  const tiles=S.order.map(k=>{
+  const vs=visSecs();
+  const tiles=vs.map(k=>{
     const o=totalOpen(k,yr), s=totalSoll(k,yr), pct=s?Math.round((s-o)/s*100):100;
     return `<button class="k" data-act="goto" data-v="${k}" style="--c:${secHex(k)}">
       <span class="lb">${SEC[k].short}</span><span class="big">${eur(o)}</span>
       <span class="bar"><i style="width:${pct}%"></i></span><span class="s">${pct} % bezahlt</span></button>`;}).join('');
-  const gesamt=r2(S.order.reduce((a,k)=>a+totalOpen(k,yr),0));
-  const gesamtMonat=r2(S.order.reduce((a,k)=>a+totalOpen(k,cm),0));
-  const debt=sorted().map(p=>{const parts=S.order.map(k=>({k,o:calc(k,p.id,yr).open})).filter(x=>x.o>0); return {p,parts,o:r2(parts.reduce((a,x)=>a+x.o,0))};})
+  const gesamt=r2(vs.reduce((a,k)=>a+totalOpen(k,yr),0));
+  const gesamtMonat=r2(vs.reduce((a,k)=>a+totalOpen(k,cm),0));
+  const debt=sorted().map(p=>{const parts=vs.map(k=>({k,o:calc(k,p.id,yr).open})).filter(x=>x.o>0); return {p,parts,o:r2(parts.reduce((a,x)=>a+x.o,0))};})
     .filter(d=>d.o>0).sort((a,b)=>b.o-a.o);
   const shown=ui.allDebtors?debt:debt.slice(0,8);
   const ld=S.days.slice().sort((a,b)=>b.date.localeCompare(a.date))[0];
@@ -2079,9 +2168,10 @@ function homeMain(){
 function personView(){
   const p=pById(ui.person); if(!p){ui.person=null;return homeView();}
   const y=ui.py, ms=yearMonths(y);
-  const per=MONEY.map(k=>({k,...calc(k,p.id,ms)}));
+  const secs=p.id===myPlayer()?S.order:visSecs();
+  const per=secs.map(k=>({k,...calc(k,p.id,ms)}));
   const total=r2(per.reduce((a,x)=>a+x.open,0));
-  const openSecs=S.order.filter(k=>per.find(x=>x.k===k).open>0);
+  const openSecs=secs.filter(k=>per.find(x=>x.k===k).open>0);
   const txt=`${p.name} ${openSecs.map(k=>SEC[k].label).join(' + ')||'Kasse'} ${y}`;
   const url=total>0?paypalUrl(total):'';
   const canAny=MONEY.some(k=>can(k));
@@ -2109,8 +2199,9 @@ function personView(){
         <button class="btn ghost" data-act="copy" data-v="${esc(url?url+'\n'+txt:txt)}">${url?'Link + Text kopieren':'Text kopieren'}</button>
         ${canAny?(ui.confirmDel==='payall'?`<button class="btn danger" data-act="payAll">Ja, als bezahlt markieren</button><button class="btn ghost" data-act="noDel">Abbrechen</button>`:`<button class="btn ghost" data-act="askDel" data-v="payall">Alles als bezahlt markieren</button>`):''}</div>
         <p class="hint">Verwendungszweck: „${esc(txt)}“</p>`:''}
+      ${finesOn()&&can('misc')?`<button class="btn ghost sm" data-act="fineFor" data-id="${p.id}" style="justify-self:start">Strafe eintragen</button>`:''}
     </div>
-    ${S.order.map(secPanel).join('')}`;
+    ${secs.map(secPanel).join('')}`;
 }
 
 /* ---------- Kassenbereiche ---------- */
@@ -2154,9 +2245,10 @@ function miscPanel(){
     :`<p class="hint">Im Zeitraum ${periodLabel()} gibt es keine Posten.</p>`;
   if(!(ui.form&&adm)) return `<div class="panel">
       <div class="row spread"><div class="grow"><h2>Posten · ${periodLabel()}</h2><p class="hint">Zum Beispiel Mannschaftsfahrt, Geschenke oder Strafen.</p></div>
-      ${adm?'<button class="btn" data-act="openForm">+ Posten erfassen</button>':''}</div>${list}</div>`;
+      ${adm?`<div class="row tight">${finesOn()?'<button class="btn" data-act="fineNew">+ Strafe</button>':''}<button class="btn${finesOn()?' ghost':''}" data-act="openForm">+ Posten erfassen</button></div>`:''}</div>${list}</div>${finesOn()?(adm?finesEditor():`<div class="panel"><h2>Strafenkatalog</h2>${finesTable()}</div>`):''}`;
   return `<div class="panel form">
-      <h2>${ui.editKey?'Posten bearbeiten':'Neuer Posten'}</h2>
+      <h2>${ui.editKey?'Posten bearbeiten':ui.fineMode?'Strafe eintragen':'Neuer Posten'}</h2>
+      ${ui.fineMode&&!ui.editKey?`<div class="f" style="font-size:12.5px;color:var(--muted);font-weight:600">Aus dem Katalog<div class="row tight">${finesList().map(x=>`<button type="button" class="chip" data-act="fineUse" data-v="${x.id}" aria-pressed="${ui.draft.title==='Strafe: '+x.name}">${esc(x.name)} · ${eur(+x.amount||0)}</button>`).join('')||'<span class="hint">Katalog ist leer.</span>'}</div></div>`:''}
       <label class="f">Bezeichnung<input type="text" id="fTitle" value="${esc(ui.draft.title)}" placeholder="z. B. Mannschaftsfahrt"></label>
       <div class="row" style="flex-wrap:nowrap">
         <label class="f" style="flex:1">Betrag p. P. (€)<input type="number" id="fAmount" step="0.5" min="0" inputmode="decimal" value="${esc(ui.draft.amount)}" placeholder="0,00"></label>
@@ -2173,7 +2265,7 @@ function teamPanel(){
 }
 function secHead(){
   return `<div class="sechead"><button class="back" data-act="goto" data-v="home">‹ Übersicht</button>
-    <div class="seg wide" role="group" aria-label="Kasse wechseln">${S.order.map(k=>`<button data-act="goto" data-v="${k}" aria-pressed="${ui.tab===k}" style="--c:${secHex(k)}">${SEC[k].short}</button>`).join('')}</div></div>`;
+    <div class="seg wide" role="group" aria-label="Kasse wechseln">${visSecs().map(k=>`<button data-act="goto" data-v="${k}" aria-pressed="${ui.tab===k}" style="--c:${secHex(k)}">${SEC[k].short}</button>`).join('')}</div></div>`;
 }
 
 function listPanel(sec){
@@ -2364,7 +2456,7 @@ function evCard(e,cls,isNext){
     <div class="tags">${isNext?'<span class="badge nx">Nächster</span>':''}<span class="badge ${e.type==='training'?'tr':''}">${typeBadge}</span>${trBadges(e)}${reportOf(e.id)&&reportOf(e.id).result?`<span class="badge">${esc(reportOf(e.id).result)}</span>`:''}</div></div>
     ${reportOf(e.id)?`<details class="pubrep"><summary>${e.type==='game'?'Spielbericht':'Bericht'}</summary><div class="report">${esc(reportOf(e.id).text)}</div></details>`:''}</div>`;
   const nc=cmtCount(e.id);
-  const foot=[e.result?`Ergebnis ${esc(e.result)}`:'',reportOf(e.id)?'Bericht':'',e.comments||nc?`💬 ${nc}`:''].filter(Boolean).join(' · ');
+  const foot=[e.result?`Ergebnis ${esc(e.result)}`:'',reportOf(e.id)?'Bericht':'',evCmtOn(e)||nc?`💬 ${nc}`:''].filter(Boolean).join(' · ');
   const acts=adm||can('drinks')?`<div class="evact">${adm?`<div style="display:flex"><button class="edit" data-act="editEvent" data-v="${e.id}">Bearbeiten</button><button class="x" data-act="askDel" data-v="${key}" aria-label="Termin löschen">×</button></div>`:''}
       ${can('drinks')&&FEAT.money&&e.date<=TODAY?`<button class="edit" data-act="evDrinks" data-v="${e.date}">Getränke erfassen</button>`:''}</div>`:'';
   return `<div class="ev ${cls}"><div class="cal"><span>${wd(e.date)}</span><b>${+d}</b><span>${MONTHS[+m-1].slice(0,3)}</span></div>
@@ -2404,11 +2496,12 @@ function evDetailView(){
       <div class="row tight"><span class="badge ${e.type==='training'?'tr':''}">${typeBadge}</span>${trBadges(e)}${adm?`<button class="edit" data-act="editEvent" data-v="${e.id}">Termin bearbeiten</button>`:''}${adm&&e.type!=='event'&&!shiftsOf(e).length&&!ui.shiftEdit?`<button class="edit" data-act="shiftEdit" data-v="new">+ Einteilung</button>`:''}</div>
       ${e.note?`<p style="margin:0">${esc(e.note)}</p>`:''}
       ${squadLine(e)}
+      <button class="linkbtn" data-act="evIcs" data-v="${e.id}" style="justify-self:start">📅 In meinen Kalender eintragen</button>
     </div>
     ${shiftsPanel(e)}
     ${reportPanel}
     ${e.cancel?'<div class="panel"><p class="cxnote" style="margin:0">Dieses Training fällt aus.</p></div>':e.poll?`<div class="panel">${pollBox(e,true)}</div>`:''}
-    ${e.comments?`<div class="panel">${commentsBlock(e,'event')}</div>`:(adm?'<p class="hint">Kommentare sind für diesen Termin ausgeschaltet (Termin bearbeiten → „Kommentare erlauben“).</p>':'')}`;
+    ${evCmtOn(e)?`<div class="panel">${commentsBlock(e,'event')}</div>`:(adm?'<p class="hint">Kommentare sind für diesen Termin ausgeschaltet (Termin bearbeiten → „Kommentare erlauben“ oder unter Optionen → Sichtbarkeit für alle Termine einschalten).</p>':'')}`;
 }
 function eventForm(){
   const f=ui.ev, t=f.type;
@@ -2436,7 +2529,7 @@ function eventForm(){
       ${f.repeat?`<label class="f" style="max-width:240px">Bis einschließlich<input type="date" id="eUntil" value="${esc(f.until||shiftDate(ui.date||TODAY,364))}"></label>
         <p class="hint">Legt jede Woche am selben Wochentag ein Training an (${seriesDates(ui.date||TODAY,f.until||shiftDate(ui.date||TODAY,364)).length} Termine, höchstens 60). Einzelne Trainings kannst du danach mit einem Tipp absagen oder in die Halle verlegen.</p>`:''}`:''}
     ${t==='game'?'<p class="hint">Kader, Aufstellung, Ergebnis und Spielbericht legst du nach dem Speichern über den Termin an.</p>':''}
-    <label class="check"><input type="checkbox" id="eComments" ${f.comments?'checked':''}> Kommentare erlauben</label>
+    ${S.cmtAll!==false?'<p class="hint" style="margin:0">💬 Kommentare sind bei allen Terminen möglich (Optionen → Sichtbarkeit).</p>':`<label class="check"><input type="checkbox" id="eComments" ${f.comments?'checked':''}> Kommentare erlauben</label>`}
     <label class="check"><input type="checkbox" id="ePoll" ${f.poll?'checked':''}> Umfrage hinzufügen</label>
     ${pollFields}
     <div class="row"><button class="btn" data-act="saveEvent">Speichern</button><button class="btn ghost" data-act="closeForm">Abbrechen</button></div>
@@ -2492,7 +2585,7 @@ function eventsView(){
   const past=all.filter(e=>e.date<TODAY).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
   const cnt=t=>S.events.filter(e=>t==='all'||e.type===t).length;
   return `${evTabs()}<div class="panel">
-    <div class="row spread"><h2>Termine</h2>${can('events')?'<button class="btn" data-act="openForm">+ Termin</button>':''}</div>
+    <div class="row spread"><h2>Termine</h2><div class="row tight">${isPublic()?'':'<button class="btn ghost sm" data-act="calOpen">📅 In meinen Kalender</button>'}${can('events')?'<button class="btn" data-act="openForm">+ Termin</button>':''}</div></div>
     <div class="seg wide" role="group" aria-label="Filter">
       <button data-act="efilter" data-v="all" aria-pressed="${f==='all'}">Alle ${cnt('all')}</button>
       <button data-act="efilter" data-v="game" aria-pressed="${f==='game'}">Spiele ${cnt('game')}</button>
@@ -2594,8 +2687,9 @@ function archivePanel(){
 }
 function adminsPanel(){
   const live=AUTH.mode==='live', list=adminList(), inv=live?LIVE.invites:[];
-  return `<div class="panel" style="${secStyle('team')}"><h2>Admins · ${list.length+inv.length} von 4</h2>
-    <p class="hint">Stufe 1 „Alles“: alle Bereiche und Optionen. Stufe 2 „Einzelne Bereiche“: nur die gewählten Bereiche. Spieler sehen die App nur lesend und beantworten Umfragen.</p>
+  return `<div class="panel" style="${secStyle('team')}"><h2>Admins · ${list.length+inv.length} von ${adminMax()}</h2>
+    <p class="hint">Stufe 1 „Alles“: alle Bereiche und Optionen. Stufe 2 „Einzelne Bereiche“: nur die gewählten Bereiche – jede Kasse und „Spieler &amp; Zugänge“ (Namen, Geburtsdaten, Codes) wird einzeln freigegeben. Wer eine Kasse nicht hat, sieht dort nur seine eigenen Beträge.</p>
+    <label class="f" style="max-width:220px">Höchstzahl Admins<select id="sAdminMax">${[2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n===adminMax()?'selected':''}>${n}</option>`).join('')}</select></label>
     <div style="display:grid;gap:6px">${list.map(a=>{
       const key='admin:'+a.uid;
       if(ui.confirmDel===key) return confirmBox(key,esc(a.name),'Admin entfernen?','Entfernen');
@@ -2604,7 +2698,7 @@ function adminsPanel(){
         ${live?`<button class="btn ghost sm" data-act="rightsEdit" data-v="${a.uid}">Rechte</button>${!lastFull&&a.uid!==(me()||{}).uid?`<button class="x" data-act="askDel" data-v="${key}" aria-label="${esc(a.name)} entfernen">×</button>`:''}`:''}</div>`;}).join('')}
       ${inv.map(i=>{const key='invite:'+i.email; if(ui.confirmDel===key) return confirmBox(key,esc(i.email),'Einladung zurückziehen?','Zurückziehen');
         return `<div class="adm"><span class="lb">${esc(i.name)} <span class="badge">eingeladen</span><small>${esc(rightsText(i))} · ${esc(i.email)}</small></span><button class="x" data-act="askDel" data-v="${key}" aria-label="Einladung zurückziehen">×</button></div>`;}).join('')}</div>
-    ${live?(list.length+inv.length<4?'<div class="row"><button class="btn" data-act="adminInvite">+ Admin einladen</button></div><p class="hint">Die eingeladene Person öffnet die App, tippt auf das Schloss, legt mit genau dieser E-Mail ein Konto an und bestätigt den Link aus der Bestätigungsmail.</p>':'')
+    ${live?(list.length+inv.length<adminMax()?'<div class="row"><button class="btn" data-act="adminInvite">+ Admin einladen</button></div><p class="hint">Die eingeladene Person öffnet die App, tippt auf das Schloss, legt mit genau dieser E-Mail ein Konto an und bestätigt den Link aus der Bestätigungsmail.</p>':'')
       :'<p class="hint">Demo: In der Online-Version lädst du Admins per E-Mail ein; jeder meldet sich mit eigenem Passwort an.</p>'}
   </div>`;
 }
@@ -2615,7 +2709,7 @@ function playersPanel(){
   return `<div class="panel" id="pnl-players" style="${secStyle('team')}">
     <button class="foldhead" data-act="playersFold" aria-expanded="${open}"><h2>Spieler &amp; Zugänge · ${S.players.length}</h2><span class="fold">${open?'Einklappen':'Aufklappen'}<i aria-hidden="true">${open?'▲':'▼'}</i></span></button>
     <div class="row tight"><span class="st ok">${nOk} aktiv</span><span class="st wait">${nWait} eingeladen</span><span class="st off">${nOff} ohne Zugang</span></div>
-    ${open?`<p class="hint">Spitznamen oder Kürzel empfohlen. Das Geburtsdatum sehen nur Admins mit allen Rechten, alle anderen sehen nur das Alter. Jeder Spieler bekommt einen persönlichen Code.</p>
+    ${open?`<p class="hint">Spitznamen oder Kürzel empfohlen. Das Geburtsdatum sehen nur Admins mit dem Recht „Spieler &amp; Zugänge“, alle anderen sehen nur das Alter. Jeder Spieler bekommt einen persönlichen Code.</p>
     ${nOff?'<button class="btn ghost sm" data-act="codesAll" style="justify-self:start">Codes für alle ohne Zugang erzeugen</button>':''}
     <div class="prows">${ps.map((p,i)=>{
       if(ui.confirmDel==='player:'+p.id) return confirmBox('player:'+p.id,esc(p.name),'Spieler entfernen? Sein Zugang wird gesperrt.','Entfernen');
@@ -2667,6 +2761,9 @@ function visibilityPanel(){
 `:''}
     ${FEAT.events?`    <div class="vis"><b>Teilnahme-Auswertung</b>
       <div class="seg wide" role="group" aria-label="Teilnahme"><button data-act="statsVis" data-v="admin" aria-pressed="${!S.statsPublic}">Nur Trainer &amp; Admins</button><button data-act="statsVis" data-v="all" aria-pressed="${!!S.statsPublic}">Alle Spieler</button></div></div>
+    ${FEAT.events?`<div class="vis"><b>Kommentare zu Terminen</b>
+      <div class="seg wide" role="group" aria-label="Kommentare"><button data-act="cmtAll" data-v="all" aria-pressed="${S.cmtAll!==false}">Bei allen Terminen</button><button data-act="cmtAll" data-v="some" aria-pressed="${S.cmtAll===false}">Nur wenn beim Termin erlaubt</button></div>
+      <p class="hint">${S.cmtAll!==false?'Jedes Spiel, Training und Event kann kommentiert werden.':'Kommentare nur bei Terminen mit Häkchen „Kommentare erlauben“.'}</p></div>`:''}
     <div class="vis"><b>Mannschafts-Chat</b>
       <div class="seg wide" role="group" aria-label="Chat"><button data-act="chatOn" data-v="off" aria-pressed="${!S.chatOn}">Aus</button><button data-act="chatOn" data-v="on" aria-pressed="${!!S.chatOn}">An – ersetzt die WhatsApp-Gruppe</button></div>
       <p class="hint">Gruppenchat für alle mit Fotos, Antworten, 👍 und Umfragen, dazu ein Chat nur für Admins. Neue Nachrichten kommen per Push (Glocke → „Chat“).</p></div>
@@ -2682,6 +2779,7 @@ function visibilityPanel(){
   </div>`;
 }
 function settings(){
+  if(!isFull()) return `${playersPanel()}<p class="hint" style="text-align:center">Du hast das Recht „Spieler &amp; Zugänge“. Die übrigen Optionen verwalten Admins mit allen Rechten.</p>`;
   const c=S.club.c;
   const colDefs=[['Hauptfarbe',FEAT.money?'Kopf, Leisten, Beiträge':'Kopf, Leisten',null],['Akzentfarbe',FEAT.money?'Hervorhebungen, Getränke':'Hervorhebungen',null],['Drittfarbe',FEAT.money?'Sonstiges':'Team & Optionen','use3'],['Viertfarbe','Termine','use4']];
   return `${adminsPanel()}
@@ -2716,6 +2814,17 @@ ${FEAT.events?`<div class="f" style="font-size:12.5px;color:var(--muted);font-we
       <button class="icon" data-act="up" data-v="${i}" ${i?'':'disabled'} aria-label="${SEC[k].label} nach vorne">↑</button><button class="icon" data-act="down" data-v="${i}" ${i<S.order.length-1?'':'disabled'} aria-label="${SEC[k].label} nach hinten">↓</button></div>`).join('')}</div>
   </div>
 `:''}
+  ${FEAT.money?`<div class="panel" style="${secStyle('misc')}"><h2>Strafenkatalog</h2>
+    <label class="check"><input type="checkbox" id="sFinesOn" ${S.finesOn?'checked':''}> Strafenkatalog verwenden</label>
+    <p class="hint">Zum Beispiel „Zu spät zum Training“ oder „Gelbe Karte wegen Meckern“ mit festem Betrag. Der Katalog wird unter „Sonstiges“ gepflegt (Admins mit Recht „Sonstiges“), dort und auf der Spielerseite trägst du Strafen mit einem Tipp ein. Alle sehen den Katalog.</p></div>`:''}
+  <div class="panel" style="${secStyle('team')}"><h2>Kalender &amp; Erinnerungen</h2>
+    ${FEAT.events?`<label class="check"><input type="checkbox" id="sCalOn" ${S.calOn?'checked':''}> Kalender-Abo anbieten (iPhone, Android, Outlook)</label>
+    ${S.calOn?`<p class="hint">Alle finden unter Termine „📅 In meinen Kalender“. Wer den Link hat, sieht die Termine (ohne Namen). Scheidet jemand aus, erzeugst du einen neuen Link – der alte funktioniert dann nicht mehr.</p><button class="btn ghost sm" data-act="calNew" style="justify-self:start">Neuen Abo-Link erzeugen</button>`:''}`:''}
+    <h3>Erinnerungen per Push</h3>
+    ${FEAT.events?`<label class="check"><input type="checkbox" id="sRemRsvp" ${S.remRsvp?'checked':''}> Zu-/Absage: am Vortag um 18 Uhr an alle, die bei Spiel oder Training mit Umfrage noch nicht geantwortet haben</label>`:''}
+    ${FEAT.money?`<label class="check"><input type="checkbox" id="sRemDebt" ${S.remDebt?'checked':''}> Offene Beträge: jeden Monat einen Tag nach dem letzten Training oder Spiel${FEAT.events?'':' (bzw. Getränketag)'} des Monats um 18 Uhr, nur an Spieler mit offenem Betrag</label>`:''}
+    <label class="check"><input type="checkbox" id="sRemBday" ${S.remBday?'checked':''}> Geburtstage: morgens um 9 Uhr an alle (nur der Spitzname, ohne Alter)</label>
+    <p class="hint">Alles ist ab Werk aus. Erinnerungen brauchen eingerichtete Push-Nachrichten (Anleitung, Abschnitt „Push“); jeder kann sie an seiner Glocke abschalten.${AUTH.mode==='live'?'':' In der Demo wird nichts verschickt.'}</p></div>
   ${FEAT.money?`<div class="panel" style="${secStyle('team')}"><h2>Einnahmen &amp; Ausgaben</h2>
     <label class="check"><input type="checkbox" id="sFinOn" ${S.financeOn?'checked':''}> Einnahmen &amp; Ausgaben (Kassenbuch) verwenden</label>
     ${S.financeOn?`<label class="f" style="max-width:220px">Anfangsbestand (€)<input type="number" id="sFinStart" step="0.01" inputmode="decimal" value="${+(S.finance||{}).start||0}"></label>`:''}
@@ -2795,6 +2904,8 @@ function renderModal(){
     const info=AUTH.mode==='live'&&!(AUTH.member||AUTH.admin)?(LIVE.privDoc===undefined?(privacyInfo(),null):LIVE.privDoc):privacyOf(S);
     body=privacyBody(info)+(myPlayer()?'<button type="button" class="btn ghost sm" data-act="mydata" style="justify-self:start">Meine Daten anzeigen</button>':'')
       +(isAdmin()&&S.players.length?`<label class="f">Daten eines Spielers anzeigen (Auskunft)<select id="mdSel"><option value="">– Spieler wählen –</option>${sorted().map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select></label>`:''); submit='';
+  }else if(m.kind==='cal'){ body=calModalBody(); submit='';
+  }else if(m.kind==='fines'){ body=`<h2>Strafenkatalog</h2>${finesTable()}<p class="hint">Strafen trägt der Kassenwart unter „Sonstiges“ ein; sie erscheinen dann bei deinem Stand.</p>`; submit='';
   }else if(m.kind==='mydata'){ body=myDataBody(m.pid); submit='';
   }else if(m.kind==='chatPoll'){
     body=`<h2>Umfrage im Chat</h2><label class="f">Frage<input type="text" id="tpQ" maxlength="200" placeholder="z. B. Wer kommt mit zum Kohlessen?"></label>
@@ -2882,7 +2993,7 @@ async function submitModal(){
       if(!name) return fail('Bitte einen Namen eingeben.');
       if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return fail('Bitte eine gültige E-Mail eingeben.');
       if(r.role==='part'&&!r.areas.length) return fail('Bitte mindestens einen Bereich wählen.');
-      if(LIVE.admins.length+LIVE.invites.length>=4) return fail('Es gibt bereits 4 Admins oder Einladungen.');
+      if(LIVE.admins.length+LIVE.invites.length>=adminMax()) return fail(`Es gibt bereits ${adminMax()} Admins oder Einladungen. Die Höchstzahl lässt sich unter „Admins“ ändern.`);
       m.busy=true; renderModal();
       const lp=v('mPlayer'); await FB.setDoc(D('invites',email),{name,role:r.role,areas:r.role==='part'?r.areas:[],...(lp?{p:lp}:{})});
       logAction(`Admin ${name} eingeladen`); ui.modal=null; renderModal(); toast('Einladung angelegt'); return;
@@ -2907,9 +3018,9 @@ function publicView(){
   return bar+(nextBlock(upcoming)||'<div class="panel"><p class="hint">Keine kommenden Termine.</p></div>');
 }
 function render(){
-  if(!isFull()&&ui.tab==='settings') ui.tab='home';
+  if(!isFull()&&!canPlayers()&&ui.tab==='settings') ui.tab='home';
   if(isPublic()&&!['home','events'].includes(ui.tab)) ui.tab='home';
-  if(MONEY.includes(ui.tab)&&!seeAllAmounts()) ui.tab='home';
+  if(MONEY.includes(ui.tab)&&!seeArea(ui.tab)) ui.tab='home';
   if(ui.person&&!seeAllAmounts()&&ui.person!==myPlayer()) ui.person=null;
   if(isPublic()){ui.person=null;ui.lineup=null;ui.evDetail=null;}
   if(!FEAT.money&&(MONEY.includes(ui.tab)||ui.person)){ui.tab='home';ui.person=null;}
@@ -2955,7 +3066,7 @@ function markWideTables(){
 window.addEventListener('resize',()=>{clearTimeout(markWideTables.t); markWideTables.t=setTimeout(markWideTables,150);});
 const footer=()=>`<p class="foot"><button class="linkbtn" data-act="privacy">Datenschutz</button>${myPlayer()?' · <button class="linkbtn" data-act="mydata">Meine Daten</button>':''}</p>`;
 function toast(t){const e=document.getElementById('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2600);}
-function closeForm(){ui.form=false;ui.shiftPick=null;ui.shiftEdit=null;ui.editKey=null;ui.sel.clear();ui.draft={title:'',amount:''};ui.ev=blankEv();}
+function closeForm(){ui.form=false;ui.fineMode=false;ui.shiftPick=null;ui.shiftEdit=null;ui.editKey=null;ui.sel.clear();ui.draft={title:'',amount:''};ui.ev=blankEv();}
 function toTop(){try{window.scrollTo({top:0,behavior:'smooth'})}catch(e){window.scrollTo(0,0)}}
 function goTab(t){ui.freeEditing=false; if(t==='chat'){ui.chatFirst=true; ui.chatSel=null;} if(t==='settings') ui.playersOpen=false; ui.tab=t;ui.person=null;ui.lineup=null;ui.evDetail=null;ui.reportEdit=false;closeForm();ui.confirmDel=null;render();window.scrollTo(0,0);}
 function enterCode(raw){
@@ -3090,7 +3201,7 @@ document.addEventListener('pointerdown',ev=>{
 });
 
 /* ---------- Bedienung ---------- */
-const READER=new Set(['privacy','mydata','mydataSave','mydataCopy','chatSel','chatSend','chatReply','chatReplyX','chatLike','chatDel','chatMore','chatCh','chatPoll','chatImg','newsNew','newsCancel','newsSend','newsDel','newsDelNo','newsDelGo','newsLike','newsCmt','prNew','prMethod','tpNew','tpCancel','tpSave','tvote','tpClose','tpOpen','tpOld','askDel','noDel','doDel','pushModal','pushOn','pushOff','newsAll','nx','cmtDelNo','cmtDelGo','shiftsOpen','shiftJoin','shiftLeave','playersFold','evOpen','evBack','cmtSend','cmtDel','codeModal','demoPublicEnd','adminBtn','modalBg','modalClose','goto','person','back','pyPrev','pyNext','allDebtors','mode','view','onlyOpen','prev','next','copy','efilter','showPast','vote','pollNames','lineup','lineupBack','noDel','evView','statType','statAll','gateGo','reload','signOut','mStep','mResend','readMode']);
+const READER=new Set(['finesShow','calOpen','calDemo','icsAll','evIcs','chatDelNo','chatDelGo','privacy','mydata','mydataSave','mydataCopy','chatSel','chatSend','chatReply','chatReplyX','chatLike','chatDel','chatMore','chatCh','chatPoll','chatImg','newsNew','newsCancel','newsSend','newsDel','newsDelNo','newsDelGo','newsLike','newsCmt','prNew','prMethod','tpNew','tpCancel','tpSave','tvote','tpClose','tpOpen','tpOld','askDel','noDel','doDel','pushModal','pushOn','pushOff','newsAll','nx','cmtDelNo','cmtDelGo','shiftsOpen','shiftJoin','shiftLeave','playersFold','evOpen','evBack','cmtSend','cmtDel','codeModal','demoPublicEnd','adminBtn','modalBg','modalClose','goto','person','back','pyPrev','pyNext','allDebtors','mode','view','onlyOpen','prev','next','copy','efilter','showPast','vote','pollNames','lineup','lineupBack','noDel','evView','statType','statAll','gateGo','reload','signOut','mStep','mResend','readMode']);
 document.addEventListener('submit',ev=>{if(ev.target.id==='mForm'){ev.preventDefault();submitModal();}});
 document.addEventListener('click',async ev=>{
   const tab=ev.target.closest('[data-tab]'); if(tab){goTab(tab.dataset.tab);return;}
@@ -3167,7 +3278,7 @@ document.addEventListener('click',async ev=>{
   case 'newsDelNo': ui.newsDel=null; render(); break;
   case 'newsDelGo': delNews(v); break;
   case 'newsLike': likeNews(v); break;
-  case 'chatSel': if(ev.target.closest('a')) return; ui.chatSel=ui.chatSel===v?null:v; render(); break;
+  case 'chatSel': if(ev.target.closest('a')) return; ui.chatDelAsk=null; ui.chatSel=ui.chatSel===v?null:v; render(); break;
   case 'privacy': ui.modal={kind:'privacy'}; renderModal(); break;
   case 'mydata': {const pid=myPlayer(); if(!pid) return; ui.modal={kind:'mydata',pid}; renderModal(); break;}
   case 'mydataCopy': if(v===myPlayer()||isAdmin()) copy(myDataText(v),'Daten kopiert'); break;
@@ -3177,11 +3288,14 @@ document.addEventListener('click',async ev=>{
   case 'chatSend': chatSend(); break;
   case 'chatReply': ui.chatRe=v; ui.chatSel=null; render(); setTimeout(()=>{const t=document.getElementById('chatText'); if(t) t.focus();},30); break;
   case 'chatReplyX': ui.chatRe=null; render(); break;
-  case 'chatLike': chatLike(v); break;
-  case 'chatDel': chatDelete(v); break;
+  case 'chatLike': chatLike(v,b.dataset.x==='down'?'down':'up'); break;
+  case 'chatDel': ui.chatDelAsk=v; render(); break;
+  case 'chatDelNo': ui.chatDelAsk=null; render(); break;
+  case 'chatDelGo': ui.chatDelAsk=null; chatDelete(v); break;
   case 'chatMore': ui.chatLim=(ui.chatLim||120)+120; render(); break;
   case 'chatCh': ui.chatCh=v; ui.chatSel=null; ui.chatRe=null; ui.chatFirst=true; render(); break;
   case 'chatPoll': if(!myAuthor()) return toast('Zum Schreiben deinen persönlichen Spieler-Link öffnen'); ui.modal={kind:'chatPoll'}; renderModal(); break;
+  case 'cmtAll': if(isFull()){ S.cmtAll=v==='all'; commit(); toast(S.cmtAll?'Kommentare bei allen Terminen möglich':'Kommentare nur bei freigegebenen Terminen'); } break;
   case 'chatOn': if(isFull()){ S.chatOn=v==='on'; commit(); toast(S.chatOn?'Chat eingeschaltet':'Chat ausgeschaltet'); } break;
   case 'newsCmt': ui.newsOpen=ui.newsOpen===v?null:v; render(); break;
   case 'newsPin': pinNews(v); break;
@@ -3215,10 +3329,10 @@ document.addEventListener('click',async ev=>{
   case 'modalBg': case 'modalClose': ui.modal=null; renderModal(); if(LIVE.pending){LIVE.pending=false;render();} break;
   case 'adminInvite': if(isFull()){ui.modal={kind:'invite'}; renderModal();} break;
   case 'rightsEdit': if(isFull()){ui.modal={kind:'rights',who:v}; renderModal();} break;
-  case 'invite': if(isFull()) shareInvite(id); break;
-  case 'qr': if(isFull()){ui.modal={kind:'qr',who:id}; renderModal();} break;
-  case 'newCode': if(isFull()){ try{await setCode(id,newCode()); logAction(`Neuer Code für ${pname(id)}`); render(); toast('Neuer Code erzeugt – alte Zugänge sind gesperrt');}catch(e){toast('Code konnte nicht erzeugt werden');} } break;
-  case 'codesAll': if(isFull()){ const ids=S.players.filter(p=>!codeOf(p.id)).map(p=>p.id); try{for(const pid of ids) await setCode(pid,newCode()); logAction(`${ids.length} Codes erzeugt`); render(); toast(`${ids.length} Codes erzeugt`);}catch(e){toast('Codes konnten nicht erzeugt werden');} } break;
+  case 'invite': if(canPlayers()) shareInvite(id); break;
+  case 'qr': if(canPlayers()){ui.modal={kind:'qr',who:id}; renderModal();} break;
+  case 'newCode': if(canPlayers()){ try{await setCode(id,newCode()); logAction(`Neuer Code für ${pname(id)}`); render(); toast('Neuer Code erzeugt – alte Zugänge sind gesperrt');}catch(e){toast('Code konnte nicht erzeugt werden');} } break;
+  case 'codesAll': if(canPlayers()){ const ids=S.players.filter(p=>!codeOf(p.id)).map(p=>p.id); try{for(const pid of ids) await setCode(pid,newCode()); logAction(`${ids.length} Codes erzeugt`); render(); toast(`${ids.length} Codes erzeugt`);}catch(e){toast('Codes konnten nicht erzeugt werden');} } break;
   case 'goto': goTab(v); break;
   case 'person': ui.person=id; ui.lineup=null; ui.py=NOW.getFullYear(); ui.confirmDel=null; render(); window.scrollTo(0,0); break;
   case 'back': ui.person=null; ui.confirmDel=null; render(); break;
@@ -3234,6 +3348,17 @@ document.addEventListener('click',async ev=>{
   case 'onlyOpen': ui.onlyOpen=!ui.onlyOpen; render(); break;
   case 'prev': case 'next': {const d=a==='prev'?-1:1; if(ui.mode==='year') ui.y+=d; else {ui.m+=d; if(ui.m<0){ui.m=11;ui.y--} if(ui.m>11){ui.m=0;ui.y++}} render(); break;}
   case 'openForm': closeForm(); ui.form=true; ui.date=TODAY; ui.confirmDel=null; render(); toTop(); break;
+  case 'fineNew': if(can('misc')){ closeForm(); ui.form=true; ui.fineMode=true; ui.date=TODAY; ui.confirmDel=null; render(); toTop(); } break;
+  case 'fineFor': if(can('misc')){ ui.person=null; ui.tab='misc'; closeForm(); ui.form=true; ui.fineMode=true; ui.date=TODAY; ui.sel.add(id); render(); toTop(); } break;
+  case 'fineUse': {const x=finesList().find(f=>f.id===v); if(!x) return; ui.draft={title:'Strafe: '+x.name,amount:String(+x.amount||0)}; render(); break;}
+  case 'fineAdd': if(can('misc')){ S.fines=[...(S.fines||[]),{id:uid(),name:'Neue Strafe',amount:2}]; commit(); } break;
+  case 'fineDel': if(can('misc')){ S.fines=(S.fines||[]).filter(f=>f.id!==v); commit(); } break;
+  case 'finesShow': ui.modal={kind:'fines'}; renderModal(); break;
+  case 'calOpen': ui.modal={kind:'cal'}; renderModal(); break;
+  case 'calDemo': toast('Demo: Das Abo gibt es nur in der echten App'); break;
+  case 'calNew': if(isFull()){ S.calToken=newToken(); commit(); toast('Neuer Abo-Link erzeugt – bitte neu abonnieren lassen'); } break;
+  case 'icsAll': { const up=S.events.filter(e=>e.date>=TODAY).sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||''))); if(!up.length) return toast('Keine kommenden Termine'); icsDownload(up,'termine.ics'); break; }
+  case 'evIcs': { const e=S.events.find(x=>x.id===v); if(e) icsDownload([e],'termin.ics'); break; }
   case 'closeForm': closeForm(); render(); break;
   case 'today': ui.date=TODAY; {const i=document.getElementById('fDate'); if(i) i.value=TODAY;} break;
   case 'sel': {ui.sel.has(id)?ui.sel.delete(id):ui.sel.add(id); syncPicker(); const s=document.getElementById('pSearch'); if(s&&s.value){s.value='';filterPicker('');} break;}
@@ -3311,7 +3436,7 @@ document.addEventListener('click',async ev=>{
     if(t==='tp'){ tpDelete(k); return; }
     if(t==='fin'){ if(!finOn()) return; S.finance.list=S.finance.list.filter(x=>x.id!==k); ui.finForm=null; ui.confirmDel=null; commit(); toast('Buchung gelöscht'); return; }
     if(!isAdmin()) return;
-    const need={day:'drinks',misc:'misc',event:'events',squad:'events',shift:'events'}[t];
+    const need={day:'drinks',misc:'misc',event:'events',squad:'events',shift:'events',player:'players',block:'players'}[t];
     if(need?!can(need):!isFull()) return;
     ui.confirmDel=null;
     if(t==='admin'){ try{await FB.deleteDoc(D('admins',k)); logAction('Admin entfernt'); toast('Admin entfernt');}catch(e){toast('Keine Berechtigung');} render(); return; }
@@ -3330,7 +3455,7 @@ document.addEventListener('click',async ev=>{
   case 'preset': if(isFull()){S.club.c=[...PRESETS[+v].c]; commit(); toast(`Farben „${PRESETS[+v].n}“ übernommen`);} break;
   case 'rmImg': if(isFull()){S.club[v]=''; commit();} break;
   case 'addPlayers': {
-    if(!isFull()) return;
+    if(!canPlayers()) return;
     const ta=document.getElementById('newPlayers'); const have=new Set(S.players.map(p=>p.name.toLowerCase()));
     const names=ta.value.split(/[\n,;]+/).map(s=>s.trim().slice(0,20)).filter(s=>s&&!have.has(s.toLowerCase()));
     if(!names.length) return toast('Keine neuen Spitznamen gefunden');
@@ -3407,10 +3532,25 @@ document.addEventListener('change',ev=>{
   if(t.id==='lGrid'&&can('events')){const e=S.events.find(x=>x.id===ui.lineup); if(e&&e.squad){e.squad.grid=+t.value; snapAll(e.squad); ui.freeSel=null; ui.freeEditing=true; commit(); toast(+t.value?`Raster: ${GRIDS[t.value]}`:'Ohne Raster – ganz frei');} return;}
   if(t.dataset.slot!==undefined&&can('events')){const e=S.events.find(x=>x.id===ui.lineup); if(e&&e.squad){const sl=e.squad.slots; Object.keys(sl).forEach(k=>{if(sl[k]===t.value) delete sl[k];}); if(t.value) sl[t.dataset.slot]=t.value; else delete sl[t.dataset.slot]; commit();} return;}
   if(t.id==='importFile'&&isFull()){const f=t.files&&t.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{try{parseImport(r.result); ui.importText=r.result; ui.confirmDel='import'; render();}catch(e){toast('Die Datei ist keine gültige Sicherung');}}; r.readAsText(f); return;}
+  if(canPlayers()&&(t.dataset.name||t.dataset.nr||t.dataset.birth)){
+    if(t.dataset.name){const p=pById(t.dataset.name); if(p&&t.value.trim()){p.name=t.value.trim().slice(0,20);commit();}}
+    else if(t.dataset.nr){const p=pById(t.dataset.nr); if(p){p.nr=t.value.replace(/\D/g,'').slice(0,3);commit();}}
+    else {S.birth=S.birth||{}; if(t.value) S.birth[t.dataset.birth]=t.value; else delete S.birth[t.dataset.birth]; commit();}
+    return;
+  }
+  if(can('misc')&&(t.dataset.fname||t.dataset.famt)){
+    const x=(S.fines||[]).find(f=>f.id===(t.dataset.fname||t.dataset.famt)); if(!x) return;
+    if(t.dataset.fname){ if(!t.value.trim()) return; x.name=t.value.trim().slice(0,40); } else x.amount=Math.max(0,parseFloat(t.value)||0);
+    commit(); return;
+  }
+  if(t.id==='sAdminMax'&&isFull()){S.adminMax=Math.min(8,Math.max(2,+t.value||ADMIN_MAX_DEF));commit();return;}
   if(!isFull()) return;
   if(t.id==='sTeam'){S.teamName=t.value.trim();commit();}
   else if(t.id==='sSeason'){S.showSeason=t.checked;commit();}
   else if(t.id==='sFinOn'){S.financeOn=t.checked;commit();}
+  else if(t.id==='sFinesOn'){S.finesOn=t.checked; if(S.finesOn&&!(S.fines||[]).length) S.fines=FINES_DEFAULT.map(([name,amount])=>({id:uid(),name,amount})); commit(); toast(S.finesOn?'Strafenkatalog eingeschaltet – Vorschläge unter „Sonstiges“ anpassen':'Strafenkatalog ausgeschaltet');}
+  else if(t.id==='sCalOn'){S.calOn=t.checked; if(S.calOn&&!S.calToken) S.calToken=newToken(); commit();}
+  else if(['sRemRsvp','sRemDebt','sRemBday'].includes(t.id)){S[{sRemRsvp:'remRsvp',sRemDebt:'remDebt',sRemBday:'remBday'}[t.id]]=t.checked; commit();}
   else if(['sPrivWho','sPrivMail','sPrivAuth','sPrivRet'].includes(t.id)){S.privacy={...(S.privacy||{}),[{sPrivWho:'who',sPrivMail:'contact',sPrivAuth:'authority',sPrivRet:'retention'}[t.id]]:t.id==='sPrivRet'?+t.value:t.value.trim()};commit();toast('Datenschutz-Angaben gespeichert');}
   else if(t.id==='sPayreq'){S.payreqOn=t.checked;commit();}
   else if(t.id==='sAppName'){S.appName=t.value.trim().slice(0,30)||'Mannschaftskasse';commit();}
