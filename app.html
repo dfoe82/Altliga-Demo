@@ -623,7 +623,7 @@ const FIREBASE_CONFIG = {
 /* Schlüssel für Push-Nachrichten (Firebase → Projekteinstellungen → Cloud Messaging → Web-Push-Zertifikate). Leer = Push aus. */
 const FIREBASE_VAPID_KEY = "";
 const FIREBASE_VERSION = "10.12.2";
-const APP_VERSION = "1.17"; /* Version der App – steht auch im Namen der ZIP-Dateien */
+const APP_VERSION = "1.20"; /* Version der App – steht auch im Namen der ZIP-Dateien */
 
 const LIVE_MODE=false; /* Demo-Repository: läuft immer als Demo mit Beispieldaten */
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
@@ -2129,7 +2129,7 @@ function renderChrome(){
   applyTheme();
   const yr=yearMonths(NOW.getFullYear());
   const gated=AUTH.mode==='live'&&(!AUTH.ready||AUTH.gate);
-  document.getElementById('score').innerHTML=gated||!seeAllAmounts()||!FEAT.money?'':visSecs().map(s=>`<div><b>${eur(totalOpen(s,yr))}</b><span>${SEC[s].short} offen</span></div>`).join('');
+  document.getElementById('score').innerHTML=gated||!seeAllAmounts()||!FEAT.money||!(ui.tab==='kasse'||MONEY.includes(ui.tab)||ui.tab==='finance'||ui.tab==='payreqs'||ui.person)?'':visSecs().map(s=>`<div><b>${eur(totalOpen(s,yr))}</b><span>${SEC[s].short} offen</span></div>`).join('');
   const words=(S.teamName||'Unsere Mannschaft').trim().split(/\s+/);
   document.getElementById('teamName').innerHTML=words.length>1?`${esc(words.slice(0,-1).join(' '))} <em>${esc(words[words.length-1])}</em>`:`<em>${esc(words[0])}</em>`;
   const y=NOW.getFullYear(), sy=NOW.getMonth()>=6?y:y-1;
@@ -2149,7 +2149,8 @@ function renderChrome(){
     .filter(k=>(k!=='events'||FEAT.events)&&(k!=='roster'||FEAT.roster)&&(k!=='chat'||!!S.chatOn));
   const cur=(ui.person||MONEY.includes(ui.tab)||ui.tab==='finance'||ui.tab==='payreqs')?(kasseTab()?'kasse':'home'):((ui.lineup||ui.evDetail)?'events':ui.tab);
   const lbl=k=>k==='kasse'?'Kasse':k==='settings'?'Optionen':k==='roster'?'Team':k==='chat'?'Chat':SEC[k].label;
-  const nUnread=chatUnread(), badge=k=>k==='chat'&&nUnread&&ui.tab!=='chat'?`<span class="tbn">${nUnread>99?'99+':nUnread}</span>`:'';
+  const nUnread=chatUnread(), nPr=FEAT.money&&moneyAdmin()&&S.payreqOn?payreqs().filter(x=>x.status==='open').length:0;
+  const badge=k=>k==='chat'&&nUnread&&ui.tab!=='chat'?`<span class="tbn">${nUnread>99?'99+':nUnread}</span>`:k==='kasse'&&nPr?`<span class="tbn" aria-label="${nPr} Zahlungen zu prüfen">${nPr}</span>`:'';
   document.getElementById('tabs').innerHTML=tabs.map(k=>`<button role="tab" data-tab="${k}" aria-selected="${cur===k}">${lbl(k)}${badge(k)}</button>`).join('');
   document.getElementById('tabbar').innerHTML=(tabs.length>1?tabs:[]).map(k=>`<button data-tab="${k}" aria-selected="${cur===k}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg><span>${lbl(k)}</span>${badge(k)}</button>`).join('');
 }
@@ -2304,7 +2305,7 @@ function myShifts(upcoming){
       <span class="mt"><span class="ml">${esc(evTitle(e))}</span><span class="mv">${esc(s.name)}</span><span class="ms">${shiftTime(s)||'Uhrzeit folgt'}</span></span></button>`;}).join('')}</div>`;
 }
 function homeView(){ return homeTiles()+homeMain()+(finesOn()&&!isPublic()&&!kasseTab()&&finesList().length?'<button class="chip" data-act="finesShow" style="justify-self:start">Strafenkatalog ansehen ›</button>':''); }
-const stateTile=()=>FEAT.money&&!!myPlayer()&&!(moneyAdmin()&&S.payreqOn);
+const stateTile=()=>FEAT.money&&!!myPlayer();
 function homeTiles(){
   if(isPublic()) return '';
   const T=[], mp=myPlayer();
@@ -2312,8 +2313,9 @@ function homeTiles(){
   if(news.length||boardWrite()) T.push({k:'news',lb:'Pinnwand',big:String(news.length),sub:news.length===1?'Beitrag':'Beiträge',badge:nNew?nNew+' neu':'',c:secHex('drinks')});
   if(FEAT.events){ const open=tpolls().filter(x=>x.open), mine=mp?open.filter(x=>(x.votes||{})[mp]==null).length:0;
     if(open.length||mp||isAdmin()) T.push({k:'poll',lb:'Umfrage',big:String(open.length),sub:mine?'offen · du fehlst':'offen',badge:mine?(mine>1?mine+' neu':'neu'):'',c:'var(--ev,#0F8580)'}); }
-  if(moneyAdmin()&&S.payreqOn&&FEAT.money){ const n=payreqs().filter(x=>x.status==='open').length; T.push({k:'pay',lb:'Zahlung',big:String(n),sub:'zu prüfen',badge:n?String(n):'',c:secHex('misc')}); }
-  else if(stateTile()){ const yr=yearMonths(NOW.getFullYear()), o=r2(MONEY.reduce((a,k)=>a+calc(k,mp,yr).open,0)); T.push({k:'pay',lb:'Dein Stand',big:o>0?eur(o):'✓',sub:o>0?'offen':'alles bezahlt',badge:'',c:secHex('misc')}); }
+  if(stateTile()){ const yr=yearMonths(NOW.getFullYear()), o=r2(MONEY.reduce((a,k)=>a+calc(k,mp,yr).open,0));
+    const rep=S.payreqOn&&payreqs().some(x=>x.p===mp&&x.status==='open');
+    T.push({k:'pay',lb:'Dein Stand',big:`<span style="color:${o>0?'var(--due)':'var(--ok)'}">${o>0?'−':'+'}${eur(o)}</span>`,sub:rep?'Zahlung gemeldet':o>0?'offen':'alles bezahlt',badge:'',c:o>0?'var(--due)':'var(--ok)'}); }
   if(!T.length) return '';
   const op=ui.homeOpen&&T.some(t=>t.k===ui.homeOpen)?ui.homeOpen:null;
   const body=op==='news'?newsBlock():op==='poll'?(tpollBlock()||'<p class="hint">Keine offenen Umfragen.</p>'):op==='pay'?(stateTile()?mineCard(yearMonths(NOW.getFullYear())):(payreqPanel()||'<div class="panel"><p class="hint">Keine gemeldeten Zahlungen.</p></div>')):'';
@@ -2353,7 +2355,7 @@ function homeMain(){
   if(ui.tab!=='kasse'){ /* Übersicht: nur das Wichtigste, Details im Reiter „Kasse“ */
     const teaser=`<button class="gesamt" data-act="goto" data-v="kasse" style="text-align:left;border:0;width:100%"><div><div class="lb">Kasse · offen ${y}</div><div class="big">${eur(gesamt)}</div></div>
       <div class="side"><div><b>${debt.length}</b> von ${S.players.length} offen</div>${nOpenPr?`<div>💶 <b>${nOpenPr}</b> zu prüfen</div>`:''}<div><b>Zur Kasse ›</b></div></div></button>`;
-    return `${stateTile()?'':mineCard(yr)}${teaser}${nextBlock(upcoming)}${myShifts(upcoming)}`;
+    return `${stateTile()?'':mineCard(yr)}${nextBlock(upcoming)}${myShifts(upcoming)}`;
   }
   const quick=[can('drinks')?'<button class="btn sm" data-act="quickDay">+ Getränketag</button>':'',finesOn()&&can('misc')?'<button class="btn sm" data-act="fineNew">+ Strafe</button>':'',
     can('misc')?'<button class="btn ghost sm" data-act="miscNew">+ Posten</button>':'',finOn()?'<button class="btn ghost sm" data-act="goto" data-v="finance">Kassenbuch</button>':''].join('');
