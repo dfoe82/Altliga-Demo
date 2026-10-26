@@ -309,7 +309,7 @@ textarea{min-height:84px;resize:vertical}
 .sq b{font-weight:700}
 .shifts{display:grid;gap:8px}
 .shift{border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:grid;gap:6px;background:var(--surface);min-width:0}
-.shift.shmine{border-color:var(--c2);box-shadow:inset 3px 0 0 var(--c2)}
+.shift.mine{border-color:var(--c2);box-shadow:inset 3px 0 0 var(--c2)}
 .shift .sh{display:flex;align-items:baseline;gap:8px;justify-content:space-between;min-width:0}
 .shift .sn{font-weight:700}
 .shift .stime{font-size:12.5px;color:var(--muted);font-weight:600;white-space:nowrap}
@@ -564,7 +564,7 @@ table.grid{border-collapse:separate;border-spacing:0;font-size:13.5px;width:100%
 .nitem.imp{border-left-color:#C8102E!important;background:#FFF1F2}
 .impinfo{font-size:13px;color:#B3261E;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
 .impopts{display:grid;gap:8px;border-left:3px solid #C8102E;padding-left:10px}
-.segr{position:relative;display:flex;flex:1 1 0}.segr input{position:absolute;opacity:0;pointer-events:none}
+.segr{position:relative;display:flex}.segr input{position:absolute;opacity:0;pointer-events:none}
 .segr span{flex:1;text-align:center;padding:9px 6px;border-radius:6px;font-weight:700;color:var(--ink);cursor:pointer}
 .segr input:checked+span{background:var(--brand,#0E2F7A);color:#fff}.segr.red input:checked+span{background:#C8102E}
 .segr input:focus-visible+span{outline:2px solid var(--brand,#0E2F7A);outline-offset:2px}
@@ -578,15 +578,6 @@ table.grid{border-collapse:separate;border-spacing:0;font-size:13.5px;width:100%
 .optbody>.panel{background:none;border:0;padding:0;box-shadow:none}
 .optbody>.panel>h2,.optbody>.panel>.row>h2{font-size:17px}
 .optbody>.panel:only-child>h2{display:none}
-.impbig .iti{font-family:var(--display);font-size:22px;line-height:1.1;text-transform:uppercase}
-.impbig .it{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.impbig .iact{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.impbig .iact .btn.ghost{background:#ffffff26;color:#fff;border-color:#ffffff66}
-.impbig .iuntil{font-size:12px;opacity:.92}
-.nitem.akt{border-left-color:var(--c1)}
-.nti{font-weight:700;font-size:15.5px}
-.akhist{display:grid;gap:3px;font-size:12.5px;color:var(--muted);background:var(--bg);border-radius:6px;padding:8px 10px}
-.akhist b{color:var(--ink);margin-top:4px}
 </style>
 </head>
 <body>
@@ -623,7 +614,7 @@ const FIREBASE_CONFIG = {
 /* Schlüssel für Push-Nachrichten (Firebase → Projekteinstellungen → Cloud Messaging → Web-Push-Zertifikate). Leer = Push aus. */
 const FIREBASE_VAPID_KEY = "";
 const FIREBASE_VERSION = "10.12.2";
-const APP_VERSION = "1.21"; /* Version der App – steht auch im Namen der ZIP-Dateien */
+const APP_VERSION = "1.15"; /* Version der App – steht auch im Namen der ZIP-Dateien */
 
 const LIVE_MODE=false; /* Demo-Repository: läuft immer als Demo mit Beispieldaten */
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
@@ -1059,7 +1050,7 @@ function subscribeAll(){
     LIVE.chat=LIVE.chat||{}; LIVE.chat[key]=qs.docs.map(d=>{const x=d.data(); return {id:d.id,...x,ts:x.ts&&x.ts.toMillis?x.ts.toMillis():Date.now()};}); schedule();},()=>{}));
   chatSub('chat','team'); if(AUTH.admin) chatSub('chatadm','admins');
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'creact'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); (v[x.m]=v[x.m]||{})[x.p]=x.e==='down'?'down':'up';}); LIVE.creact=v; schedule();},()=>{}));
-  LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'nreads'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); (v[x.n]=v[x.n]||{})[x.p]=x.ts||true;}); LIVE.nreads=v; schedule();},()=>{}));
+  LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'nreads'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); (v[x.n]=v[x.n]||{})[x.p]=true;}); LIVE.nreads=v; schedule();},()=>{}));
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'nlikes'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); (v[x.n]=v[x.n]||{})[x.p]=true;}); LIVE.nlikes=v; schedule();},err));
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'polls'),qs=>{LIVE.polls=qs.docs.map(d=>{const x=d.data(); return {id:d.id,...x,ts:x.ts&&x.ts.toMillis?x.ts.toMillis():Date.now()};}); schedule();},err));
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'pvotes'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); (v[x.q]=v[x.q]||{})[x.p]=x.i;}); LIVE.pvotes=v; schedule();},err));
@@ -1577,7 +1568,7 @@ function myPayreqs(pid){
 }
 function payreqNewBody(){
   const pid=myPlayer(), y=yearMonths(NOW.getFullYear()), open=r2(MONEY.reduce((a,k)=>a+calc(k,pid,y).open,0));
-  return `<h2>Zahlung einreichen</h2><p class="hint">Du hast z. B. per PayPal, Überweisung oder bar bezahlt? Melde es hier – der Kassenwart prüft und verrechnet es mit deinen offenen Beträgen.</p>
+  return `<h2>Zahlung melden</h2><p class="hint">Du hast z. B. per PayPal, Überweisung oder bar bezahlt? Melde es hier – der Kassenwart prüft und verrechnet es mit deinen offenen Beträgen.</p>
     <label class="f">Betrag (€)<input type="number" id="prAmt" step="0.01" min="0.01" inputmode="decimal" value="${open>0?open.toFixed(2):''}"></label>
     <div class="f" style="font-size:12.5px;color:var(--muted);font-weight:600">Wie bezahlt?<div class="seg wide" role="group" aria-label="Zahlungsart">${['paypal','bank','cash'].map(k=>`<button type="button" data-act="prMethod" data-v="${k}" aria-pressed="${(ui.modal.method||'paypal')===k}">${PAY_METHODS[k]}</button>`).join('')}</div></div>
     <label class="f">Notiz (optional)<input type="text" id="prNote" maxlength="200" placeholder="z. B. Getränke September und Oktober"></label>`;
@@ -1905,113 +1896,41 @@ const newsList=()=>{
   return raw.map(n=>({...n,likes:lk?Object.keys(lk[n.id]||{}):(n.likes||[])})).sort((x,y)=>(!!y.pin-!!x.pin)||y.ts-x.ts);
 };
 const boardWrite=()=>isAdmin()||(S.boardOpen!==false&&!!myPlayer());
-/* ---------- Aktuelles: Mitteilungen der Admins; „Wichtig“ = roter Banner auf jeder Seite ---------- */
-const isAkt=n=>n.cat==='akt'||!!n.imp;
-const pinwand=()=>newsList().filter(n=>!isAkt(n));
-const AKT_TPL=[['Training fällt aus','Das Training heute fällt aus.','end'],['Platz gesperrt – Halle','Der Platz ist gesperrt – wir trainieren heute in der Halle.','end'],['Treffpunkt geändert','Neuer Treffpunkt: ','d1'],['Spiel abgesagt','Das Spiel ist abgesagt. Ein Nachholtermin folgt.','d2']];
-const AKT_DUR={end:'Bis Ende des Tages',d1:'1 Tag',d2:'2 Tage',d3:'3 Tage',w1:'1 Woche',date:'Bis Datum & Uhrzeit …',open:'Bis ich es beende'};
-function aktUntil(k,from,dt){ const base=from||Date.now(); if(k==='open') return 0; if(k==='date') return dt?new Date(dt).getTime():0;
-  if(k==='end'){ const d=new Date(base); d.setHours(23,59,59,0); return d.getTime(); } return base+({d1:1,d2:2,d3:3,w1:7}[k]||1)*864e5; }
-const dtLocal=ms=>{ const d=new Date(ms-new Date(ms).getTimezoneOffset()*6e4); return d.toISOString().slice(0,16); };
-const impLive=n=>!!n.imp&&(!n.impFrom||n.impFrom<=Date.now())&&(!n.impUntil||n.impUntil>Date.now());
-const impActive=impLive;
-const impPlanned=n=>!!n.imp&&+n.impFrom>Date.now();
-const aktuelles=()=>newsList().filter(isAkt).sort((a,b)=>(impLive(b)-impLive(a))||(impPlanned(b)-impPlanned(a))||b.ts-a.ts);
+/* Wichtige Nachrichten: rote Leiste auf jeder Seite, optional großer Hinweis / Fenster, bis „Gelesen“ */
 const impReads=()=>AUTH.mode==='live'?(LIVE.nreads||{}):(S.demoNreads||{});
 const impLocal=()=>{try{return JSON.parse(localStorage.getItem('mk-impread')||'[]')}catch(e){return []}};
+const impActive=n=>!!n.imp&&(!n.impUntil||n.impUntil>Date.now());
 const impIsRead=n=>{const mp=myPlayer(); return newsMine(n)||(mp?!!(impReads()[n.id]||{})[mp]:impLocal().includes(n.id));};
-const impUnread=()=>isPublic()?[]:newsList().filter(n=>impLive(n)&&!impIsRead(n)).sort((a,b)=>b.ts-a.ts);
-const impReadList=n=>Object.entries(impReads()[n.id]||{}).filter(([p])=>pById(p));
-const impReadCount=n=>impReadList(n).length;
-const aktHead=n=>n.ti?esc(n.ti):esc(n.t.split('\n')[0].slice(0,80));
-function impBanners(){
-  if(isPublic()) return '';
-  return newsList().filter(impLive).sort((a,b)=>b.ts-a.ts).map(n=>{
-    const read=impIsRead(n), nc=n.cmt?cmtCount(n.id,'news'):0;
-    if(read&&n.impAfter==='hide'&&!newsMine(n)) return '';
-    if(read) return `<button class="impbar" data-act="impOpen" data-v="${n.id}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.5"/></svg><span>${aktHead(n)}</span><b>${n.cmt?'💬 '+nc+' · ':''}›</b></button>`;
-    return `<section class="impbig" role="alert"><div class="ih"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.5"/></svg><b>Wichtig</b><small>${esc(newsAuthor(n))} · ${fmtTs(n.ts)}</small></div>
-      ${n.ti?`<div class="iti">${esc(n.ti)}</div>`:''}<div class="it">${esc(n.t)}</div>
-      <div class="iact"><button class="btn" data-act="impRead" data-v="${n.id}">Gelesen ✓</button><button class="btn ghost sm" data-act="impOpen" data-v="${n.id}">mehr</button>
-        ${n.cmt?`<button class="btn ghost sm" data-act="aktCmt" data-v="${n.id}">💬 ${nc}</button>`:''}${n.eid&&S.events.some(e=>e.id===n.eid)?`<button class="btn ghost sm" data-act="evOpen" data-v="${n.eid}">Zum Termin</button>`:''}</div>
-      <small class="iuntil">${n.impUntil?'Angezeigt bis '+fmtTs(n.impUntil):'Angezeigt, bis ein Admin sie beendet'}${isAdmin()?` · gelesen von ${impReadCount(n)} / ${S.players.length}`:''}</small></section>`;
-  }).join('');
-}
-function impModalBody(id){ const n=newsList().find(x=>x.id===id); if(!n) return '<p class="hint">Mitteilung nicht mehr vorhanden.</p>';
-  const read=impIsRead(n), nc=n.cmt?cmtCount(n.id,'news'):0;
-  return `<div class="impmodal"><div class="ih"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.5"/></svg><b>${n.imp?'Wichtige Mitteilung':'Aktuelles'}</b></div>
-    ${n.ti?`<h2 style="margin:0">${esc(n.ti)}</h2>`:''}<div class="it">${esc(n.t)}</div><p class="hint">${esc(newsAuthor(n))} · ${fmtTs(n.ts)}${n.impUntil?' · angezeigt bis '+fmtTs(n.impUntil):''}</p>
-    <div class="row tight">${read?'<span class="hint">✓ gelesen</span>':`<button type="button" class="btn" data-act="impRead" data-v="${n.id}">${n.impPopup?'Verstanden':'Gelesen ✓'}</button>`}
-      ${n.cmt?`<button type="button" class="btn ghost sm" data-act="aktCmt" data-v="${n.id}">💬 ${nc} Kommentare</button>`:''}${n.eid&&S.events.some(e=>e.id===n.eid)?`<button type="button" class="btn ghost sm" data-act="evOpen" data-v="${n.eid}">Zum Termin</button>`:''}</div></div>`; }
+const impUnread=()=>isPublic()?[]:newsList().filter(n=>impActive(n)&&!impIsRead(n)).sort((a,b)=>b.ts-a.ts);
+const impReadCount=n=>Object.keys(impReads()[n.id]||{}).filter(p=>pById(p)).length;
+const IMP_UNTIL={today:'Heute, 23:59 Uhr',tomorrow:'Morgen, 23:59 Uhr',week:'In 1 Woche',open:'Bis ich es beende'};
+function impUntilTs(k){ const d=new Date(); if(k==='open') return 0; if(k==='week') return Date.now()+7*864e5; if(k==='tomorrow') d.setDate(d.getDate()+1); d.setHours(23,59,59,0); return d.getTime(); }
+function impBar(){ const u=impUnread(); if(!u.length) return ''; if(ui.tab==='home'&&!ui.person&&u.some(x=>x.impBanner)) return ''; const n=u[0];
+  return `<button class="impbar" data-act="impOpen" data-v="${n.id}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.5"/></svg><span>Wichtig: ${esc(n.t.split('\n')[0].slice(0,80))}</span><b>${u.length>1?u.length+' · ':''}Lesen ›</b></button>`; }
+function impBanner(){ const n=impUnread().find(x=>x.impBanner); if(!n) return '';
+  return `<section class="impbig" role="alert"><div class="ih"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.5"/></svg><b>Wichtig</b><small>${esc(newsAuthor(n))} · ${fmtTs(n.ts)}</small></div>
+    <div class="it">${esc(n.t)}</div><button class="btn" data-act="impRead" data-v="${n.id}">Gelesen ✓</button></section>`; }
+function impModalBody(id){ const n=newsList().find(x=>x.id===id); if(!n) return '<p class="hint">Nachricht nicht mehr vorhanden.</p>';
+  return `<div class="impmodal"><div class="ih"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.5"/></svg><b>Wichtige Nachricht</b></div>
+    <div class="it">${esc(n.t)}</div><p class="hint">${esc(newsAuthor(n))} · ${fmtTs(n.ts)}</p>
+    <button type="button" class="btn" data-act="impRead" data-v="${n.id}">${n.impPopup?'Verstanden':'Gelesen ✓'}</button></div>`; }
 async function impMarkRead(id){
   try{ const l=impLocal(); if(!l.includes(id)){ l.push(id); localStorage.setItem('mk-impread',JSON.stringify(l.slice(-100))); } }catch(e){}
-  const mp=myPlayer(), ts=Date.now();
-  if(mp){ if(AUTH.mode==='live'){ LIVE.nreads=LIVE.nreads||{}; (LIVE.nreads[id]=LIVE.nreads[id]||{})[mp]=ts; FB.setDoc(D('nreads',`${id}_${mp}`),{n:id,p:mp,ts}).catch(e=>console.warn(e)); }
-    else { S.demoNreads=S.demoNreads||{}; (S.demoNreads[id]=S.demoNreads[id]||{})[mp]=ts; save(); } }
+  const mp=myPlayer();
+  if(mp){ if(AUTH.mode==='live'){ LIVE.nreads=LIVE.nreads||{}; (LIVE.nreads[id]=LIVE.nreads[id]||{})[mp]=true; FB.setDoc(D('nreads',`${id}_${mp}`),{n:id,p:mp}).catch(e=>console.warn(e)); }
+    else { S.demoNreads=S.demoNreads||{}; (S.demoNreads[id]=S.demoNreads[id]||{})[mp]=true; save(); } }
   if(ui.modal&&ui.modal.kind==='imp'){ ui.modal=null; renderModal(); } render();
 }
 async function impRemind(id){
-  if(!isAdmin()) return; const n=newsList().find(x=>x.id===id);
-  if(AUTH.mode==='live'){ try{ await FB.addDoc(FB.collection(FB.db,'nremind'),{n:id,a:me().uid,ts:FB.serverTimestamp()}); }catch(e){ return toast('Erinnern fehlgeschlagen'); } }
-  if(n) await aktUpdate(n,{},'an alle erinnert, die noch nicht gelesen haben');
-  toast(AUTH.mode==='live'?'Erinnerung an alle verschickt, die noch nicht gelesen haben':'Demo: Erinnerung würde per Push an alle gehen, die noch nicht gelesen haben');
-}
-/* Änderung mit Verlauf (wer, wann, was) – zusätzlich im Änderungsprotokoll */
-async function aktUpdate(n,patch,what){
-  const hist=[...(n.hist||[]),{ts:Date.now(),by:(me()||{}).name||'Admin',w:what}].slice(-40);
-  if(AUTH.mode==='live'){ try{ await FB.updateDoc(D('news',n.id),{...patch,hist}); }catch(e){ console.warn(e); toast('Keine Berechtigung'); return false; } }
-  else { const d=(S.demoNews||[]).find(x=>x.id===n.id); if(d) Object.assign(d,patch,{hist}); save(); }
-  logAction(`Aktuelles „${(n.ti||n.t).slice(0,40)}“: ${what}`); render(); return true;
-}
-async function impEnd(id){ const n=newsList().find(x=>x.id===id); if(!n||!isAdmin()) return; if(await aktUpdate(n,{impUntil:Date.now()-1000},'Banner beendet')) toast('Banner beendet – die Mitteilung bleibt unter Aktuelles'); }
-async function aktExtend(id){ const n=newsList().find(x=>x.id===id); if(!n||!isAdmin()) return; const u=Math.max(+n.impUntil||Date.now(),Date.now())+864e5;
-  if(await aktUpdate(n,{imp:true,impUntil:u},'verlängert bis '+fmtTs(u))) toast('Verlängert bis '+fmtTs(u)); }
-function aktHistHtml(n){
-  const reads=impReadList(n).sort((a,b)=>(+b[1]||0)-(+a[1]||0)), done=new Set(reads.map(r=>r[0])), open=sorted().filter(p=>!done.has(p.id));
-  return `<div class="akhist"><b>Verlauf</b>${(n.hist||[{ts:n.ts,by:newsAuthor(n),w:'erstellt'}]).map(h=>`<div>${fmtTs(h.ts)} · ${esc(h.by)}: ${esc(h.w)}</div>`).join('')}
-    ${n.imp?`<b>Gelesen (${reads.length} / ${S.players.length})</b><div>${reads.map(([p,t])=>`${esc(pname(p))}${+t>1?' '+fmtTs(+t).replace(/^\d+\.\d+\.\d+, /,''):''}`).join(' · ')||'–'}</div>
-    ${open.length?`<b>Noch offen</b><div>${open.map(p=>esc(p.name)).join(' · ')}</div>`:''}`:''}</div>`;
-}
-function aktForm(){
-  const p=ui.newsPre||{}, ev=S.events.filter(e=>e.date>=TODAY).sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||''))).slice(0,25);
-  return `<div class="panel form nobar"><h2>Neue Mitteilung</h2>
-    <div class="row tight"><span class="hint">Vorlage:</span>${AKT_TPL.map((x,i)=>`<button type="button" class="chip" data-act="aktTpl" data-v="${i}">${x[0]}</button>`).join('')}</div>
-    <label class="f">Überschrift<input type="text" id="aktTi" maxlength="80" value="${esc(p.ti||'')}" placeholder="z. B. Training fällt aus"></label>
-    <label class="f">Text<textarea id="newsText" maxlength="500" placeholder="Was alle wissen müssen">${esc(p.t||'')}</textarea></label>
-    <div class="f" style="font-size:12.5px;color:var(--muted);font-weight:600">Stufe<div class="seg wide" role="radiogroup" aria-label="Stufe">
-      <label class="segr"><input type="radio" name="aktLvl" value="info" ${p.lvl==='imp'?'':'checked'}><span>Info</span></label><label class="segr red"><input type="radio" name="aktLvl" value="imp" ${p.lvl==='imp'?'checked':''}><span>Wichtig – roter Banner</span></label></div></div>
-    <div id="impOpts" class="impopts" ${p.lvl==='imp'?'':'hidden'}>
-      <div class="row" style="flex-wrap:wrap">
-        <label class="f" style="flex:1 1 160px">Banner anzeigen<select id="aktDur">${Object.entries(AKT_DUR).map(([k,l])=>`<option value="${k}" ${(p.dur||'end')===k?'selected':''}>${l}</option>`).join('')}</select></label>
-        <label class="f" style="flex:1 1 160px" id="aktUntilBox" ${p.dur==='date'?'':'hidden'}>Bis<input type="datetime-local" id="aktUntilDt" value="${p.until?dtLocal(p.until):''}"></label></div>
-      <div class="row" style="flex-wrap:wrap">
-        <label class="f" style="flex:1 1 160px">Start<select id="aktStart"><option value="now">Sofort</option><option value="later">Später …</option></select></label>
-        <label class="f" style="flex:1 1 160px" id="aktFromBox" hidden>Ab<input type="datetime-local" id="aktFrom"></label></div>
-      <div class="f" style="font-size:12.5px;color:var(--muted);font-weight:600">Nach „Gelesen“<div class="seg wide" role="radiogroup" aria-label="Nach Gelesen">
-        <label class="segr"><input type="radio" name="aktAfter" value="shrink" checked><span>schmale Zeile bleibt</span></label><label class="segr"><input type="radio" name="aktAfter" value="hide"><span>ganz ausblenden</span></label></div></div>
-      <label class="check"><input type="checkbox" id="impPopup"> Zusätzlich als Fenster beim Öffnen (muss bestätigt werden)</label>
-      <label class="check"><input type="checkbox" id="impPushAll" checked> Push an alle – auch an die, die Pinnwand-Nachrichten abgeschaltet haben</label>
-    </div>
-    <label class="check"><input type="checkbox" id="aktCmt" ${p.cmt?'checked':''}> Kommentare erlauben</label>
-    ${ev.length?`<label class="f">Mit Termin verknüpfen (optional)<select id="aktEid"><option value="">– kein Termin –</option>${ev.map(e=>`<option value="${e.id}" ${p.eid===e.id?'selected':''}>${fmtShort(e.date)} · ${esc(evTitle(e))}</option>`).join('')}</select></label>`:''}
-    <div class="row"><button class="btn" data-act="aktSend">Veröffentlichen</button><button class="btn ghost" data-act="newsCancel">Abbrechen</button></div></div>`;
-}
-async function sendAkt(){
   if(!isAdmin()) return;
-  const g=id=>(document.getElementById(id)||{}), t=(g('newsText').value||'').trim().slice(0,500), ti=(g('aktTi').value||'').trim().slice(0,80);
-  if(!t&&!ti) return toast('Bitte Überschrift oder Text eingeben');
-  const imp=((document.querySelector('input[name="aktLvl"]:checked')||{}).value)==='imp';
-  const from=imp&&g('aktStart').value==='later'&&g('aktFrom').value?new Date(g('aktFrom').value).getTime():0;
-  const until=imp?aktUntil(g('aktDur').value||'end',from,g('aktUntilDt').value):0;
-  if(imp&&g('aktDur').value==='date'&&!until) return toast('Bitte Datum und Uhrzeit für das Ende wählen');
-  if(imp&&until&&until<=(from||Date.now())) return toast('Das Ende liegt vor dem Start');
-  const a=me(), d={cat:'akt',t:t||ti,a:a.uid,an:a.name,...(ti?{ti}:{}),...(g('aktCmt').checked?{cmt:true}:{}),...(g('aktEid').value?{eid:g('aktEid').value}:{}),
-    ...(imp?{imp:true,impUntil:until,...(from?{impFrom:from}:{}),impAfter:(document.querySelector('input[name="aktAfter"]:checked')||{}).value==='hide'?'hide':'shrink',impPopup:!!g('impPopup').checked,impPushAll:!!g('impPushAll').checked}:{}),
-    hist:[{ts:Date.now(),by:a.name,w:imp?`erstellt – Banner ${from?'ab '+fmtTs(from)+' ':''}${until?'bis '+fmtTs(until):'bis zum Beenden'}`:'erstellt'}]};
-  if(AUTH.mode==='live'){ try{ await FB.addDoc(FB.collection(FB.db,'news'),{...d,ts:FB.serverTimestamp()}); }catch(e){ console.warn(e); return toast('Veröffentlichen fehlgeschlagen'); } }
-  else { S.demoNews=S.demoNews||[]; S.demoNews.push({id:uid(),...d,ts:Date.now(),likes:[]}); save(); }
-  logAction(`Aktuelles „${(ti||t).slice(0,40)}“ veröffentlicht${imp?' (wichtig)':''}`);
-  ui.newsForm=false; ui.newsPre=null; ui.newsTab='akt'; render(); toast(imp?(from?'Geplant – der Banner erscheint ab '+fmtTs(from):'Banner ist jetzt für alle sichtbar'):'Mitteilung veröffentlicht');
+  if(AUTH.mode==='live'){ try{ await FB.addDoc(FB.collection(FB.db,'nremind'),{n:id,a:me().uid,ts:FB.serverTimestamp()}); toast('Erinnerung an alle verschickt, die noch nicht gelesen haben'); }catch(e){ toast('Erinnern fehlgeschlagen'); } }
+  else toast('Demo: Erinnerung würde per Push an alle gehen, die noch nicht gelesen haben');
+}
+async function impEnd(id){
+  if(!isAdmin()) return;
+  if(AUTH.mode==='live'){ try{ await FB.updateDoc(D('news',id),{imp:false}); }catch(e){ return toast('Keine Berechtigung'); } }
+  else { const d=(S.demoNews||[]).find(x=>x.id===id); if(d) d.imp=false; save(); render(); }
+  toast('Nicht mehr als wichtig markiert');
 }
 const newsMine=n=>{const a=myAuthor(); return !!a&&((n.p&&a.p===n.p&&!isAdmin())||(n.a&&a.a===n.a));};
 const newsAuthor=n=>n.p?pname(n.p):(n.an||'Admin');
@@ -2019,40 +1938,35 @@ function newsItem(n){
   if(ui.newsDel===n.id) return `<div class="nitem">${confirmBoxNews(n)}</div>`;
   const mp=myPlayer(), liked=!!mp&&n.likes.includes(mp), nc=cmtCount(n.id,'news'), open=ui.newsOpen===n.id;
   const canDel=isAdmin()||newsMine(n);
-  const akt=isAkt(n), imp=impLive(n), plan=impPlanned(n), isNew=ui.newsSeenPrev!=null&&n.ts>ui.newsSeenPrev&&!newsMine(n);
-  const st=!akt?'':imp?`<b>🔴 Wichtig</b> · Banner ${n.impUntil?'bis '+fmtTs(n.impUntil):'bis zum Beenden'}`:plan?`<b>⏱ Geplant</b> · Banner ab ${fmtTs(n.impFrom)}`:n.imp?`<span style="color:var(--muted)">Banner abgelaufen ${n.impUntil?fmtTs(n.impUntil):''}</span>`:'<span style="color:var(--muted)">Info</span>';
-  const tools=akt&&isAdmin()?`${n.imp?`<button class="edit" data-act="aktExtend" data-v="${n.id}">+1 Tag</button>`:''}${imp||plan?`<button class="edit" data-act="impEnd" data-v="${n.id}">Beenden</button>`:''}<button class="edit" data-act="aktEdit" data-v="${n.id}">Bearbeiten</button>${imp?`<button class="edit" data-act="impRemind" data-v="${n.id}">Erinnern</button>`:''}<button class="edit" data-act="aktHist" data-v="${n.id}" aria-expanded="${ui.histOpen===n.id}">Verlauf</button>`:'';
-  const impInfo=akt?`<div class="impinfo">${st}${n.imp&&!isAdmin()&&imp?(impIsRead(n)?' · gelesen ✓':` · <button class="edit" data-act="impRead" data-v="${n.id}">Gelesen ✓</button>`):''}${n.imp&&isAdmin()?` · gelesen ${impReadCount(n)} / ${S.players.length}`:''}${n.edited?' · bearbeitet':''}</div>${tools?`<div class="row tight">${tools}</div>`:''}${ui.histOpen===n.id&&isAdmin()?aktHistHtml(n):''}`:'';
-  return `<div class="nitem ${n.pin&&!akt?'pin':''} ${imp?'imp':''} ${akt?'akt':''}" id="n-${n.id}">${impInfo}${akt&&n.ti?`<div class="nti">${esc(n.ti)}</div>`:''}<div class="who"><span>${isNew?'<span class="newdot">neu</span> ':''}${n.pin&&!akt?'📌 ':''}${esc(newsAuthor(n))}${n.a?' <span class="badge">Admin</span>':''}</span>
+  const imp=impActive(n), isNew=ui.newsSeenPrev!=null&&n.ts>ui.newsSeenPrev&&!newsMine(n);
+  const impInfo=imp?`<div class="impinfo"><b>⚠ Wichtig</b>${n.impUntil?' bis '+fmtTs(n.impUntil):''}${isAdmin()?` · gelesen von ${impReadCount(n)} / ${S.players.length} <button class="edit" data-act="impRemind" data-v="${n.id}">Erinnern</button><button class="edit" data-act="impEnd" data-v="${n.id}">Beenden</button>`:(impIsRead(n)?' · gelesen ✓':` · <button class="edit" data-act="impRead" data-v="${n.id}">Gelesen ✓</button>`)}</div>`:'';
+  return `<div class="nitem ${n.pin?'pin':''} ${imp?'imp':''}">${impInfo}<div class="who"><span>${isNew?'<span class="newdot">neu</span> ':''}${n.pin&&!imp?'📌 ':''}${esc(newsAuthor(n))}${n.a?' <span class="badge">Admin</span>':''}</span>
       <span class="row tight"><small>${fmtTs(n.ts)}</small>${canDel?`<button class="x" data-act="newsDel" data-v="${n.id}" aria-label="Beitrag löschen">×</button>`:''}</span></div>
     <div class="tx">${esc(n.t)}</div>
     <div class="nact"><button class="chip ${liked?'on':''}" data-act="newsLike" data-v="${n.id}" aria-pressed="${liked}">👍 ${n.likes.length||''}</button>
-      ${!akt||n.cmt?`<button class="chip" data-act="newsCmt" data-v="${n.id}" aria-expanded="${open}">💬 ${open?'ausblenden':nc===1?'1 Kommentar':nc?nc+' Kommentare':'Kommentieren'}</button>`:''}
-      ${isAdmin()&&!akt?`<button class="edit" data-act="newsPin" data-v="${n.id}">${n.pin?'Lösen':'Anheften'}</button>`:''}${akt&&n.eid&&S.events.some(e=>e.id===n.eid)?`<button class="edit" data-act="evOpen" data-v="${n.eid}">Zum Termin</button>`:''}</div>
-    ${open&&(!akt||n.cmt)?commentsBlock(n,'news'):''}</div>`;
+      <button class="chip" data-act="newsCmt" data-v="${n.id}" aria-expanded="${open}">💬 ${open?'ausblenden':nc===1?'1 Kommentar':nc?nc+' Kommentare':'Kommentieren'}</button>
+      ${isAdmin()?`<button class="edit" data-act="newsPin" data-v="${n.id}">${n.pin?'Lösen':'Anheften'}</button>`:''}</div>
+    ${open?commentsBlock(n,'news'):''}</div>`;
 }
 function newsBlock(){
   if(isPublic()) return '';
-  const akt=aktuelles(), all=pinwand(), pinned=all.filter(n=>n.pin), rest=all.filter(n=>!n.pin);
-  const tab=ui.newsTab||(akt.some(n=>impLive(n)||Date.now()-n.ts<14*864e5)?'akt':'pin');
-  const nw=l=>ui.newsSeenPrev!=null?l.filter(n=>n.ts>ui.newsSeenPrev&&!newsMine(n)).length:0;
-  const tabs=`<div class="seg wide" role="tablist" aria-label="Pinnwand"><button role="tab" data-act="newsTab" data-v="akt" aria-pressed="${tab==='akt'}">Aktuelles ${akt.length?`(${akt.length})`:''}${nw(akt)?' <span class="newdot">'+nw(akt)+'</span>':''}</button><button role="tab" data-act="newsTab" data-v="pin" aria-pressed="${tab==='pin'}">Pinnwand ${all.length?`(${all.length})`:''}${nw(all)?' <span class="newdot">'+nw(all)+'</span>':''}</button></div>`;
-  if(tab==='akt'){
-    const shown=ui.allNews?akt:akt.filter((n,i)=>impLive(n)||impPlanned(n)||i<5), hidden=akt.length-shown.length;
-    return `<div class="hd">Aktuelles ${isAdmin()&&!ui.newsForm?'<button class="chip" data-act="aktNew" style="font-family:var(--body);text-transform:none;letter-spacing:0">+ Mitteilung</button>':''}</div>${tabs}
-      ${ui.newsForm&&isAdmin()?aktForm():''}
-      ${shown.length?`<div class="news">${shown.map(newsItem).join('')}</div>`:'<p class="hint" style="margin:0">Hier stehen Mitteilungen von Vorstand, Trainer und Kassenwart. Wichtige erscheinen zusätzlich als roter Banner auf jeder Seite.</p>'}
-      ${hidden>0||(ui.allNews&&akt.length>5)?`<button class="chip" data-act="newsAll" style="justify-self:start">${ui.allNews?'Weniger anzeigen':`Ältere Mitteilungen (${hidden})`}</button>`:''}`;
-  }
+  const all=newsList(), pinned=all.filter(n=>n.pin), rest=all.filter(n=>!n.pin);
   const recent=rest.filter(n=>Date.now()-n.ts<30*864e5).slice(0,pinned.length?1:2);
   const shown=[...pinned,...(ui.allNews?rest:recent)], hidden=rest.length-(ui.allNews?rest.length:recent.length);
   const canW=boardWrite();
-  const form=ui.newsForm&&canW?`<div class="panel form nobar"><h2>Neuer Beitrag</h2>
-      <p class="hint">Erscheint auf der Pinnwand. Wer Benachrichtigungen aktiviert hat, bekommt eine Nachricht.${isAdmin()?' Für offizielle Mitteilungen oder einen roten Banner den Reiter „Aktuelles“ nehmen.':''}</p>
-      <label class="f">Text<textarea id="newsText" maxlength="500" placeholder="z. B. Suche Mitfahrgelegenheit zum Auswärtsspiel am Samstag."></textarea></label>
-      ${isAdmin()?'<label class="check"><input type="checkbox" id="newsPin"> Oben anheften</label>':''}
+  if(!shown.length&&!canW) return '';
+  const form=ui.newsForm&&canW?`<div class="panel form nobar"><h2>${isAdmin()?'Beitrag / Nachricht an alle':'Neuer Beitrag'}</h2>
+      <p class="hint">Erscheint auf der Pinnwand. Wer Benachrichtigungen aktiviert hat, bekommt eine Nachricht.</p>
+      <label class="f">Text<textarea id="newsText" maxlength="500" placeholder="${isAdmin()?'z. B. Training fällt heute wegen Platzsperre aus.':'z. B. Suche Mitfahrgelegenheit zum Auswärtsspiel am Samstag.'}"></textarea></label>
+      ${isAdmin()?`<div class="f" style="font-size:12.5px;color:var(--muted);font-weight:600">Wie wichtig?<div class="seg wide" role="radiogroup" aria-label="Stufe">${[['norm','Normal'],['pin','Angeheftet'],['imp','Wichtig']].map(([k,l])=>`<label class="segr ${k==='imp'?'red':''}"><input type="radio" name="newsLvl" value="${k}" ${k==='norm'?'checked':''}><span>${l}</span></label>`).join('')}</div></div>
+      <div id="impOpts" class="impopts" hidden>
+        <label class="check"><input type="checkbox" id="impBanner"> Zusätzlich großer roter Hinweis auf der Übersicht</label>
+        <label class="check"><input type="checkbox" id="impPopup"> Zusätzlich als Fenster beim Öffnen der App (muss bestätigt werden)</label>
+        <label class="check"><input type="checkbox" id="impPushAll" checked> Push an alle – auch an die, die Pinnwand-Nachrichten abgeschaltet haben</label>
+        <label class="f" style="max-width:260px">Wichtig bis<select id="impUntil">${Object.entries(IMP_UNTIL).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select></label>
+        <p class="hint">Alle sehen oben auf jeder Seite eine rote Leiste, bis sie „Gelesen“ tippen. Du siehst, wer schon gelesen hat.</p></div>`:''}
       <div class="row"><button class="btn" data-act="newsSend">Veröffentlichen</button><button class="btn ghost" data-act="newsCancel">Abbrechen</button></div></div>`:'';
-  return `<div class="hd">Pinnwand ${canW&&!ui.newsForm?'<button class="chip" data-act="newsNew" style="font-family:var(--body);text-transform:none;letter-spacing:0">+ Beitrag</button>':''}</div>${tabs}
+  return `<div class="hd">Pinnwand ${canW&&!ui.newsForm?'<button class="chip" data-act="newsNew" style="font-family:var(--body);text-transform:none;letter-spacing:0">+ Beitrag</button>':''}</div>
     ${form}${shown.length?`<div class="news">${shown.map(newsItem).join('')}</div>`:(canW&&!ui.newsForm?'<p class="hint" style="margin:0">Noch keine Beiträge. Hier steht, was alle wissen sollen – und nicht im Chat untergehen soll.</p>':'')}
     ${hidden>0||ui.allNews?`<button class="chip" data-act="newsAll" style="justify-self:start">${ui.allNews?'Weniger anzeigen':`Weitere Beiträge (${hidden})`}</button>`:''}`;
 }
@@ -2060,7 +1974,9 @@ const confirmBoxNews=n=>`<div class="row tight">Beitrag löschen? <button class=
 async function sendNews(){
   const ta=document.getElementById('newsText'), t=(ta&&ta.value||'').trim().slice(0,500); if(!t) return toast('Bitte einen Text eingeben');
   if(!boardWrite()) return toast('Zum Schreiben deinen persönlichen Spieler-Link öffnen');
-  const a=me(), asAdmin=isAdmin(), pin=asAdmin&&!!(document.getElementById('newsPin')||{}).checked, impF={};
+  const a=me(), asAdmin=isAdmin(), lvl=asAdmin?((document.querySelector('input[name="newsLvl"]:checked')||{}).value||'norm'):'norm', pin=lvl!=='norm';
+  const chk=id=>!!(document.getElementById(id)||{}).checked;
+  const impF=lvl==='imp'?{imp:true,impUntil:impUntilTs((document.getElementById('impUntil')||{}).value||'today'),impBanner:chk('impBanner'),impPopup:chk('impPopup'),impPushAll:chk('impPushAll')}:{};
   const who=asAdmin?{a:a.uid,an:a.name}:{p:myPlayer()};
   if(AUTH.mode==='live'){
     try{ await FB.addDoc(FB.collection(FB.db,'news'),{t,ts:FB.serverTimestamp(),...who,...(pin?{pin:true}:{}),...impF}); if(asAdmin) logAction(impF.imp?'Wichtige Nachricht veröffentlicht':'Pinnwand-Beitrag veröffentlicht'); }
@@ -2129,7 +2045,7 @@ function renderChrome(){
   applyTheme();
   const yr=yearMonths(NOW.getFullYear());
   const gated=AUTH.mode==='live'&&(!AUTH.ready||AUTH.gate);
-  document.getElementById('score').innerHTML=gated||!seeAllAmounts()||!FEAT.money||!(ui.tab==='kasse'||MONEY.includes(ui.tab)||ui.tab==='finance'||ui.tab==='payreqs'||ui.person)?'':visSecs().map(s=>`<div><b>${eur(totalOpen(s,yr))}</b><span>${SEC[s].short} offen</span></div>`).join('');
+  document.getElementById('score').innerHTML=gated||!seeAllAmounts()||!FEAT.money?'':visSecs().map(s=>`<div><b>${eur(totalOpen(s,yr))}</b><span>${SEC[s].short} offen</span></div>`).join('');
   const words=(S.teamName||'Unsere Mannschaft').trim().split(/\s+/);
   document.getElementById('teamName').innerHTML=words.length>1?`${esc(words.slice(0,-1).join(' '))} <em>${esc(words[words.length-1])}</em>`:`<em>${esc(words[0])}</em>`;
   const y=NOW.getFullYear(), sy=NOW.getMonth()>=6?y:y-1;
@@ -2149,8 +2065,7 @@ function renderChrome(){
     .filter(k=>(k!=='events'||FEAT.events)&&(k!=='roster'||FEAT.roster)&&(k!=='chat'||!!S.chatOn));
   const cur=(ui.person||MONEY.includes(ui.tab)||ui.tab==='finance'||ui.tab==='payreqs')?(kasseTab()?'kasse':'home'):((ui.lineup||ui.evDetail)?'events':ui.tab);
   const lbl=k=>k==='kasse'?'Kasse':k==='settings'?'Optionen':k==='roster'?'Team':k==='chat'?'Chat':SEC[k].label;
-  const nUnread=chatUnread(), nPr=FEAT.money&&moneyAdmin()&&S.payreqOn?payreqs().filter(x=>x.status==='open').length:0;
-  const badge=k=>k==='chat'&&nUnread&&ui.tab!=='chat'?`<span class="tbn">${nUnread>99?'99+':nUnread}</span>`:k==='kasse'&&nPr?`<span class="tbn" aria-label="${nPr} Zahlungen zu prüfen">${nPr}</span>`:'';
+  const nUnread=chatUnread(), badge=k=>k==='chat'&&nUnread&&ui.tab!=='chat'?`<span class="tbn">${nUnread>99?'99+':nUnread}</span>`:'';
   document.getElementById('tabs').innerHTML=tabs.map(k=>`<button role="tab" data-tab="${k}" aria-selected="${cur===k}">${lbl(k)}${badge(k)}</button>`).join('');
   document.getElementById('tabbar').innerHTML=(tabs.length>1?tabs:[]).map(k=>`<button data-tab="${k}" aria-selected="${cur===k}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg><span>${lbl(k)}</span>${badge(k)}</button>`).join('');
 }
@@ -2304,18 +2219,17 @@ function myShifts(upcoming){
     return `<button class="mini evt" data-act="shiftsOpen" data-v="${e.id}"><span class="md"><b>${+d}</b><i>${wd(e.date)} · ${MONTHS[+m-1].slice(0,3)}</i></span>
       <span class="mt"><span class="ml">${esc(evTitle(e))}</span><span class="mv">${esc(s.name)}</span><span class="ms">${shiftTime(s)||'Uhrzeit folgt'}</span></span></button>`;}).join('')}</div>`;
 }
-function homeView(){ return homeTiles()+homeMain()+(finesOn()&&!isPublic()&&!kasseTab()&&finesList().length?'<button class="chip" data-act="finesShow" style="justify-self:start">Strafenkatalog ansehen ›</button>':''); }
-const stateTile=()=>FEAT.money&&!!myPlayer();
+function homeView(){ return impBanner()+homeTiles()+homeMain()+(finesOn()&&!isPublic()&&!kasseTab()&&finesList().length?'<button class="chip" data-act="finesShow" style="justify-self:start">Strafenkatalog ansehen ›</button>':''); }
+const stateTile=()=>FEAT.money&&!!myPlayer()&&!(moneyAdmin()&&S.payreqOn);
 function homeTiles(){
   if(isPublic()) return '';
   const T=[], mp=myPlayer();
-  const news=newsList(), seen=+(ls.get('mk-seen-news')||0), nNew=news.filter(n=>n.ts>seen&&!newsMine(n)&&!impPlanned(n)).length;
+  const news=newsList(), seen=+(ls.get('mk-seen-news')||0), nNew=news.filter(n=>n.ts>seen&&!newsMine(n)).length;
   if(news.length||boardWrite()) T.push({k:'news',lb:'Pinnwand',big:String(news.length),sub:news.length===1?'Beitrag':'Beiträge',badge:nNew?nNew+' neu':'',c:secHex('drinks')});
   if(FEAT.events){ const open=tpolls().filter(x=>x.open), mine=mp?open.filter(x=>(x.votes||{})[mp]==null).length:0;
     if(open.length||mp||isAdmin()) T.push({k:'poll',lb:'Umfrage',big:String(open.length),sub:mine?'offen · du fehlst':'offen',badge:mine?(mine>1?mine+' neu':'neu'):'',c:'var(--ev,#0F8580)'}); }
-  if(stateTile()){ const yr=yearMonths(NOW.getFullYear()), o=r2(MONEY.reduce((a,k)=>a+calc(k,mp,yr).open,0));
-    const rep=S.payreqOn&&payreqs().some(x=>x.p===mp&&x.status==='open');
-    T.push({k:'pay',lb:'Dein Stand',big:`<span style="color:${o>0?'var(--due)':'var(--ok)'}">${o>0?'−':'+'}${eur(o)}</span>`,sub:rep?'Zahlung gemeldet':o>0?'offen':'alles bezahlt',badge:'',c:o>0?'var(--due)':'var(--ok)'}); }
+  if(moneyAdmin()&&S.payreqOn&&FEAT.money){ const n=payreqs().filter(x=>x.status==='open').length; T.push({k:'pay',lb:'Zahlung',big:String(n),sub:'zu prüfen',badge:n?String(n):'',c:secHex('misc')}); }
+  else if(stateTile()){ const yr=yearMonths(NOW.getFullYear()), o=r2(MONEY.reduce((a,k)=>a+calc(k,mp,yr).open,0)); T.push({k:'pay',lb:'Dein Stand',big:o>0?eur(o):'✓',sub:o>0?'offen':'alles bezahlt',badge:'',c:secHex('misc')}); }
   if(!T.length) return '';
   const op=ui.homeOpen&&T.some(t=>t.k===ui.homeOpen)?ui.homeOpen:null;
   const body=op==='news'?newsBlock():op==='poll'?(tpollBlock()||'<p class="hint">Keine offenen Umfragen.</p>'):op==='pay'?(stateTile()?mineCard(yearMonths(NOW.getFullYear())):(payreqPanel()||'<div class="panel"><p class="hint">Keine gemeldeten Zahlungen.</p></div>')):'';
@@ -2355,7 +2269,7 @@ function homeMain(){
   if(ui.tab!=='kasse'){ /* Übersicht: nur das Wichtigste, Details im Reiter „Kasse“ */
     const teaser=`<button class="gesamt" data-act="goto" data-v="kasse" style="text-align:left;border:0;width:100%"><div><div class="lb">Kasse · offen ${y}</div><div class="big">${eur(gesamt)}</div></div>
       <div class="side"><div><b>${debt.length}</b> von ${S.players.length} offen</div>${nOpenPr?`<div>💶 <b>${nOpenPr}</b> zu prüfen</div>`:''}<div><b>Zur Kasse ›</b></div></div></button>`;
-    return `${stateTile()?'':mineCard(yr)}${nextBlock(upcoming)}${myShifts(upcoming)}`;
+    return `${stateTile()?'':mineCard(yr)}${teaser}${nextBlock(upcoming)}${myShifts(upcoming)}`;
   }
   const quick=[can('drinks')?'<button class="btn sm" data-act="quickDay">+ Getränketag</button>':'',finesOn()&&can('misc')?'<button class="btn sm" data-act="fineNew">+ Strafe</button>':'',
     can('misc')?'<button class="btn ghost sm" data-act="miscNew">+ Posten</button>':'',finOn()?'<button class="btn ghost sm" data-act="goto" data-v="finance">Kassenbuch</button>':''].join('');
@@ -2411,7 +2325,6 @@ function personView(){
         <button class="btn ghost" data-act="copy" data-v="${esc(url?url+'\n'+txt:txt)}">${url?'Link + Text kopieren':'Text kopieren'}</button>
         ${canAny?(ui.confirmDel==='payall'?`<button class="btn danger" data-act="payAll">Ja, als bezahlt markieren</button><button class="btn ghost" data-act="noDel">Abbrechen</button>`:`<button class="btn ghost" data-act="askDel" data-v="payall">Alles als bezahlt markieren</button>`):''}</div>
         <p class="hint">Verwendungszweck: „${esc(txt)}“</p>`:''}
-      ${p.id===myPlayer()&&S.payreqOn&&!isPublic()?`<div class="row tight"><button class="btn${total>0?'':' ghost'}" data-act="prNew">Zahlung einreichen</button><span class="hint">Schon überwiesen oder bar bezahlt? Der Kassenwart prüft und verrechnet es.</span></div>${myPayreqs(p.id)}`:''}
       ${finesOn()&&can('misc')?`<button class="btn ghost sm" data-act="fineFor" data-id="${p.id}" style="justify-self:start">Strafe eintragen</button>`:''}
     </div>
     ${secs.map(secPanel).join('')}`;
@@ -2638,7 +2551,7 @@ function shiftsPanel(e){
     else if(self&&!past){ if(selfIn) act=`<button class="btn ghost sm" data-act="shiftLeave" data-v="${s.id}">Austragen</button>`;
       else if(inIt) act='<span class="hint">Vom Orga-Team eingeteilt</span>';
       else if(!full) act=`<button class="btn sm" data-act="shiftJoin" data-v="${s.id}">Eintragen</button>`; }
-    return `<div class="shift ${inIt?'shmine':''}"><div class="sh"><span style="min-width:0"><span class="sn">${esc(s.name)}</span> <span class="stime">${shiftTime(s)}</span></span>${cap}</div>
+    return `<div class="shift ${inIt?'mine':''}"><div class="sh"><span style="min-width:0"><span class="sn">${esc(s.name)}</span> <span class="stime">${shiftTime(s)}</span></span>${cap}</div>
       <div class="who">${who.map(id=>`<span class="${id===pid?'me':''}">${esc(pname(id))}</span>`).join('')}${free}${!n&&!s.need?'<span class="free">noch niemand</span>':''}</div>
       ${act?`<div class="sact">${act}</div>`:''}</div>`;}).join('');
   return `<div class="panel" id="pnl-shifts" style="${secStyle('events')}">
@@ -3147,8 +3060,6 @@ function renderModal(){
     body=privacyBody(info)+(myPlayer()?'<button type="button" class="btn ghost sm" data-act="mydata" style="justify-self:start">Meine Daten anzeigen</button>':'')
       +(isAdmin()&&S.players.length?`<label class="f">Daten eines Spielers anzeigen (Auskunft)<select id="mdSel"><option value="">– Spieler wählen –</option>${sorted().map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select></label>`:''); submit='';
   }else if(m.kind==='imp'){ body=impModalBody(m.id); submit='';
-  }else if(m.kind==='aktEdit'){ const n=newsList().find(x=>x.id===m.id)||{t:'',ti:''}; body=`<h2>Mitteilung bearbeiten</h2><label class="f">Überschrift<input type="text" id="mTi" maxlength="80" value="${esc(n.ti||'')}"></label><label class="f">Text<textarea id="mTx" maxlength="500" style="min-height:140px">${esc(n.t)}</textarea></label><p class="hint">Die Änderung steht im Verlauf.</p>`;
-  }else if(m.kind==='aktSuggest'){ const e=S.events.find(x=>x.id===m.eid); body=`<h2>Roten Banner anlegen?</h2><p class="hint">${e?esc(evTitle(e))+' am '+fmtShort(e.date)+(e.time?', '+e.time+' Uhr':''):'Training'} fällt aus. Soll die App dazu einen roten Banner für alle anlegen – bis zum Ende des Trainings?</p><button type="button" class="btn" data-act="aktSuggestYes" data-v="${m.eid}">Banner vorbereiten</button>`; submit='';
   }else if(m.kind==='cal'){ body=calModalBody(); submit='';
   }else if(m.kind==='fines'){ body=`<h2>Strafenkatalog</h2>${finesTable()}<p class="hint">Strafen trägt der Kassenwart unter „Sonstiges“ ein; sie erscheinen dann bei deinem Stand.</p>`; submit='';
   }else if(m.kind==='mydata'){ body=myDataBody(m.pid); submit='';
@@ -3213,8 +3124,6 @@ async function submitModal(){
       if(!q) return fail('Bitte eine Frage eingeben.'); if(opts.length<2||opts.length>6) return fail('Bitte 2 bis 6 Antworten eintragen.');
       ui.modal=null; renderModal(); return chatPollCreate(q,opts); }
     if(m.kind==='prCheck'){ return payreqResolve(m,true); }
-    if(m.kind==='aktEdit'){ const n=newsList().find(x=>x.id===m.id); if(!n) return; const t=v('mTx').slice(0,500), ti=v('mTi').slice(0,80); if(!t) return fail('Bitte einen Text eingeben.');
-      ui.modal=null; renderModal(); return aktUpdate(n,{t,ti,edited:true},'Text geändert'); }
     if(m.kind==='push'){ const prefs={}; document.querySelectorAll('input[name="pPref"]').forEach(x=>prefs[x.value]=x.checked); ui.modal=null; renderModal(); return savePushPrefs(prefs); }
     if(m.kind==='demo'){ ui.demoAdmin=v('mDemo'); ui.adminView=true; ui.modal=null; renderModal(); render(); toast(`Admin-Ansicht: ${me().name}`); return; }
     if(m.kind==='login'){
@@ -3298,7 +3207,7 @@ function render(){
     const bottom=ui.view==='table'?(ui.mode==='month'?monthTable(ui.tab):yearTable(ui.tab)):listPanel(ui.tab);
     html=(ui.form?'':secHead())+top+(ui.form?'':bottom);
   }
-  v.innerHTML=bar+impBanners()+html+(ui.tab==='chat'?'':footer());
+  v.innerHTML=bar+impBar()+html+(ui.tab==='chat'?'':footer());
   { const pop=impUnread().find(n=>n.impPopup&&!(ui.impShown||(ui.impShown=new Set())).has(n.id)); if(pop&&!ui.modal){ ui.impShown.add(pop.id); ui.modal={kind:'imp',id:pop.id,force:true}; setTimeout(renderModal,0); } }
   if(ui.tab==='chat'&&S.chatOn){ chatMarkRead(); chatScroll(ui.chatFirst); ui.chatFirst=false; }
   renderChrome();
@@ -3451,7 +3360,7 @@ document.addEventListener('pointerdown',ev=>{
 });
 
 /* ---------- Bedienung ---------- */
-const READER=new Set(['impOpen','impRead','homeTile','newsTab','aktCmt','aktHist','finesShow','calOpen','calDemo','icsAll','evIcs','chatDelNo','chatDelGo','privacy','mydata','mydataSave','mydataCopy','chatSel','chatSend','chatReply','chatReplyX','chatLike','chatDel','chatMore','chatCh','chatPoll','chatImg','newsNew','newsCancel','newsSend','newsDel','newsDelNo','newsDelGo','newsLike','newsCmt','prNew','prMethod','tpNew','tpCancel','tpSave','tvote','tpClose','tpOpen','tpOld','askDel','noDel','doDel','pushModal','pushOn','pushOff','newsAll','nx','cmtDelNo','cmtDelGo','shiftsOpen','shiftJoin','shiftLeave','playersFold','evOpen','evBack','cmtSend','cmtDel','codeModal','demoPublicEnd','adminBtn','modalBg','modalClose','goto','person','back','pyPrev','pyNext','allDebtors','mode','view','onlyOpen','prev','next','copy','efilter','showPast','vote','pollNames','lineup','lineupBack','noDel','evView','statType','statAll','gateGo','reload','signOut','mStep','mResend','readMode']);
+const READER=new Set(['impOpen','impRead','homeTile','finesShow','calOpen','calDemo','icsAll','evIcs','chatDelNo','chatDelGo','privacy','mydata','mydataSave','mydataCopy','chatSel','chatSend','chatReply','chatReplyX','chatLike','chatDel','chatMore','chatCh','chatPoll','chatImg','newsNew','newsCancel','newsSend','newsDel','newsDelNo','newsDelGo','newsLike','newsCmt','prNew','prMethod','tpNew','tpCancel','tpSave','tvote','tpClose','tpOpen','tpOld','askDel','noDel','doDel','pushModal','pushOn','pushOff','newsAll','nx','cmtDelNo','cmtDelGo','shiftsOpen','shiftJoin','shiftLeave','playersFold','evOpen','evBack','cmtSend','cmtDel','codeModal','demoPublicEnd','adminBtn','modalBg','modalClose','goto','person','back','pyPrev','pyNext','allDebtors','mode','view','onlyOpen','prev','next','copy','efilter','showPast','vote','pollNames','lineup','lineupBack','noDel','evView','statType','statAll','gateGo','reload','signOut','mStep','mResend','readMode']);
 document.addEventListener('submit',ev=>{if(ev.target.id==='mForm'){ev.preventDefault();submitModal();}});
 document.addEventListener('click',async ev=>{
   const tab=ev.target.closest('[data-tab]'); if(tab){goTab(tab.dataset.tab);return;}
@@ -3609,21 +3518,7 @@ document.addEventListener('click',async ev=>{
   case 'impRead': impMarkRead(v); break;
   case 'impRemind': impRemind(v); break;
   case 'impEnd': impEnd(v); break;
-  case 'aktExtend': aktExtend(v); break;
-  case 'aktHist': ui.histOpen=ui.histOpen===v?null:v; render(); break;
-  case 'aktEdit': if(isAdmin()){ ui.modal={kind:'aktEdit',id:v}; renderModal(); } break;
-  case 'aktNew': if(isAdmin()){ ui.newsTab='akt'; ui.newsForm=true; ui.newsPre=null; render(); } break;
-  case 'aktSend': sendAkt(); break;
-  case 'newsTab': ui.newsTab=v; ui.newsForm=false; ui.allNews=false; render(); break;
-  case 'aktTpl': { const x=AKT_TPL[+v]; if(!x) return; const ti=document.getElementById('aktTi'), tx=document.getElementById('newsText'), du=document.getElementById('aktDur');
-    if(ti) ti.value=x[0]; if(tx&&!tx.value.trim()) tx.value=x[1]; const r=document.querySelector('input[name="aktLvl"][value="imp"]'); if(r) r.checked=true;
-    const o=document.getElementById('impOpts'); if(o) o.hidden=false; if(du){ du.value=x[2]; document.getElementById('aktUntilBox').hidden=true; } break; }
-  case 'aktCmt': ui.modal=null; renderModal(); ui.tab='home'; ui.person=null; ui.evDetail=null; ui.homeOpen='news'; ui.newsTab='akt'; ui.newsOpen=v; ui.allNews=true; render(); setTimeout(()=>{const el=document.getElementById('n-'+v); if(el) el.scrollIntoView({block:'start'});},30); break;
-  case 'aktSuggestYes': { const e=S.events.find(x=>x.id===v); if(!e) return; const end=new Date(e.date+'T'+(e.time||'19:00')).getTime()+90*6e4;
-    ui.newsPre={ti:'Training fällt aus',t:`Das Training am ${wd(e.date)}, ${fmtDate(e.date)}${e.time?' um '+e.time+' Uhr':''} fällt aus.`,lvl:'imp',dur:'date',until:end,eid:e.id};
-    ui.modal=null; renderModal(); ui.tab='home'; ui.evDetail=null; ui.homeOpen='news'; ui.newsTab='akt'; ui.newsForm=true; render(); toTop(); break; }
-  case 'homeTile': if(v==='pay'&&stateTile()){ ui.person=myPlayer(); ui.lineup=null; ui.py=NOW.getFullYear(); ui.confirmDel=null; ui.homeOpen=null; render(); window.scrollTo(0,0); break; }
-    if(v==='news'&&ui.homeOpen!=='news'){ ui.newsSeenPrev=+(ls.get('mk-seen-news')||0); ls.set('mk-seen-news',String(Date.now())); } ui.homeOpen=ui.homeOpen===v?null:v; render(); break;
+  case 'homeTile': if(v==='news'&&ui.homeOpen!=='news'){ ui.newsSeenPrev=+(ls.get('mk-seen-news')||0); ls.set('mk-seen-news',String(Date.now())); } ui.homeOpen=ui.homeOpen===v?null:v; render(); break;
   case 'finesShow': ui.modal={kind:'fines'}; renderModal(); break;
   case 'calOpen': ui.modal={kind:'cal'}; renderModal(); break;
   case 'calDemo': toast('Demo: Das Abo gibt es nur in der echten App'); break;
@@ -3671,7 +3566,7 @@ document.addEventListener('click',async ev=>{
   case 'evHome': ui.ev.home=v==='1'; render(); break;
   case 'evVenue': ui.ev.venue=v; render(); break;
   case 'trVenue': {const e=S.events.find(x=>x.id===v); if(!e||!can('events')) return; e.venue=b.dataset.x==='in'?'in':'out'; commit(); toast(`${fmtShort(e.date)}: Training ${e.venue==='in'?'in der Halle':'draußen'}`); break;}
-  case 'trCancel': {const e=S.events.find(x=>x.id===v); if(!e||!can('events')) return; if(e.cancel) delete e.cancel; else e.cancel=true; commit(); toast(e.cancel?`Training am ${fmtShort(e.date)} fällt aus`:`Training am ${fmtShort(e.date)} findet statt`); if(e.cancel&&isAdmin()&&e.date>=TODAY){ ui.modal={kind:'aktSuggest',eid:e.id}; renderModal(); } break;}
+  case 'trCancel': {const e=S.events.find(x=>x.id===v); if(!e||!can('events')) return; if(e.cancel) delete e.cancel; else e.cancel=true; commit(); toast(e.cancel?`Training am ${fmtShort(e.date)} fällt aus`:`Training am ${fmtShort(e.date)} findet statt`); break;}
   case 'ptype': ui.ev.ptype=v; render(); break;
   case 'editEvent': {const e=S.events.find(x=>x.id===v); if(!e||!can('events')) return; closeForm(); ui.form=true; ui.editKey=v; ui.date=e.date;
     const custom=e.poll&&!(e.poll.q===RSVPQ[e.type]&&JSON.stringify(e.poll.opts)===JSON.stringify(RSVP));
@@ -3786,9 +3681,7 @@ document.addEventListener('change',ev=>{
   if(t.id==='eUntil'){ui.ev.until=t.value; render(); return;}
   if(t.id==='eCancel'){ui.ev.cancel=t.checked; return;}
   if(t.id==='fDate'){ui.date=t.value; return;}
-  if(t.name==='aktLvl'){ const o=document.getElementById('impOpts'); if(o) o.hidden=t.value!=='imp'; return; }
-  if(t.id==='aktDur'){ const b=document.getElementById('aktUntilBox'); if(b) b.hidden=t.value!=='date'; return; }
-  if(t.id==='aktStart'){ const b=document.getElementById('aktFromBox'); if(b) b.hidden=t.value!=='later'; return; }
+  if(t.name==='newsLvl'){ const o=document.getElementById('impOpts'); if(o) o.hidden=t.value!=='imp'; return; }
   if(t.id==='mdSel'&&t.value&&isAdmin()){ ui.modal={kind:'mydata',pid:t.value}; renderModal(); return; }
   if(t.id==='chatFile'){ chatPhoto(t.files&&t.files[0]); t.value=''; return; }
   if(t.name==='prItem'&&ui.modal&&ui.modal.kind==='prCheck'){ const i=+t.value; if(t.checked) ui.modal.sel.add(i); else ui.modal.sel.delete(i); const sc=document.querySelector('.sheet').scrollTop; renderModal(); const sh=document.querySelector('.sheet'); if(sh) sh.scrollTop=sc; return; }
