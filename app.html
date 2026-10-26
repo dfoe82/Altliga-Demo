@@ -593,6 +593,16 @@ table.grid{border-collapse:separate;border-spacing:0;font-size:13.5px;width:100%
 #view .panel.form .savebar{bottom:0;border-radius:0}
 .formbg{position:fixed;inset:0;z-index:24;background:#000a}
 body.formopen{overflow:hidden}
+.ptile{display:grid;gap:8px;background:var(--surface);border:0;border-radius:10px;padding:10px 12px 12px;color:var(--ink);text-align:left;width:100%;font:inherit}
+button.ptile{cursor:pointer}
+.ptile .pth{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.ptile .pth b{letter-spacing:0;text-transform:none;font-size:12.5px;color:var(--c1)}
+.ptile .ptc{display:grid;gap:12px}
+.ptile .ptx{display:grid;gap:3px;min-width:0}
+.ptile .ptl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.ptile .ptv{font-family:var(--display);font-size:22px;line-height:1.1;white-space:nowrap}
+.ptile .ptb{display:block;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.ptile .ptb i{display:block;height:6px}
 </style>
 </head>
 <body>
@@ -629,7 +639,7 @@ const FIREBASE_CONFIG = {
 /* Schlüssel für Push-Nachrichten (Firebase → Projekteinstellungen → Cloud Messaging → Web-Push-Zertifikate). Leer = Push aus. */
 const FIREBASE_VAPID_KEY = "";
 const FIREBASE_VERSION = "10.12.2";
-const APP_VERSION = "1.25"; /* Version der App – steht auch im Namen der ZIP-Dateien */
+const APP_VERSION = "1.26"; /* Version der App – steht auch im Namen der ZIP-Dateien */
 
 const LIVE_MODE=false; /* Demo-Repository: läuft immer als Demo mit Beispieldaten */
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
@@ -2323,7 +2333,19 @@ function myShifts(upcoming){
     return `<button class="mini evt" data-act="shiftsOpen" data-v="${e.id}"><span class="md"><b>${+d}</b><i>${wd(e.date)} · ${MONTHS[+m-1].slice(0,3)}</i></span>
       <span class="mt"><span class="ml">${esc(evTitle(e))}</span><span class="mv">${esc(s.name)}</span><span class="ms">${shiftTime(s)||'Uhrzeit folgt'}</span></span></button>`;}).join('')}</div>`;
 }
-function homeView(){ return homeTiles()+homeMain()+(finesOn()&&!isPublic()&&!kasseTab()&&finesList().length?'<button class="chip" data-act="finesShow" style="justify-self:start">Strafenkatalog ansehen ›</button>':''); }
+/* Eigene Teilnahme im Auswertungszeitraum: Zusagen bei vergangenen, nicht abgesagten Terminen mit Zu-/Absage */
+function partTile(){
+  const mp=myPlayer(); if(!mp||!FEAT.events||isPublic()) return '';
+  const from=seasonStart(), cols=[['training','Training','var(--ev,#0F8580)'],['game','Spiele',secHex('drinks')],['event','Events','var(--muted)']].map(([t,l,c])=>{
+    const evs=S.events.filter(e=>e.type===t&&!e.cancel&&e.date<=TODAY&&e.date>=from&&isRsvp(e)), n=evs.length, z=evs.filter(e=>(e.poll.votes||{})[mp]===0).length;
+    return {t,l,c,n,z};}).filter(x=>x.n);
+  if(!cols.length) return '';
+  const tap=canSeeStats();
+  const inner=`<span class="pth"><span>Deine Teilnahme · ${seasonLabel()}</span>${tap?'<b>Auswertung ›</b>':''}</span>
+    <span class="ptc" style="grid-template-columns:repeat(${cols.length},minmax(0,1fr))">${cols.map(x=>`<span class="ptx"><span class="ptl">${x.l}</span><span class="ptv">${x.z} von ${x.n}</span><span class="ptb"><i style="width:${Math.round(x.z/x.n*100)}%;background:${x.c}"></i></span></span>`).join('')}</span>`;
+  return tap?`<button class="ptile" data-act="partStats">${inner}</button>`:`<div class="ptile">${inner}</div>`;
+}
+function homeView(){ return homeTiles()+partTile()+homeMain()+(finesOn()&&!isPublic()&&!kasseTab()&&finesList().length?'<button class="chip" data-act="finesShow" style="justify-self:start">Strafenkatalog ansehen ›</button>':''); }
 const stateTile=()=>FEAT.money&&!!myPlayer();
 function homeTiles(){
   if(isPublic()) return '';
@@ -3471,7 +3493,7 @@ document.addEventListener('pointerdown',ev=>{
 });
 
 /* ---------- Bedienung ---------- */
-const READER=new Set(['impOpen','impRead','homeTile','newsTab','aktCmt','aktHist','finesShow','calOpen','calDemo','icsAll','evIcs','chatDelNo','chatDelGo','privacy','mydata','mydataSave','mydataCopy','chatSel','chatSend','chatReply','chatReplyX','chatLike','chatDel','chatMore','chatCh','chatPoll','chatImg','newsNew','newsCancel','newsSend','newsDel','newsDelNo','newsDelGo','newsLike','newsCmt','prNew','prMethod','tpNew','tpCancel','tpSave','tvote','tpClose','tpOpen','tpOld','askDel','noDel','doDel','pushModal','pushOn','pushOff','newsAll','nx','cmtDelNo','cmtDelGo','shiftsOpen','shiftJoin','shiftLeave','playersFold','evOpen','evBack','cmtSend','cmtDel','codeModal','demoPublicEnd','adminBtn','modalBg','modalClose','goto','person','back','pyPrev','pyNext','allDebtors','mode','view','onlyOpen','prev','next','copy','efilter','showPast','vote','pollNames','lineup','lineupBack','noDel','evView','statType','statAll','gateGo','reload','signOut','mStep','mResend','readMode']);
+const READER=new Set(['partStats','impOpen','impRead','homeTile','newsTab','aktCmt','aktHist','finesShow','calOpen','calDemo','icsAll','evIcs','chatDelNo','chatDelGo','privacy','mydata','mydataSave','mydataCopy','chatSel','chatSend','chatReply','chatReplyX','chatLike','chatDel','chatMore','chatCh','chatPoll','chatImg','newsNew','newsCancel','newsSend','newsDel','newsDelNo','newsDelGo','newsLike','newsCmt','prNew','prMethod','tpNew','tpCancel','tpSave','tvote','tpClose','tpOpen','tpOld','askDel','noDel','doDel','pushModal','pushOn','pushOff','newsAll','nx','cmtDelNo','cmtDelGo','shiftsOpen','shiftJoin','shiftLeave','playersFold','evOpen','evBack','cmtSend','cmtDel','codeModal','demoPublicEnd','adminBtn','modalBg','modalClose','goto','person','back','pyPrev','pyNext','allDebtors','mode','view','onlyOpen','prev','next','copy','efilter','showPast','vote','pollNames','lineup','lineupBack','noDel','evView','statType','statAll','gateGo','reload','signOut','mStep','mResend','readMode']);
 document.addEventListener('submit',ev=>{if(ev.target.id==='mForm'){ev.preventDefault();submitModal();}});
 document.addEventListener('click',async ev=>{
   const tab=ev.target.closest('[data-tab]'); if(tab){goTab(tab.dataset.tab);return;}
@@ -3642,6 +3664,7 @@ document.addEventListener('click',async ev=>{
   case 'aktSuggestYes': { const e=S.events.find(x=>x.id===v); if(!e) return; const end=new Date(e.date+'T'+(e.time||'19:00')).getTime()+90*6e4;
     ui.newsPre={ti:'Training fällt aus',t:`Das Training am ${wd(e.date)}, ${fmtDate(e.date)}${e.time?' um '+e.time+' Uhr':''} fällt aus.`,lvl:'imp',dur:'date',until:end,eid:e.id};
     ui.modal=null; renderModal(); ui.tab='home'; ui.evDetail=null; ui.homeOpen='news'; ui.newsTab='akt'; ui.newsForm=true; render(); toTop(); break; }
+  case 'partStats': ui.tab='events'; ui.evView='stats'; ui.statType='training'; ui.statAll=false; ui.evDetail=null; ui.person=null; closeForm(); render(); window.scrollTo(0,0); break;
   case 'homeTile': if(v==='pay'&&stateTile()){ ui.person=myPlayer(); ui.lineup=null; ui.py=NOW.getFullYear(); ui.confirmDel=null; ui.homeOpen=null; render(); window.scrollTo(0,0); break; }
     if(v==='news'&&ui.homeOpen!=='news'){ ui.newsSeenPrev=+(ls.get('mk-seen-news')||0); ls.set('mk-seen-news',String(Date.now())); } ui.homeOpen=ui.homeOpen===v?null:v; render(); break;
   case 'finesShow': ui.modal={kind:'fines'}; renderModal(); break;
