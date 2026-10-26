@@ -623,7 +623,7 @@ const FIREBASE_CONFIG = {
 /* Schlüssel für Push-Nachrichten (Firebase → Projekteinstellungen → Cloud Messaging → Web-Push-Zertifikate). Leer = Push aus. */
 const FIREBASE_VAPID_KEY = "";
 const FIREBASE_VERSION = "10.12.2";
-const APP_VERSION = "1.20"; /* Version der App – steht auch im Namen der ZIP-Dateien */
+const APP_VERSION = "1.21"; /* Version der App – steht auch im Namen der ZIP-Dateien */
 
 const LIVE_MODE=false; /* Demo-Repository: läuft immer als Demo mit Beispieldaten */
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
@@ -1577,7 +1577,7 @@ function myPayreqs(pid){
 }
 function payreqNewBody(){
   const pid=myPlayer(), y=yearMonths(NOW.getFullYear()), open=r2(MONEY.reduce((a,k)=>a+calc(k,pid,y).open,0));
-  return `<h2>Zahlung melden</h2><p class="hint">Du hast z. B. per PayPal, Überweisung oder bar bezahlt? Melde es hier – der Kassenwart prüft und verrechnet es mit deinen offenen Beträgen.</p>
+  return `<h2>Zahlung einreichen</h2><p class="hint">Du hast z. B. per PayPal, Überweisung oder bar bezahlt? Melde es hier – der Kassenwart prüft und verrechnet es mit deinen offenen Beträgen.</p>
     <label class="f">Betrag (€)<input type="number" id="prAmt" step="0.01" min="0.01" inputmode="decimal" value="${open>0?open.toFixed(2):''}"></label>
     <div class="f" style="font-size:12.5px;color:var(--muted);font-weight:600">Wie bezahlt?<div class="seg wide" role="group" aria-label="Zahlungsart">${['paypal','bank','cash'].map(k=>`<button type="button" data-act="prMethod" data-v="${k}" aria-pressed="${(ui.modal.method||'paypal')===k}">${PAY_METHODS[k]}</button>`).join('')}</div></div>
     <label class="f">Notiz (optional)<input type="text" id="prNote" maxlength="200" placeholder="z. B. Getränke September und Oktober"></label>`;
@@ -2411,6 +2411,7 @@ function personView(){
         <button class="btn ghost" data-act="copy" data-v="${esc(url?url+'\n'+txt:txt)}">${url?'Link + Text kopieren':'Text kopieren'}</button>
         ${canAny?(ui.confirmDel==='payall'?`<button class="btn danger" data-act="payAll">Ja, als bezahlt markieren</button><button class="btn ghost" data-act="noDel">Abbrechen</button>`:`<button class="btn ghost" data-act="askDel" data-v="payall">Alles als bezahlt markieren</button>`):''}</div>
         <p class="hint">Verwendungszweck: „${esc(txt)}“</p>`:''}
+      ${p.id===myPlayer()&&S.payreqOn&&!isPublic()?`<div class="row tight"><button class="btn${total>0?'':' ghost'}" data-act="prNew">Zahlung einreichen</button><span class="hint">Schon überwiesen oder bar bezahlt? Der Kassenwart prüft und verrechnet es.</span></div>${myPayreqs(p.id)}`:''}
       ${finesOn()&&can('misc')?`<button class="btn ghost sm" data-act="fineFor" data-id="${p.id}" style="justify-self:start">Strafe eintragen</button>`:''}
     </div>
     ${secs.map(secPanel).join('')}`;
@@ -3621,7 +3622,8 @@ document.addEventListener('click',async ev=>{
   case 'aktSuggestYes': { const e=S.events.find(x=>x.id===v); if(!e) return; const end=new Date(e.date+'T'+(e.time||'19:00')).getTime()+90*6e4;
     ui.newsPre={ti:'Training fällt aus',t:`Das Training am ${wd(e.date)}, ${fmtDate(e.date)}${e.time?' um '+e.time+' Uhr':''} fällt aus.`,lvl:'imp',dur:'date',until:end,eid:e.id};
     ui.modal=null; renderModal(); ui.tab='home'; ui.evDetail=null; ui.homeOpen='news'; ui.newsTab='akt'; ui.newsForm=true; render(); toTop(); break; }
-  case 'homeTile': if(v==='news'&&ui.homeOpen!=='news'){ ui.newsSeenPrev=+(ls.get('mk-seen-news')||0); ls.set('mk-seen-news',String(Date.now())); } ui.homeOpen=ui.homeOpen===v?null:v; render(); break;
+  case 'homeTile': if(v==='pay'&&stateTile()){ ui.person=myPlayer(); ui.lineup=null; ui.py=NOW.getFullYear(); ui.confirmDel=null; ui.homeOpen=null; render(); window.scrollTo(0,0); break; }
+    if(v==='news'&&ui.homeOpen!=='news'){ ui.newsSeenPrev=+(ls.get('mk-seen-news')||0); ls.set('mk-seen-news',String(Date.now())); } ui.homeOpen=ui.homeOpen===v?null:v; render(); break;
   case 'finesShow': ui.modal={kind:'fines'}; renderModal(); break;
   case 'calOpen': ui.modal={kind:'cal'}; renderModal(); break;
   case 'calDemo': toast('Demo: Das Abo gibt es nur in der echten App'); break;
