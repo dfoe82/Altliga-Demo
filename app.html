@@ -537,6 +537,47 @@ table.grid{border-collapse:separate;border-spacing:0;font-size:13.5px;width:100%
 @media (prefers-reduced-motion:no-preference){.pick,.seg button,nav.top button,.pick .box,.chip,.tabbar button,.vopt{transition:background .12s,color .12s,border-color .12s}}
 .calopt{display:grid;gap:6px;padding:10px 0;border-top:1px solid var(--line)}.calopt .btn{justify-self:start}
 .rgroup{display:grid;gap:4px;margin-top:4px}.rgroup>b{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.check small{display:block;font-size:12px;color:var(--muted);font-weight:400}
+.optp.closed>:not(.foldhead){display:none!important}
+.htiles{display:grid;gap:8px}
+.htile{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;background:var(--surface);border:2px solid transparent;border-bottom:4px solid var(--c);border-radius:10px;padding:10px;min-height:92px;min-width:0;color:var(--ink);cursor:pointer}
+.htile.on{border-color:var(--brand,#0E2F7A);border-bottom-color:var(--c)}
+.htile .hl{display:flex;justify-content:space-between;align-items:center;width:100%;gap:4px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.htile .hl i{font-style:normal;background:#C8102E;color:#fff;font-size:11px;letter-spacing:0;text-transform:none;border-radius:10px;padding:1px 7px;white-space:nowrap}
+.htile .hb{font-family:var(--display);font-size:22px;line-height:1.1;overflow-wrap:anywhere}
+.htile .hs{font-size:12px;color:var(--muted);line-height:1.25}
+.hopen{display:grid;gap:var(--gap)}
+.newdot{background:#C8102E;color:#fff;font-size:10.5px;font-weight:700;border-radius:8px;padding:1px 6px;text-transform:uppercase}
+.impbar{display:flex;align-items:center;gap:10px;width:100%;background:#C8102E;color:#fff;border:0;border-radius:8px;padding:11px 14px;min-height:44px;text-align:left;font:inherit;font-weight:700;cursor:pointer}
+.impbar svg,.impbig svg,.impmodal svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2.2}
+.impbar span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.impbar b{flex:none;font-size:13px}
+.impbig{background:#C8102E;color:#fff;border-radius:12px;padding:14px 16px;display:grid;gap:8px;box-shadow:0 6px 18px rgba(200,16,46,.3)}
+.impbig .ih,.impmodal .ih{display:flex;align-items:center;gap:8px}
+.impbig .ih b,.impmodal .ih b{font-family:var(--display);font-size:20px;text-transform:uppercase;letter-spacing:.03em}
+.impbig .ih small{margin-left:auto;font-size:12px;opacity:.9}
+.impbig .it{font-size:16px;line-height:1.4;white-space:pre-wrap}
+.impbig .btn{justify-self:start;background:#fff;color:#C8102E}
+.impmodal{display:grid;gap:10px}
+.impmodal .ih{background:#C8102E;color:#fff;margin:calc(var(--pad) * -1) calc(var(--pad) * -1) 4px;padding:16px var(--pad);border-radius:inherit}
+.impmodal .it{font-size:17px;line-height:1.45;white-space:pre-wrap}
+.impmodal .btn{background:#C8102E;color:#fff}
+.nitem.imp{border-left-color:#C8102E!important;background:#FFF1F2}
+.impinfo{font-size:13px;color:#B3261E;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.impopts{display:grid;gap:8px;border-left:3px solid #C8102E;padding-left:10px}
+.segr{position:relative;display:flex}.segr input{position:absolute;opacity:0;pointer-events:none}
+.segr span{flex:1;text-align:center;padding:9px 6px;border-radius:6px;font-weight:700;color:var(--ink);cursor:pointer}
+.segr input:checked+span{background:var(--brand,#0E2F7A);color:#fff}.segr.red input:checked+span{background:#C8102E}
+.segr input:focus-visible+span{outline:2px solid var(--brand,#0E2F7A);outline-offset:2px}
+.optg{gap:0}
+.optgh{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:0;text-align:left;color:var(--ink);cursor:pointer;min-height:44px}
+.optgh .ot{flex:1;min-width:0;display:grid;gap:2px}.optgh h2{margin:0}
+.optgh small{font-size:13px;color:var(--muted);line-height:1.3}
+.optgh i{font-style:normal;font-size:11px;color:var(--muted)}
+.owarn{flex:none;background:#FDECC8;color:#7A4B00;font-size:12px;font-weight:700;border-radius:10px;padding:2px 8px}
+.optbody{display:grid;gap:22px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.optbody>.panel{background:none;border:0;padding:0;box-shadow:none}
+.optbody>.panel>h2,.optbody>.panel>.row>h2{font-size:17px}
+.optbody>.panel:only-child>h2{display:none}
 </style>
 </head>
 <body>
@@ -573,7 +614,7 @@ const FIREBASE_CONFIG = {
 /* Schlüssel für Push-Nachrichten (Firebase → Projekteinstellungen → Cloud Messaging → Web-Push-Zertifikate). Leer = Push aus. */
 const FIREBASE_VAPID_KEY = "";
 const FIREBASE_VERSION = "10.12.2";
-const APP_VERSION = "1.13"; /* Version der App – steht auch im Namen der ZIP-Dateien */
+const APP_VERSION = "1.15"; /* Version der App – steht auch im Namen der ZIP-Dateien */
 
 const LIVE_MODE=false; /* Demo-Repository: läuft immer als Demo mit Beispieldaten */
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
@@ -598,6 +639,7 @@ const ICON={
   lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
   unlock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.6-1.7"/>',
   bell:'<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2.5h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/>',
+  kasse:'<circle cx="12" cy="12" r="9"/><path d="M15.5 8.6a4.2 4.2 0 1 0 0 6.8M7 10.8h6.5M7 13.2h6.5"/>',
   chat:'<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 4V16h0A1.5 1.5 0 0 1 4 14.5z"/>'
 };
 const PRESETS=[
@@ -873,12 +915,12 @@ const AUTH={mode:LIVE_MODE?'live':'demo',ready:!LIVE_MODE,gate:null,user:null,ad
 const HASH_CODE=(()=>{const m=location.hash.match(/c=([A-Za-z0-9-]+)/); return m?normCode(m[1]):'';})();
 if(HASH_CODE){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}
 
-const ui={tab:'home',person:null,lineup:null,evView:'list',statType:'game',statAll:false,mode:'month',view:'list',onlyOpen:false,
+const ui={optOpen:new Set(),tab:'home',person:null,lineup:null,evView:'list',statType:'game',statAll:false,mode:'month',view:'list',onlyOpen:false,
   y:NOW.getFullYear(),m:NOW.getMonth(),py:NOW.getFullYear(),
   form:false,editKey:null,sel:new Set(),date:TODAY,draft:{title:'',amount:''},
   ev:null,efilter:'all',showPast:false,allDebtors:false,showNames:null,openArch:null,
   confirmDel:null,confirmReset:false,adminView:false,demoAdmin:null,demoPublic:false,evDetail:null,reportEdit:false,voter:ls.get('mk-demo-voter')||'',modal:null,importText:''};
-{const h=location.hash.slice(1); if(h in SEC||h==='settings'||h==='roster') ui.tab=h;}
+{const h=location.hash.slice(1); if(h in SEC||h==='settings'||h==='roster'||h==='kasse') ui.tab=h;}
 
 /* ---------- Rechte ---------- */
 const isPublic=()=>AUTH.mode==='live'?!!AUTH.public:ui.demoPublic;
@@ -896,6 +938,7 @@ const isAdmin=()=>!!me()&&ui.adminView;
 const isFull=()=>isAdmin()&&me().role!=='part';
 const can=area=>isAdmin()&&(me().role!=='part'||(me().areas||[]).includes(area));
 const canPlayers=()=>can('players');
+const kasseTab=()=>FEAT.money&&!isPublic()&&seeAllAmounts();
 const canOpt=()=>isFull()||can('players')||OPT_AREAS.some(k=>can(k));
 const myPlayer=()=>AUTH.mode==='live'?(AUTH.member&&pById(AUTH.member.p)?AUTH.member.p:''):(pById(ui.voter)?ui.voter:'');
 const rightsText=a=>a.role==='part'?((a.areas||[]).length?a.areas.filter(k=>AREAS[k]).map(k=>OPT_AREAS.includes(k)?'Optionen: '+AREAS[k]:AREAS[k]).join(', '):'keine Bereiche'):'Alles inkl. Optionen';
@@ -1007,6 +1050,7 @@ function subscribeAll(){
     LIVE.chat=LIVE.chat||{}; LIVE.chat[key]=qs.docs.map(d=>{const x=d.data(); return {id:d.id,...x,ts:x.ts&&x.ts.toMillis?x.ts.toMillis():Date.now()};}); schedule();},()=>{}));
   chatSub('chat','team'); if(AUTH.admin) chatSub('chatadm','admins');
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'creact'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); (v[x.m]=v[x.m]||{})[x.p]=x.e==='down'?'down':'up';}); LIVE.creact=v; schedule();},()=>{}));
+  LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'nreads'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); (v[x.n]=v[x.n]||{})[x.p]=true;}); LIVE.nreads=v; schedule();},()=>{}));
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'nlikes'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); (v[x.n]=v[x.n]||{})[x.p]=true;}); LIVE.nlikes=v; schedule();},err));
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'polls'),qs=>{LIVE.polls=qs.docs.map(d=>{const x=d.data(); return {id:d.id,...x,ts:x.ts&&x.ts.toMillis?x.ts.toMillis():Date.now()};}); schedule();},err));
   LIVE.unsubs.push(FB.onSnapshot(FB.collection(FB.db,'pvotes'),qs=>{const v={}; qs.forEach(d=>{const x=d.data(); (v[x.q]=v[x.q]||{})[x.p]=x.i;}); LIVE.pvotes=v; schedule();},err));
@@ -1472,7 +1516,7 @@ function financeView(){
     return head+`<button class="p" data-act="finEdit" data-v="${x.id}" style="text-align:left"><span class="n">${esc(x.title||'(ohne Bezeichnung)')}<div>${fmtShort(x.date)}${x.cat?' · '+esc(x.cat):''}${x.ref?' · <span class="badge">gemeldet</span>':''}${x.note?' · '+esc(x.note):''}</div></span>
       <span class="v" style="color:${x.kind==='out'?'var(--due)':'var(--ok)'}">${x.kind==='out'?'−':'+'}${eur(x.amount)}</span></button>`;}).join('');
   return `<div class="panel" style="${secStyle('team')}">
-      <button class="back" data-act="goto" data-v="home">‹ Übersicht</button>
+      <button class="back" data-act="goto" data-v="${kasseTab()?'kasse':'home'}">‹ ${kasseTab()?'Kasse':'Übersicht'}</button>
       <div class="summary"><div><div class="lbl">Kassenstand</div><div class="big" style="color:${finBalance()<0?'var(--due)':'inherit'}">${eur(finBalance())}</div></div>
         <div class="row tight"><button class="btn sm" data-act="finNew" data-v="in">+ Einnahme</button><button class="btn ghost sm" data-act="finNew" data-v="out">+ Ausgabe</button></div></div>
       <div class="toolbar"><div class="period"><button class="icon" data-act="fyPrev" aria-label="Voriges Jahr">‹</button><b>${y}</b><button class="icon" data-act="fyNext" aria-label="Nächstes Jahr">›</button></div></div>
@@ -1852,13 +1896,51 @@ const newsList=()=>{
   return raw.map(n=>({...n,likes:lk?Object.keys(lk[n.id]||{}):(n.likes||[])})).sort((x,y)=>(!!y.pin-!!x.pin)||y.ts-x.ts);
 };
 const boardWrite=()=>isAdmin()||(S.boardOpen!==false&&!!myPlayer());
+/* Wichtige Nachrichten: rote Leiste auf jeder Seite, optional großer Hinweis / Fenster, bis „Gelesen“ */
+const impReads=()=>AUTH.mode==='live'?(LIVE.nreads||{}):(S.demoNreads||{});
+const impLocal=()=>{try{return JSON.parse(localStorage.getItem('mk-impread')||'[]')}catch(e){return []}};
+const impActive=n=>!!n.imp&&(!n.impUntil||n.impUntil>Date.now());
+const impIsRead=n=>{const mp=myPlayer(); return newsMine(n)||(mp?!!(impReads()[n.id]||{})[mp]:impLocal().includes(n.id));};
+const impUnread=()=>isPublic()?[]:newsList().filter(n=>impActive(n)&&!impIsRead(n)).sort((a,b)=>b.ts-a.ts);
+const impReadCount=n=>Object.keys(impReads()[n.id]||{}).filter(p=>pById(p)).length;
+const IMP_UNTIL={today:'Heute, 23:59 Uhr',tomorrow:'Morgen, 23:59 Uhr',week:'In 1 Woche',open:'Bis ich es beende'};
+function impUntilTs(k){ const d=new Date(); if(k==='open') return 0; if(k==='week') return Date.now()+7*864e5; if(k==='tomorrow') d.setDate(d.getDate()+1); d.setHours(23,59,59,0); return d.getTime(); }
+function impBar(){ const u=impUnread(); if(!u.length) return ''; if(ui.tab==='home'&&!ui.person&&u.some(x=>x.impBanner)) return ''; const n=u[0];
+  return `<button class="impbar" data-act="impOpen" data-v="${n.id}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.5"/></svg><span>Wichtig: ${esc(n.t.split('\n')[0].slice(0,80))}</span><b>${u.length>1?u.length+' · ':''}Lesen ›</b></button>`; }
+function impBanner(){ const n=impUnread().find(x=>x.impBanner); if(!n) return '';
+  return `<section class="impbig" role="alert"><div class="ih"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.5"/></svg><b>Wichtig</b><small>${esc(newsAuthor(n))} · ${fmtTs(n.ts)}</small></div>
+    <div class="it">${esc(n.t)}</div><button class="btn" data-act="impRead" data-v="${n.id}">Gelesen ✓</button></section>`; }
+function impModalBody(id){ const n=newsList().find(x=>x.id===id); if(!n) return '<p class="hint">Nachricht nicht mehr vorhanden.</p>';
+  return `<div class="impmodal"><div class="ih"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.5"/></svg><b>Wichtige Nachricht</b></div>
+    <div class="it">${esc(n.t)}</div><p class="hint">${esc(newsAuthor(n))} · ${fmtTs(n.ts)}</p>
+    <button type="button" class="btn" data-act="impRead" data-v="${n.id}">${n.impPopup?'Verstanden':'Gelesen ✓'}</button></div>`; }
+async function impMarkRead(id){
+  try{ const l=impLocal(); if(!l.includes(id)){ l.push(id); localStorage.setItem('mk-impread',JSON.stringify(l.slice(-100))); } }catch(e){}
+  const mp=myPlayer();
+  if(mp){ if(AUTH.mode==='live'){ LIVE.nreads=LIVE.nreads||{}; (LIVE.nreads[id]=LIVE.nreads[id]||{})[mp]=true; FB.setDoc(D('nreads',`${id}_${mp}`),{n:id,p:mp}).catch(e=>console.warn(e)); }
+    else { S.demoNreads=S.demoNreads||{}; (S.demoNreads[id]=S.demoNreads[id]||{})[mp]=true; save(); } }
+  if(ui.modal&&ui.modal.kind==='imp'){ ui.modal=null; renderModal(); } render();
+}
+async function impRemind(id){
+  if(!isAdmin()) return;
+  if(AUTH.mode==='live'){ try{ await FB.addDoc(FB.collection(FB.db,'nremind'),{n:id,a:me().uid,ts:FB.serverTimestamp()}); toast('Erinnerung an alle verschickt, die noch nicht gelesen haben'); }catch(e){ toast('Erinnern fehlgeschlagen'); } }
+  else toast('Demo: Erinnerung würde per Push an alle gehen, die noch nicht gelesen haben');
+}
+async function impEnd(id){
+  if(!isAdmin()) return;
+  if(AUTH.mode==='live'){ try{ await FB.updateDoc(D('news',id),{imp:false}); }catch(e){ return toast('Keine Berechtigung'); } }
+  else { const d=(S.demoNews||[]).find(x=>x.id===id); if(d) d.imp=false; save(); render(); }
+  toast('Nicht mehr als wichtig markiert');
+}
 const newsMine=n=>{const a=myAuthor(); return !!a&&((n.p&&a.p===n.p&&!isAdmin())||(n.a&&a.a===n.a));};
 const newsAuthor=n=>n.p?pname(n.p):(n.an||'Admin');
 function newsItem(n){
   if(ui.newsDel===n.id) return `<div class="nitem">${confirmBoxNews(n)}</div>`;
   const mp=myPlayer(), liked=!!mp&&n.likes.includes(mp), nc=cmtCount(n.id,'news'), open=ui.newsOpen===n.id;
   const canDel=isAdmin()||newsMine(n);
-  return `<div class="nitem ${n.pin?'pin':''}"><div class="who"><span>${n.pin?'📌 ':''}${esc(newsAuthor(n))}${n.a?' <span class="badge">Admin</span>':''}</span>
+  const imp=impActive(n), isNew=ui.newsSeenPrev!=null&&n.ts>ui.newsSeenPrev&&!newsMine(n);
+  const impInfo=imp?`<div class="impinfo"><b>⚠ Wichtig</b>${n.impUntil?' bis '+fmtTs(n.impUntil):''}${isAdmin()?` · gelesen von ${impReadCount(n)} / ${S.players.length} <button class="edit" data-act="impRemind" data-v="${n.id}">Erinnern</button><button class="edit" data-act="impEnd" data-v="${n.id}">Beenden</button>`:(impIsRead(n)?' · gelesen ✓':` · <button class="edit" data-act="impRead" data-v="${n.id}">Gelesen ✓</button>`)}</div>`:'';
+  return `<div class="nitem ${n.pin?'pin':''} ${imp?'imp':''}">${impInfo}<div class="who"><span>${isNew?'<span class="newdot">neu</span> ':''}${n.pin&&!imp?'📌 ':''}${esc(newsAuthor(n))}${n.a?' <span class="badge">Admin</span>':''}</span>
       <span class="row tight"><small>${fmtTs(n.ts)}</small>${canDel?`<button class="x" data-act="newsDel" data-v="${n.id}" aria-label="Beitrag löschen">×</button>`:''}</span></div>
     <div class="tx">${esc(n.t)}</div>
     <div class="nact"><button class="chip ${liked?'on':''}" data-act="newsLike" data-v="${n.id}" aria-pressed="${liked}">👍 ${n.likes.length||''}</button>
@@ -1869,29 +1951,37 @@ function newsItem(n){
 function newsBlock(){
   if(isPublic()) return '';
   const all=newsList(), pinned=all.filter(n=>n.pin), rest=all.filter(n=>!n.pin);
-  const recent=rest.filter(n=>Date.now()-n.ts<30*864e5).slice(0,5);
+  const recent=rest.filter(n=>Date.now()-n.ts<30*864e5).slice(0,pinned.length?1:2);
   const shown=[...pinned,...(ui.allNews?rest:recent)], hidden=rest.length-(ui.allNews?rest.length:recent.length);
   const canW=boardWrite();
   if(!shown.length&&!canW) return '';
   const form=ui.newsForm&&canW?`<div class="panel form nobar"><h2>${isAdmin()?'Beitrag / Nachricht an alle':'Neuer Beitrag'}</h2>
       <p class="hint">Erscheint auf der Pinnwand. Wer Benachrichtigungen aktiviert hat, bekommt eine Nachricht.</p>
       <label class="f">Text<textarea id="newsText" maxlength="500" placeholder="${isAdmin()?'z. B. Training fällt heute wegen Platzsperre aus.':'z. B. Suche Mitfahrgelegenheit zum Auswärtsspiel am Samstag.'}"></textarea></label>
-      ${isAdmin()?'<label class="check"><input type="checkbox" id="newsPin"> Oben anheften</label>':''}
+      ${isAdmin()?`<div class="f" style="font-size:12.5px;color:var(--muted);font-weight:600">Wie wichtig?<div class="seg wide" role="radiogroup" aria-label="Stufe">${[['norm','Normal'],['pin','Angeheftet'],['imp','Wichtig']].map(([k,l])=>`<label class="segr ${k==='imp'?'red':''}"><input type="radio" name="newsLvl" value="${k}" ${k==='norm'?'checked':''}><span>${l}</span></label>`).join('')}</div></div>
+      <div id="impOpts" class="impopts" hidden>
+        <label class="check"><input type="checkbox" id="impBanner"> Zusätzlich großer roter Hinweis auf der Übersicht</label>
+        <label class="check"><input type="checkbox" id="impPopup"> Zusätzlich als Fenster beim Öffnen der App (muss bestätigt werden)</label>
+        <label class="check"><input type="checkbox" id="impPushAll" checked> Push an alle – auch an die, die Pinnwand-Nachrichten abgeschaltet haben</label>
+        <label class="f" style="max-width:260px">Wichtig bis<select id="impUntil">${Object.entries(IMP_UNTIL).map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select></label>
+        <p class="hint">Alle sehen oben auf jeder Seite eine rote Leiste, bis sie „Gelesen“ tippen. Du siehst, wer schon gelesen hat.</p></div>`:''}
       <div class="row"><button class="btn" data-act="newsSend">Veröffentlichen</button><button class="btn ghost" data-act="newsCancel">Abbrechen</button></div></div>`:'';
   return `<div class="hd">Pinnwand ${canW&&!ui.newsForm?'<button class="chip" data-act="newsNew" style="font-family:var(--body);text-transform:none;letter-spacing:0">+ Beitrag</button>':''}</div>
     ${form}${shown.length?`<div class="news">${shown.map(newsItem).join('')}</div>`:(canW&&!ui.newsForm?'<p class="hint" style="margin:0">Noch keine Beiträge. Hier steht, was alle wissen sollen – und nicht im Chat untergehen soll.</p>':'')}
-    ${hidden>0||ui.allNews?`<button class="chip" data-act="newsAll" style="justify-self:start">${ui.allNews?'Weniger anzeigen':`Ältere Beiträge (${hidden})`}</button>`:''}`;
+    ${hidden>0||ui.allNews?`<button class="chip" data-act="newsAll" style="justify-self:start">${ui.allNews?'Weniger anzeigen':`Weitere Beiträge (${hidden})`}</button>`:''}`;
 }
 const confirmBoxNews=n=>`<div class="row tight">Beitrag löschen? <button class="btn danger sm" data-act="newsDelGo" data-v="${n.id}">Löschen</button><button class="btn ghost sm" data-act="newsDelNo">Abbrechen</button></div>`;
 async function sendNews(){
   const ta=document.getElementById('newsText'), t=(ta&&ta.value||'').trim().slice(0,500); if(!t) return toast('Bitte einen Text eingeben');
   if(!boardWrite()) return toast('Zum Schreiben deinen persönlichen Spieler-Link öffnen');
-  const a=me(), asAdmin=isAdmin(), pin=asAdmin&&!!(document.getElementById('newsPin')||{}).checked;
+  const a=me(), asAdmin=isAdmin(), lvl=asAdmin?((document.querySelector('input[name="newsLvl"]:checked')||{}).value||'norm'):'norm', pin=lvl!=='norm';
+  const chk=id=>!!(document.getElementById(id)||{}).checked;
+  const impF=lvl==='imp'?{imp:true,impUntil:impUntilTs((document.getElementById('impUntil')||{}).value||'today'),impBanner:chk('impBanner'),impPopup:chk('impPopup'),impPushAll:chk('impPushAll')}:{};
   const who=asAdmin?{a:a.uid,an:a.name}:{p:myPlayer()};
   if(AUTH.mode==='live'){
-    try{ await FB.addDoc(FB.collection(FB.db,'news'),{t,ts:FB.serverTimestamp(),...who,...(pin?{pin:true}:{})}); if(asAdmin) logAction('Pinnwand-Beitrag veröffentlicht'); }
+    try{ await FB.addDoc(FB.collection(FB.db,'news'),{t,ts:FB.serverTimestamp(),...who,...(pin?{pin:true}:{}),...impF}); if(asAdmin) logAction(impF.imp?'Wichtige Nachricht veröffentlicht':'Pinnwand-Beitrag veröffentlicht'); }
     catch(e){console.warn(e); return toast('Veröffentlichen fehlgeschlagen');}
-  }else{ S.demoNews=S.demoNews||[]; S.demoNews.push({id:uid(),t,ts:Date.now(),likes:[],...who,...(pin?{pin:true}:{})}); if(asAdmin) logAction('Pinnwand-Beitrag veröffentlicht'); save(); }
+  }else{ S.demoNews=S.demoNews||[]; S.demoNews.push({id:uid(),t,ts:Date.now(),likes:[],...who,...(pin?{pin:true}:{}),...impF}); if(asAdmin) logAction('Pinnwand-Beitrag veröffentlicht'); save(); }
   ui.newsForm=false; render(); toast(AUTH.mode==='live'?'Beitrag veröffentlicht':'Demo: Beitrag gespeichert – Push gibt es nur in der echten App');
 }
 async function delNews(id){
@@ -1971,10 +2061,10 @@ function renderChrome(){
   ab.className='adminbtn'+(isAdmin()?' on':(me()?' half':''));
   ab.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true">${isAdmin()?ICON.unlock:ICON.lock}</svg>`;
   ab.setAttribute('aria-label',isAdmin()?(myPlayer()?'Zur Spieleransicht wechseln':'Zum Lesemodus wechseln'):(me()?'Zur Admin-Ansicht wechseln':'Admin-Anmeldung'));
-  const tabs=(gated?[]:isPublic()?['home','events']:(canOpt()?['home','events','chat','roster','settings']:['home','events','chat','roster']))
+  const tabs=(gated?[]:isPublic()?['home','events']:['home',...(kasseTab()?['kasse']:[]),'events','chat','roster',...(canOpt()?['settings']:[])])
     .filter(k=>(k!=='events'||FEAT.events)&&(k!=='roster'||FEAT.roster)&&(k!=='chat'||!!S.chatOn));
-  const cur=(ui.person||MONEY.includes(ui.tab)||ui.tab==='finance'||ui.tab==='payreqs')?'home':((ui.lineup||ui.evDetail)?'events':ui.tab);
-  const lbl=k=>k==='settings'?'Optionen':k==='roster'?'Team':k==='chat'?'Chat':SEC[k].label;
+  const cur=(ui.person||MONEY.includes(ui.tab)||ui.tab==='finance'||ui.tab==='payreqs')?(kasseTab()?'kasse':'home'):((ui.lineup||ui.evDetail)?'events':ui.tab);
+  const lbl=k=>k==='kasse'?'Kasse':k==='settings'?'Optionen':k==='roster'?'Team':k==='chat'?'Chat':SEC[k].label;
   const nUnread=chatUnread(), badge=k=>k==='chat'&&nUnread&&ui.tab!=='chat'?`<span class="tbn">${nUnread>99?'99+':nUnread}</span>`:'';
   document.getElementById('tabs').innerHTML=tabs.map(k=>`<button role="tab" data-tab="${k}" aria-selected="${cur===k}">${lbl(k)}${badge(k)}</button>`).join('');
   document.getElementById('tabbar').innerHTML=(tabs.length>1?tabs:[]).map(k=>`<button data-tab="${k}" aria-selected="${cur===k}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg><span>${lbl(k)}</span>${badge(k)}</button>`).join('');
@@ -2129,7 +2219,24 @@ function myShifts(upcoming){
     return `<button class="mini evt" data-act="shiftsOpen" data-v="${e.id}"><span class="md"><b>${+d}</b><i>${wd(e.date)} · ${MONTHS[+m-1].slice(0,3)}</i></span>
       <span class="mt"><span class="ml">${esc(evTitle(e))}</span><span class="mv">${esc(s.name)}</span><span class="ms">${shiftTime(s)||'Uhrzeit folgt'}</span></span></button>`;}).join('')}</div>`;
 }
-function homeView(){ return newsBlock()+tpollBlock()+homeMain()+(finesOn()&&!isPublic()&&finesList().length?'<button class="chip" data-act="finesShow" style="justify-self:start">Strafenkatalog ansehen ›</button>':''); }
+function homeView(){ return impBanner()+homeTiles()+homeMain()+(finesOn()&&!isPublic()&&!kasseTab()&&finesList().length?'<button class="chip" data-act="finesShow" style="justify-self:start">Strafenkatalog ansehen ›</button>':''); }
+const stateTile=()=>FEAT.money&&!!myPlayer()&&!(moneyAdmin()&&S.payreqOn);
+function homeTiles(){
+  if(isPublic()) return '';
+  const T=[], mp=myPlayer();
+  const news=newsList(), seen=+(ls.get('mk-seen-news')||0), nNew=news.filter(n=>n.ts>seen&&!newsMine(n)).length;
+  if(news.length||boardWrite()) T.push({k:'news',lb:'Pinnwand',big:String(news.length),sub:news.length===1?'Beitrag':'Beiträge',badge:nNew?nNew+' neu':'',c:secHex('drinks')});
+  if(FEAT.events){ const open=tpolls().filter(x=>x.open), mine=mp?open.filter(x=>(x.votes||{})[mp]==null).length:0;
+    if(open.length||mp||isAdmin()) T.push({k:'poll',lb:'Umfrage',big:String(open.length),sub:mine?'offen · du fehlst':'offen',badge:mine?(mine>1?mine+' neu':'neu'):'',c:'var(--ev,#0F8580)'}); }
+  if(moneyAdmin()&&S.payreqOn&&FEAT.money){ const n=payreqs().filter(x=>x.status==='open').length; T.push({k:'pay',lb:'Zahlung',big:String(n),sub:'zu prüfen',badge:n?String(n):'',c:secHex('misc')}); }
+  else if(stateTile()){ const yr=yearMonths(NOW.getFullYear()), o=r2(MONEY.reduce((a,k)=>a+calc(k,mp,yr).open,0)); T.push({k:'pay',lb:'Dein Stand',big:o>0?eur(o):'✓',sub:o>0?'offen':'alles bezahlt',badge:'',c:secHex('misc')}); }
+  if(!T.length) return '';
+  const op=ui.homeOpen&&T.some(t=>t.k===ui.homeOpen)?ui.homeOpen:null;
+  const body=op==='news'?newsBlock():op==='poll'?(tpollBlock()||'<p class="hint">Keine offenen Umfragen.</p>'):op==='pay'?(stateTile()?mineCard(yearMonths(NOW.getFullYear())):(payreqPanel()||'<div class="panel"><p class="hint">Keine gemeldeten Zahlungen.</p></div>')):'';
+  return `<div class="htiles" style="grid-template-columns:repeat(${T.length},minmax(0,1fr))">${T.map(t=>`<button class="htile ${op===t.k?'on':''}" data-act="homeTile" data-v="${t.k}" aria-expanded="${op===t.k}" style="--c:${t.c}">
+      <span class="hl"><span>${t.lb}</span>${t.badge?`<i>${t.badge}</i>`:''}</span><span class="hb">${t.big}</span><span class="hs">${t.sub}</span></button>`).join('')}</div>
+    ${op?`<div class="hopen">${body}</div>`:''}`;
+}
 function homeMain(){
   const y=NOW.getFullYear(), yr=yearMonths(y), cm=[mk(y,NOW.getMonth())];
   const upcoming=S.events.filter(e=>e.date>=TODAY).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
@@ -2153,19 +2260,25 @@ function homeMain(){
   const shown=ui.allDebtors?debt:debt.slice(0,8);
   const ld=S.days.slice().sort((a,b)=>b.date.localeCompare(a.date))[0];
   if(!seeAllAmounts()){
-    return `${mineCard(yr)||`<div class="panel"><p class="hint">Die Beträge sind nur für den jeweiligen Spieler sichtbar. ${AUTH.mode==='demo'?'Wähle oben unter „Ansicht als“ einen Spieler oder wechsle über das Schloss oben rechts in die Admin-Ansicht.':'Öffne deinen persönlichen Link, um deinen Stand zu sehen.'}</p></div>`}
+    return `${stateTile()?'':mineCard(yr)||`<div class="panel"><p class="hint">Die Beträge sind nur für den jeweiligen Spieler sichtbar. ${AUTH.mode==='demo'?'Wähle oben unter „Ansicht als“ einen Spieler oder wechsle über das Schloss oben rechts in die Admin-Ansicht.':'Öffne deinen persönlichen Link, um deinen Stand zu sehen.'}</p></div>`}
       ${nextBlock(upcoming)}${myShifts(upcoming)}
       ${FEAT.roster?'<button class="chip" data-act="goto" data-v="roster" style="justify-self:start">Mannschaft ansehen ›</button>':''}`;
   }
   if(!S.players.length&&isFull()) return `<div class="panel"><h2>Los geht's</h2><p class="hint">Trag unter Optionen die Spieler mit Spitznamen ein, wähle die Vereinsfarben und verschicke die Einladungen.</p><button class="btn" data-act="goto" data-v="settings" style="justify-self:start">Zu den Optionen</button></div>`;
   const nOpenPr=moneyAdmin()&&S.payreqOn?payreqs().filter(x=>x.status==='open').length:0;
+  if(ui.tab!=='kasse'){ /* Übersicht: nur das Wichtigste, Details im Reiter „Kasse“ */
+    const teaser=`<button class="gesamt" data-act="goto" data-v="kasse" style="text-align:left;border:0;width:100%"><div><div class="lb">Kasse · offen ${y}</div><div class="big">${eur(gesamt)}</div></div>
+      <div class="side"><div><b>${debt.length}</b> von ${S.players.length} offen</div>${nOpenPr?`<div>💶 <b>${nOpenPr}</b> zu prüfen</div>`:''}<div><b>Zur Kasse ›</b></div></div></button>`;
+    return `${stateTile()?'':mineCard(yr)}${teaser}${nextBlock(upcoming)}${myShifts(upcoming)}`;
+  }
+  const quick=[can('drinks')?'<button class="btn sm" data-act="quickDay">+ Getränketag</button>':'',finesOn()&&can('misc')?'<button class="btn sm" data-act="fineNew">+ Strafe</button>':'',
+    can('misc')?'<button class="btn ghost sm" data-act="miscNew">+ Posten</button>':'',finOn()?'<button class="btn ghost sm" data-act="goto" data-v="finance">Kassenbuch</button>':''].join('');
   const finTile=finOn()?`<button class="gesamt" data-act="goto" data-v="finance" style="text-align:left;border:0;width:100%"><div><div class="lb">Einnahmen &amp; Ausgaben</div><div class="big">${eur(finBalance())}</div></div><div class="side"><div>Kassenstand</div><div><b>Buchungen ›</b></div></div></button>`:'';
-  return `${mineCard(yr)}${nOpenPr?`<button class="chip" data-act="goto" data-v="${finOn()?'finance':'payreqs'}" style="justify-self:start;border-color:var(--due);color:var(--due)">💶 ${nOpenPr} gemeldete Zahlung${nOpenPr>1?'en':''} prüfen ›</button>`:''}<div class="kassen">${tiles}</div>${finTile}
+  return `${quick?`<div class="row tight">${quick}</div>`:''}${nOpenPr?`<button class="chip" data-act="goto" data-v="${finOn()?'finance':'payreqs'}" style="justify-self:start;border-color:var(--due);color:var(--due)">💶 ${nOpenPr} gemeldete Zahlung${nOpenPr>1?'en':''} prüfen ›</button>`:''}<div class="kassen">${tiles}</div>${finTile}
     <div class="gesamt">
       <div><div class="lb">Gesamt offen · ${y} bis ${MONTHS[NOW.getMonth()]}</div><div class="big">${eur(gesamt)}</div></div>
       <div class="side"><div>${MONTHS[NOW.getMonth()]}: <b>${eur(gesamtMonat)}</b></div><div><b>${debt.length}</b> von ${S.players.length} offen</div></div>
     </div>
-    ${nextBlock(upcoming)}${myShifts(upcoming)}
     <div class="hd">Noch offen <span>Name antippen für Details &amp; PayPal</span></div>
     ${debt.length?`<div class="plist">${shown.map(d=>`<button class="p" data-act="person" data-id="${d.p.id}">${nrBox(d.p)}
         <div class="n">${esc(d.p.name)}<div>${d.parts.map(x=>`<span class="dot" style="background:${secHex(x.k)}"></span>${SEC[x.k].short} ${eur(x.o)}`).join(' · ')}</div></div>
@@ -2173,7 +2286,8 @@ function homeMain(){
       ${debt.length>8?`<button class="chip" data-act="allDebtors" style="justify-self:start">${ui.allDebtors?'Weniger anzeigen':`Alle ${debt.length} anzeigen`}</button>`:''}`
       :'<div class="panel"><p class="hint">Alle haben bezahlt.</p></div>'}
     ${can('drinks')&&ld?`<div class="panel" style="${secStyle('drinks')}"><div class="row spread"><div class="grow"><h3>Letzter Getränketag</h3><div style="font-weight:600;margin-top:4px">${wd(ld.date)}, ${fmtDate(ld.date)} · ${ld.att.length} Personen · ${eur(ld.att.length*S.rate)}</div></div>
-      <button class="btn" data-act="quickDay">+ Getränketag</button></div></div>`:''}`;
+      <button class="btn" data-act="quickDay">+ Getränketag</button></div></div>`:''}
+    ${finesOn()&&finesList().length?'<button class="chip" data-act="finesShow" style="justify-self:start">Strafenkatalog ansehen ›</button>':''}`;
 }
 
 /* ---------- Personenseite ---------- */
@@ -2276,7 +2390,7 @@ function teamPanel(){
     <p class="hint">${can('team')?'Zahlungen hakst du in der Liste oder Tabelle ab.':'Wer bezahlt hat und wer noch offen ist.'}</p></div>`;
 }
 function secHead(){
-  return `<div class="sechead"><button class="back" data-act="goto" data-v="home">‹ Übersicht</button>
+  return `<div class="sechead"><button class="back" data-act="goto" data-v="${kasseTab()?'kasse':'home'}">‹ ${kasseTab()?'Kasse':'Übersicht'}</button>
     <div class="seg wide" role="group" aria-label="Kasse wechseln">${visSecs().map(k=>`<button data-act="goto" data-v="${k}" aria-pressed="${ui.tab===k}" style="--c:${secHex(k)}">${SEC[k].short}</button>`).join('')}</div></div>`;
 }
 
@@ -2719,7 +2833,7 @@ function playersPanel(){
   const nOk=st.filter(s=>s.cls==='ok').length, nWait=st.filter(s=>s.cls==='wait').length, nOff=st.filter(s=>s.cls==='off').length;
   const open=ui.playersOpen;
   return `<div class="panel" id="pnl-players" style="${secStyle('team')}">
-    <button class="foldhead" data-act="playersFold" aria-expanded="${open}"><h2>Spieler &amp; Zugänge · ${S.players.length}</h2><span class="fold">${open?'Einklappen':'Aufklappen'}<i aria-hidden="true">${open?'▲':'▼'}</i></span></button>
+    <button class="foldhead" data-act="playersFold" aria-expanded="${open}" hidden><h2>Spieler &amp; Zugänge · ${S.players.length}</h2><span class="fold">${open?'Einklappen':'Aufklappen'}<i aria-hidden="true">${open?'▲':'▼'}</i></span></button>
     <div class="row tight"><span class="st ok">${nOk} aktiv</span><span class="st wait">${nWait} eingeladen</span><span class="st off">${nOff} ohne Zugang</span></div>
     ${open?`<p class="hint">Spitznamen oder Kürzel empfohlen. Das Geburtsdatum sehen nur Admins mit dem Recht „Spieler &amp; Zugänge“, alle anderen sehen nur das Alter. Jeder Spieler bekommt einen persönlichen Code.</p>
     ${nOff?'<button class="btn ghost sm" data-act="codesAll" style="justify-self:start">Codes für alle ohne Zugang erzeugen</button>':''}
@@ -2790,14 +2904,42 @@ function visibilityPanel(){
 `:''}
   </div>`;
 }
+const OPT_GROUPS=[['players','Spieler & Zugänge'],['admins','Admins & Rechte'],['kasse','Kasse'],['club','Verein & Aussehen'],['vis','Sichtbarkeit & Chat'],['notify','Kalender & Erinnerungen'],['data','Daten & Datenschutz']];
+function optSummary(k){
+  const onoff=b=>b?'an':'aus';
+  if(k==='players'){ const st=S.players.map(p=>playerStatus(p.id)), off=st.filter(x=>x.cls==='off').length;
+    return [`${S.players.length} Spieler · ${st.filter(x=>x.cls==='ok').length} aktiv · ${st.filter(x=>x.cls==='wait').length} eingeladen`, off?off+' ohne Code':'']; }
+  if(k==='admins'){ const l=adminList(); return [`${l.length} von ${adminMax()} · ${l.map(a=>a.name).join(', ')}`,'']; }
+  if(k==='kasse') return [`Beitrag ${eur(S.fee)} · Getränke ${eur(S.rate)} · Strafen ${onoff(S.finesOn)} · Kassenbuch ${onoff(S.financeOn)}`, S.paypal?'':'PayPal fehlt'];
+  if(k==='club'){ const pr=PRESETS.find(p=>p.c.slice(0,2).join()===S.club.c.slice(0,2).join()); return [`${S.teamName} · ${pr?pr.n:'eigene Farben'}${S.club.crest?' · Wappen':''}`,'']; }
+  if(k==='vis') return [`Beträge: ${S.amountsPublic?'alle sehen alles':'jeder nur seine'} · Chat ${onoff(S.chatOn)} · Pinnwand: ${S.boardOpen!==false?'alle':'nur Admins'} · Öffentlich ${onoff(S.publicView)}`,''];
+  if(k==='notify'){ const n=[S.remRsvp,S.remDebt,S.remBday].filter(Boolean).length; return [`${FEAT.events?'Kalender-Abo '+onoff(S.calOn)+' · ':''}${n} von ${FEAT.events&&FEAT.money?3:2} Erinnerungen an`,'']; }
+  if(k==='data') return [`Datenschutz${(S.privacy||{}).who?' eingetragen':' noch offen'}${isFull()?' · Sicherung · Protokoll · Zurücksetzen':''}`, can('o_privacy')&&!(S.privacy||{}).who?'Verantwortlicher fehlt':''];
+  return ['',''];
+}
 function settings(){
+  ui.playersOpen=true;
+  const raw=settingsRaw(), parts={};
+  raw.split('<!--g:').slice(1).forEach(ch=>{ const i=ch.indexOf('-->'), k=ch.slice(0,i); parts[k]=(parts[k]||'')+ch.slice(i+3); });
+  const groups=OPT_GROUPS.filter(([k])=>parts[k]&&parts[k].replace(/\s+/g,'')).map(([k,t])=>{
+    const open=ui.optOpen.has(k), [sum,warn]=optSummary(k);
+    return `<section class="panel optg ${open?'':'closed'}"><button class="optgh" data-act="optFold" data-v="${k}" aria-expanded="${open}">
+      <span class="ot"><h2>${t}</h2><small>${esc(sum)}</small></span>${warn?`<span class="owarn">${esc(warn)}</span>`:''}<i aria-hidden="true">${open?'▲':'▼'}</i></button>
+      ${open?`<div class="optbody">${parts[k]}</div>`:''}</section>`;}).join('');
+  return groups+(parts.note||'');
+}
+function foldPanels(html){
+  return html.replace(/<div class="panel"( style="[^"]*")><h2>([^<]*)<\/h2>/g,(m,st,t)=>{ const k=t.replace(/ ·.*$/,'').trim(), open=ui.optOpen.has(k);
+    return `<div class="panel optp${open?'':' closed'}"${st}><button class="foldhead" data-act="optFold" data-v="${k}" aria-expanded="${open}"><h2>${t}</h2><span class="fold">${open?'Einklappen':'Aufklappen'}<i aria-hidden="true">${open?'▲':'▼'}</i></span></button>`; });
+}
+function settingsRaw(){
   const F=isFull(), o=k=>can(k);
   const c=S.club.c;
   const colDefs=[['Hauptfarbe',FEAT.money?'Kopf, Leisten, Beiträge':'Kopf, Leisten',null],['Akzentfarbe',FEAT.money?'Hervorhebungen, Getränke':'Hervorhebungen',null],['Drittfarbe',FEAT.money?'Sonstiges':'Team & Optionen','use3'],['Viertfarbe','Termine','use4']];
-  return `${F?adminsPanel():''}
-  ${o('o_vis')?visibilityPanel():''}
-  ${o('players')?playersPanel():''}
-  ${o('o_club')?`<div class="panel" style="${secStyle('team')}"><h2>Verein</h2>
+  return `${F?'<!--g:admins-->'+adminsPanel():''}
+  ${o('o_vis')?'<!--g:vis-->'+visibilityPanel():''}
+  ${o('players')?'<!--g:players-->'+playersPanel():''}
+  ${o('o_club')?`<!--g:club--><div class="panel" style="${secStyle('team')}"><h2>Verein</h2>
     <div class="row">
       <label class="f grow">Name der App<input type="text" id="sAppName" maxlength="30" value="${esc(S.appName)}" placeholder="Mannschaftskasse"></label>
       <label class="f grow">Name der Mannschaft<input type="text" id="sTeam" value="${esc(S.teamName)}"></label>
@@ -2815,7 +2957,7 @@ ${FEAT.events?`<div class="f" style="font-size:12.5px;color:var(--muted);font-we
     ${imgSetting('crest','Wappen','Erscheint im Kopf und als App-Symbol auf dem Home-Bildschirm. Am besten PNG mit transparentem Hintergrund.')}
     ${imgSetting('logo','Weiteres Logo','Optional, z. B. Sponsor oder Verband. Erscheint rechts im Kopf.')}
   </div>`:''}
-  ${FEAT.money&&o('o_money')?`  <div class="panel" style="${secStyle('team')}"><h2>Kassen</h2>
+  ${FEAT.money&&o('o_money')?`<!--g:kasse-->  <div class="panel" style="${secStyle('team')}"><h2>Beiträge &amp; Preise</h2>
     <div class="row" style="flex-wrap:nowrap">
       <label class="f" style="flex:1">Monatsbeitrag (€)<input type="number" id="sFee" step="0.5" min="0" inputmode="decimal" value="${S.fee}"></label>
       <label class="f" style="flex:1">Getränke pro Tag (€)<input type="number" id="sRate" step="0.5" min="0" inputmode="decimal" value="${S.rate}"></label>
@@ -2826,10 +2968,10 @@ ${FEAT.events?`<div class="f" style="font-size:12.5px;color:var(--muted);font-we
       <button class="icon" data-act="up" data-v="${i}" ${i?'':'disabled'} aria-label="${SEC[k].label} nach vorne">↑</button><button class="icon" data-act="down" data-v="${i}" ${i<S.order.length-1?'':'disabled'} aria-label="${SEC[k].label} nach hinten">↓</button></div>`).join('')}</div>
   </div>
 `:''}
-  ${FEAT.money&&o('o_money')?`<div class="panel" style="${secStyle('misc')}"><h2>Strafenkatalog</h2>
+  ${FEAT.money&&o('o_money')?`<!--g:kasse--><div class="panel" style="${secStyle('misc')}"><h2>Strafenkatalog</h2>
     <label class="check"><input type="checkbox" id="sFinesOn" ${S.finesOn?'checked':''}> Strafenkatalog verwenden</label>
     <p class="hint">Zum Beispiel „Zu spät zum Training“ oder „Gelbe Karte wegen Meckern“ mit festem Betrag. Der Katalog wird unter „Sonstiges“ gepflegt (Admins mit Recht „Sonstiges“), dort und auf der Spielerseite trägst du Strafen mit einem Tipp ein. Alle sehen den Katalog.</p></div>`:''}
-  ${o('o_notify')?`<div class="panel" style="${secStyle('team')}"><h2>Kalender &amp; Erinnerungen</h2>
+  ${o('o_notify')?`<!--g:notify--><div class="panel" style="${secStyle('team')}"><h2>Kalender &amp; Erinnerungen</h2>
     ${FEAT.events?`<label class="check"><input type="checkbox" id="sCalOn" ${S.calOn?'checked':''}> Kalender-Abo anbieten (iPhone, Android, Outlook)</label>
     ${S.calOn?`<p class="hint">Alle finden unter Termine „📅 In meinen Kalender“. Wer den Link hat, sieht die Termine (ohne Namen). Scheidet jemand aus, erzeugst du einen neuen Link – der alte funktioniert dann nicht mehr.</p><button class="btn ghost sm" data-act="calNew" style="justify-self:start">Neuen Abo-Link erzeugen</button>`:''}`:''}
     <h3>Erinnerungen per Push</h3>
@@ -2837,20 +2979,20 @@ ${FEAT.events?`<div class="f" style="font-size:12.5px;color:var(--muted);font-we
     ${FEAT.money?`<label class="check"><input type="checkbox" id="sRemDebt" ${S.remDebt?'checked':''}> Offene Beträge: jeden Monat einen Tag nach dem letzten Training oder Spiel${FEAT.events?'':' (bzw. Getränketag)'} des Monats um 18 Uhr, nur an Spieler mit offenem Betrag</label>`:''}
     <label class="check"><input type="checkbox" id="sRemBday" ${S.remBday?'checked':''}> Geburtstage: morgens um 9 Uhr an alle (nur der Spitzname, ohne Alter)</label>
     <p class="hint">Alles ist ab Werk aus. Erinnerungen brauchen eingerichtete Push-Nachrichten (Anleitung, Abschnitt „Push“); jeder kann sie an seiner Glocke abschalten.${AUTH.mode==='live'?'':' In der Demo wird nichts verschickt.'}</p></div>`:''}
-  ${FEAT.money&&o('o_money')?`<div class="panel" style="${secStyle('team')}"><h2>Einnahmen &amp; Ausgaben</h2>
+  ${FEAT.money&&o('o_money')?`<!--g:kasse--><div class="panel" style="${secStyle('team')}"><h2>Einnahmen &amp; Ausgaben</h2>
     <label class="check"><input type="checkbox" id="sFinOn" ${S.financeOn?'checked':''}> Einnahmen &amp; Ausgaben (Kassenbuch) verwenden</label>
     ${S.financeOn?`<label class="f" style="max-width:220px">Anfangsbestand (€)<input type="number" id="sFinStart" step="0.01" inputmode="decimal" value="${+(S.finance||{}).start||0}"></label>`:''}
     <label class="check"><input type="checkbox" id="sPayreq" ${S.payreqOn?'checked':''}> Spieler können geleistete Zahlungen melden</label>
     <p class="hint">Sehen und bearbeiten dürfen das Kassenbuch nur Admins mit dem Recht „Einnahmen &amp; Ausgaben“ (z. B. Vorlage „Kassenwart“). Gemeldete Zahlungen prüfen Admins mit Recht auf eine der Kassen und verrechnen sie mit den offenen Beträgen; ist das Kassenbuch an, wird die Zahlung dort als Einnahme gebucht.</p></div>`:''}
-  ${o('o_privacy')?`<div class="panel" style="${secStyle('team')}"><h2>Datenschutz</h2>
+  ${o('o_privacy')?`<!--g:data--><div class="panel" style="${secStyle('team')}"><h2>Datenschutz</h2>
     <label class="f">Verantwortlich (Name, Anschrift)<textarea id="sPrivWho" maxlength="300" placeholder="z. B. SV Musterdorf e.V., vertreten durch …, Straße, Ort">${esc((S.privacy||{}).who||'')}</textarea></label>
     <label class="f">Kontakt für Datenschutzfragen<input type="text" id="sPrivMail" maxlength="100" value="${esc((S.privacy||{}).contact||'')}" placeholder="z. B. mannschaft@example.de"></label>
     <label class="f">Zuständige Aufsichtsbehörde (optional)<input type="text" id="sPrivAuth" maxlength="120" value="${esc((S.privacy||{}).authority||'')}" placeholder="z. B. ULD Schleswig-Holstein"></label>
     <label class="f" style="max-width:280px">Chat &amp; Pinnwand automatisch löschen<select id="sPrivRet">${Object.entries(RETENTION).map(([k,l])=>`<option value="${k}" ${+((S.privacy||{}).retention||0)===+k?'selected':''}>${l}</option>`).join('')}</select></label>
     <p class="hint">Daraus entsteht automatisch der Datenschutzhinweis, den alle über „Datenschutz“ unten in der App und auf der Anmeldeseite sehen. Er passt sich an die eingeschalteten Bereiche an. Bitte einmal prüfen – das ist eine Vorlage, keine Rechtsberatung.</p>
     <button class="btn ghost sm" data-act="privacy" style="justify-self:start">Datenschutzhinweis ansehen</button></div>`:''}
-  ${!F?`<p class="hint" style="text-align:center">Du siehst die Optionen, für die du freigeschaltet bist. Admins verwalten, Sicherung und Zurücksetzen gibt es mit „Alles“.</p>`:`
-  ${FEAT.events?archivePanel():''}
+  ${!F?`<!--g:note--><p class="hint" style="text-align:center">Du siehst die Optionen, für die du freigeschaltet bist. Admins verwalten, Sicherung und Zurücksetzen gibt es mit „Alles“.</p>`:`
+  <!--g:data-->${FEAT.events?archivePanel():''}
   ${backupPanel()}
   ${logPanel()}
   <div class="panel" style="--sec:var(--due);--on-sec:#fff"><h2>Daten zurücksetzen</h2>
@@ -2917,6 +3059,7 @@ function renderModal(){
     const info=AUTH.mode==='live'&&!(AUTH.member||AUTH.admin)?(LIVE.privDoc===undefined?(privacyInfo(),null):LIVE.privDoc):privacyOf(S);
     body=privacyBody(info)+(myPlayer()?'<button type="button" class="btn ghost sm" data-act="mydata" style="justify-self:start">Meine Daten anzeigen</button>':'')
       +(isAdmin()&&S.players.length?`<label class="f">Daten eines Spielers anzeigen (Auskunft)<select id="mdSel"><option value="">– Spieler wählen –</option>${sorted().map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select></label>`:''); submit='';
+  }else if(m.kind==='imp'){ body=impModalBody(m.id); submit='';
   }else if(m.kind==='cal'){ body=calModalBody(); submit='';
   }else if(m.kind==='fines'){ body=`<h2>Strafenkatalog</h2>${finesTable()}<p class="hint">Strafen trägt der Kassenwart unter „Sonstiges“ ein; sie erscheinen dann bei deinem Stand.</p>`; submit='';
   }else if(m.kind==='mydata'){ body=myDataBody(m.pid); submit='';
@@ -2937,7 +3080,7 @@ function renderModal(){
   }
   root.innerHTML=`<div class="modal" data-act="modalBg"><form class="sheet" id="mForm" style="${secStyle('team')}" autocomplete="on" novalidate>${body}
     ${m.err?`<p class="err">${esc(m.err)}</p>`:''}${m.info?`<p class="hint" style="color:var(--ok);font-weight:600">${esc(m.info)}</p>`:''}
-    <div class="row">${submit?`<button class="btn" type="submit" ${m.busy?'disabled':''}>${m.busy?'Bitte warten …':submit}</button>`:''}<button class="btn ghost" type="button" data-act="modalClose">${submit?'Abbrechen':'Schließen'}</button></div>${extra}</form></div>`;
+    <div class="row">${submit?`<button class="btn" type="submit" ${m.busy?'disabled':''}>${m.busy?'Bitte warten …':submit}</button>`:''}${m.kind==='imp'&&m.force?'':`<button class="btn ghost" type="button" data-act="modalClose">${submit?'Abbrechen':'Schließen'}</button>`}</div>${extra}</form></div>`;
   if(m.kind==='qr'){ const code=codeOf(m.who); loadQrLib().then(()=>{const box=document.getElementById('qrBox'); if(box&&window.QRCode) new QRCode(box,{text:appLink(code),width:220,height:220,colorDark:'#0B1530',colorLight:'#ffffff'});}).catch(()=>{const box=document.getElementById('qrBox'); if(box) box.textContent='QR-Code konnte nicht geladen werden.';}); }
   const first=root.querySelector('#mName')||root.querySelector('#mEmail')||root.querySelector('#mPw')||root.querySelector('#gateCode'); if(first&&!first.value) setTimeout(()=>first.focus(),30);
 }
@@ -3053,9 +3196,10 @@ function render(){
   else if(ui.person) html=personView();
   else if(ui.tab==='settings') html=settings()+`<p class="hint" style="text-align:center;margin:4px 0 0">${esc(S.appName||'App')} · Version ${APP_VERSION}</p>`;
   else if(ui.tab==='home') html=note+homeView();
+  else if(ui.tab==='kasse') html=kasseTab()?note+homeMain():(ui.tab='home',note+homeView());
   else if(ui.tab==='chat') html=S.chatOn?chatView():(ui.tab='home',note+homeView());
   else if(ui.tab==='finance') html=finOn()?financeView():(ui.tab='home',note+homeView());
-  else if(ui.tab==='payreqs') html=moneyAdmin()?`<div class="panel"><button class="back" data-act="goto" data-v="home">‹ Übersicht</button></div>${payreqPanel()||'<div class="panel"><p class="hint">Keine gemeldeten Zahlungen.</p></div>'}`:(ui.tab='home',note+homeView());
+  else if(ui.tab==='payreqs') html=moneyAdmin()?`<div class="panel"><button class="back" data-act="goto" data-v="${kasseTab()?'kasse':'home'}">‹ ${kasseTab()?'Kasse':'Übersicht'}</button></div>${payreqPanel()||'<div class="panel"><p class="hint">Keine gemeldeten Zahlungen.</p></div>'}`:(ui.tab='home',note+homeView());
   else if(ui.tab==='events') html=eventsView();
   else if(ui.tab==='roster') html=teamView();
   else{
@@ -3063,7 +3207,8 @@ function render(){
     const bottom=ui.view==='table'?(ui.mode==='month'?monthTable(ui.tab):yearTable(ui.tab)):listPanel(ui.tab);
     html=(ui.form?'':secHead())+top+(ui.form?'':bottom);
   }
-  v.innerHTML=bar+html+(ui.tab==='chat'?'':footer());
+  v.innerHTML=bar+impBar()+html+(ui.tab==='chat'?'':footer());
+  { const pop=impUnread().find(n=>n.impPopup&&!(ui.impShown||(ui.impShown=new Set())).has(n.id)); if(pop&&!ui.modal){ ui.impShown.add(pop.id); ui.modal={kind:'imp',id:pop.id,force:true}; setTimeout(renderModal,0); } }
   if(ui.tab==='chat'&&S.chatOn){ chatMarkRead(); chatScroll(ui.chatFirst); ui.chatFirst=false; }
   renderChrome();
   markWideTables();
@@ -3082,7 +3227,7 @@ const footer=()=>`<p class="foot"><button class="linkbtn" data-act="privacy">Dat
 function toast(t){const e=document.getElementById('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2600);}
 function closeForm(){ui.form=false;ui.fineMode=false;ui.shiftPick=null;ui.shiftEdit=null;ui.editKey=null;ui.sel.clear();ui.draft={title:'',amount:''};ui.ev=blankEv();}
 function toTop(){try{window.scrollTo({top:0,behavior:'smooth'})}catch(e){window.scrollTo(0,0)}}
-function goTab(t){ui.freeEditing=false; if(t==='chat'){ui.chatFirst=true; ui.chatSel=null;} if(t==='settings') ui.playersOpen=false; ui.tab=t;ui.person=null;ui.lineup=null;ui.evDetail=null;ui.reportEdit=false;closeForm();ui.confirmDel=null;render();window.scrollTo(0,0);}
+function goTab(t){ui.freeEditing=false; if(t==='chat'){ui.chatFirst=true; ui.chatSel=null;} if(t==='settings'){ ui.playersOpen=false; ui.optOpen=new Set(); } ui.tab=t;ui.person=null;ui.lineup=null;ui.evDetail=null;ui.reportEdit=false;closeForm();ui.confirmDel=null;render();window.scrollTo(0,0);}
 function enterCode(raw){
   const c=normCode(raw); if(c.length<8){toast('Bitte den vollständigen Code eingeben');return;}
   ls.set('mk-code',c); AUTH.ready=false; render();
@@ -3215,7 +3360,7 @@ document.addEventListener('pointerdown',ev=>{
 });
 
 /* ---------- Bedienung ---------- */
-const READER=new Set(['finesShow','calOpen','calDemo','icsAll','evIcs','chatDelNo','chatDelGo','privacy','mydata','mydataSave','mydataCopy','chatSel','chatSend','chatReply','chatReplyX','chatLike','chatDel','chatMore','chatCh','chatPoll','chatImg','newsNew','newsCancel','newsSend','newsDel','newsDelNo','newsDelGo','newsLike','newsCmt','prNew','prMethod','tpNew','tpCancel','tpSave','tvote','tpClose','tpOpen','tpOld','askDel','noDel','doDel','pushModal','pushOn','pushOff','newsAll','nx','cmtDelNo','cmtDelGo','shiftsOpen','shiftJoin','shiftLeave','playersFold','evOpen','evBack','cmtSend','cmtDel','codeModal','demoPublicEnd','adminBtn','modalBg','modalClose','goto','person','back','pyPrev','pyNext','allDebtors','mode','view','onlyOpen','prev','next','copy','efilter','showPast','vote','pollNames','lineup','lineupBack','noDel','evView','statType','statAll','gateGo','reload','signOut','mStep','mResend','readMode']);
+const READER=new Set(['impOpen','impRead','homeTile','finesShow','calOpen','calDemo','icsAll','evIcs','chatDelNo','chatDelGo','privacy','mydata','mydataSave','mydataCopy','chatSel','chatSend','chatReply','chatReplyX','chatLike','chatDel','chatMore','chatCh','chatPoll','chatImg','newsNew','newsCancel','newsSend','newsDel','newsDelNo','newsDelGo','newsLike','newsCmt','prNew','prMethod','tpNew','tpCancel','tpSave','tvote','tpClose','tpOpen','tpOld','askDel','noDel','doDel','pushModal','pushOn','pushOff','newsAll','nx','cmtDelNo','cmtDelGo','shiftsOpen','shiftJoin','shiftLeave','playersFold','evOpen','evBack','cmtSend','cmtDel','codeModal','demoPublicEnd','adminBtn','modalBg','modalClose','goto','person','back','pyPrev','pyNext','allDebtors','mode','view','onlyOpen','prev','next','copy','efilter','showPast','vote','pollNames','lineup','lineupBack','noDel','evView','statType','statAll','gateGo','reload','signOut','mStep','mResend','readMode']);
 document.addEventListener('submit',ev=>{if(ev.target.id==='mForm'){ev.preventDefault();submitModal();}});
 document.addEventListener('click',async ev=>{
   const tab=ev.target.closest('[data-tab]'); if(tab){goTab(tab.dataset.tab);return;}
@@ -3232,6 +3377,7 @@ document.addEventListener('click',async ev=>{
       if(u&&!u.isAnonymous){ ui.modal.busy=true; renderModal(); afterClaim(await claimAdmin().catch(()=>'login')); } else renderModal(); }
     break;
   case 'playersFold': ui.playersOpen=!ui.playersOpen; render(); break;
+  case 'optFold': ui.optOpen.has(v)?ui.optOpen.delete(v):ui.optOpen.add(v); render(); break;
   case 'shiftsOpen': ui.evDetail=v; ui.lineup=null; ui.person=null; ui.tab='events'; ui.reportEdit=false; closeForm(); render(); window.scrollTo(0,0); scrollToId('pnl-shifts'); break;
   case 'shiftJoin': case 'shiftLeave': {const e=S.events.find(x=>x.id===ui.evDetail), s=e&&shiftsOf(e).find(x=>x.id===v); if(s) doShift(e,s,a==='shiftJoin'); break;}
   case 'shiftEdit': closeForm(); ui.shiftEdit=v; render(); scrollToId('pnl-shifts'); setTimeout(()=>{const i=document.getElementById('shName'); if(i&&v==='new') i.focus();},60); break;
@@ -3340,7 +3486,7 @@ document.addEventListener('click',async ev=>{
   case 'gateGo': enterCode(document.getElementById('gateCode').value); break;
   case 'mStep': ui.modal.step=v; ui.modal.err=''; ui.modal.info=''; renderModal(); break;
   case 'mResend': try{await FB.sendEmailVerification(FB.auth.currentUser); ui.modal.info='Link wurde erneut gesendet.';}catch(e){ui.modal.err='Bitte kurz warten und erneut versuchen.';} renderModal(); break;
-  case 'modalBg': case 'modalClose': ui.modal=null; renderModal(); if(LIVE.pending){LIVE.pending=false;render();} break;
+  case 'modalBg': case 'modalClose': if(ui.modal&&ui.modal.force) return; ui.modal=null; renderModal(); if(LIVE.pending){LIVE.pending=false;render();} break;
   case 'adminInvite': if(isFull()){ui.modal={kind:'invite'}; renderModal();} break;
   case 'rightsEdit': if(isFull()){ui.modal={kind:'rights',who:v}; renderModal();} break;
   case 'invite': if(canPlayers()) shareInvite(id); break;
@@ -3362,11 +3508,17 @@ document.addEventListener('click',async ev=>{
   case 'onlyOpen': ui.onlyOpen=!ui.onlyOpen; render(); break;
   case 'prev': case 'next': {const d=a==='prev'?-1:1; if(ui.mode==='year') ui.y+=d; else {ui.m+=d; if(ui.m<0){ui.m=11;ui.y--} if(ui.m>11){ui.m=0;ui.y++}} render(); break;}
   case 'openForm': closeForm(); ui.form=true; ui.date=TODAY; ui.confirmDel=null; render(); toTop(); break;
-  case 'fineNew': if(can('misc')){ closeForm(); ui.form=true; ui.fineMode=true; ui.date=TODAY; ui.confirmDel=null; render(); toTop(); } break;
+  case 'miscNew': if(can('misc')){ ui.tab='misc'; closeForm(); ui.form=true; ui.date=TODAY; ui.confirmDel=null; render(); toTop(); } break;
+  case 'fineNew': if(can('misc')){ ui.tab='misc'; closeForm(); ui.form=true; ui.fineMode=true; ui.date=TODAY; ui.confirmDel=null; render(); toTop(); } break;
   case 'fineFor': if(can('misc')){ ui.person=null; ui.tab='misc'; closeForm(); ui.form=true; ui.fineMode=true; ui.date=TODAY; ui.sel.add(id); render(); toTop(); } break;
   case 'fineUse': {const x=finesList().find(f=>f.id===v); if(!x) return; ui.draft={title:'Strafe: '+x.name,amount:String(+x.amount||0)}; render(); break;}
   case 'fineAdd': if(can('misc')){ S.fines=[...(S.fines||[]),{id:uid(),name:'Neue Strafe',amount:2}]; commit(); } break;
   case 'fineDel': if(can('misc')){ S.fines=(S.fines||[]).filter(f=>f.id!==v); commit(); } break;
+  case 'impOpen': ui.modal={kind:'imp',id:v}; renderModal(); break;
+  case 'impRead': impMarkRead(v); break;
+  case 'impRemind': impRemind(v); break;
+  case 'impEnd': impEnd(v); break;
+  case 'homeTile': if(v==='news'&&ui.homeOpen!=='news'){ ui.newsSeenPrev=+(ls.get('mk-seen-news')||0); ls.set('mk-seen-news',String(Date.now())); } ui.homeOpen=ui.homeOpen===v?null:v; render(); break;
   case 'finesShow': ui.modal={kind:'fines'}; renderModal(); break;
   case 'calOpen': ui.modal={kind:'cal'}; renderModal(); break;
   case 'calDemo': toast('Demo: Das Abo gibt es nur in der echten App'); break;
@@ -3529,6 +3681,7 @@ document.addEventListener('change',ev=>{
   if(t.id==='eUntil'){ui.ev.until=t.value; render(); return;}
   if(t.id==='eCancel'){ui.ev.cancel=t.checked; return;}
   if(t.id==='fDate'){ui.date=t.value; return;}
+  if(t.name==='newsLvl'){ const o=document.getElementById('impOpts'); if(o) o.hidden=t.value!=='imp'; return; }
   if(t.id==='mdSel'&&t.value&&isAdmin()){ ui.modal={kind:'mydata',pid:t.value}; renderModal(); return; }
   if(t.id==='chatFile'){ chatPhoto(t.files&&t.files[0]); t.value=''; return; }
   if(t.name==='prItem'&&ui.modal&&ui.modal.kind==='prCheck'){ const i=+t.value; if(t.checked) ui.modal.sel.add(i); else ui.modal.sel.delete(i); const sc=document.querySelector('.sheet').scrollTop; renderModal(); const sh=document.querySelector('.sheet'); if(sh) sh.scrollTop=sc; return; }
