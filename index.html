@@ -57,12 +57,23 @@ li.no::before{content:"–";color:var(--muted)}
 <header><div class="wrap">
   <div class="kick">Demo · Beispieldaten</div>
   <h1>Mannschafts-App <em>Demo</em></h1>
-  <p>Wähle eine Variante aus. Jede Variante hat ihre eigenen Beispieldaten mit 40 Spielern. Du kannst alles ausprobieren, es wird nichts verschickt oder gespeichert außer auf diesem Gerät.</p>
+  <p>Die App ist modular: Ein Admin schaltet unter Optionen → Module frei, was die Mannschaft sieht. Die Karten zeigen typische Zusammenstellungen, jeweils mit eigenen Beispieldaten. Du kannst alles ausprobieren, es wird nichts verschickt oder gespeichert außer auf diesem Gerät.</p>
 </div></header>
 <main><div class="wrap">
   <div class="grid">
+    <section class="card" style="--k:#0E2F7A;--on-k:#fff">
+      <div class="top"><span class="lt">T</span><div><h2>Start: nur Termine</h2><div class="s">So startet die echte App – alles Weitere per Modul</div></div></div>
+      <ul>
+        <li>Training, Spiele und Events für alle sichtbar – ohne Code</li>
+        <li>Training dienstags 19 Uhr, Orte Draußen · Halle · OHLA Stadion</li>
+        <li>Absagen per Tipp, Turniere, Kalender-Abo</li>
+        <li>Nur Admins pflegen die Termine</li>
+        <li>Unter Optionen → Module Schritt für Schritt freischalten: Kader, Zugänge, Zu-/Absagen, Chat, Kassen …</li>
+      </ul>
+      <div class="act"><a class="btn" href="app.html?v=t">Demo öffnen</a></div>
+    </section>
     <section class="card" style="--k:var(--a);--on-k:#14171f">
-      <div class="top"><span class="lt">A</span><div><h2>Komplett</h2><div class="s">Kassen und Mannschaftsorganisation in einer App</div></div></div>
+      <div class="top"><span class="lt">A</span><div><h2>Alle Module</h2><div class="s">Kassen und Mannschaftsorganisation in einer App</div></div></div>
       <ul>
         <li>Getränkekasse, Mannschaftskasse, Sonstiges</li>
         <li>Übersicht der offenen Beträge mit PayPal-Link</li>
@@ -74,7 +85,7 @@ li.no::before{content:"–";color:var(--muted)}
       <div class="act"><a class="btn" href="app.html?v=a">Demo öffnen</a><a class="btn ghost" href="praesentation.html">Präsentation</a></div>
     </section>
     <section class="card" style="--k:var(--b)">
-      <div class="top"><span class="lt">B</span><div><h2>Mannschaft</h2><div class="s">Organisation ohne Geld-Themen</div></div></div>
+      <div class="top"><span class="lt">B</span><div><h2>Ohne Kassen</h2><div class="s">Alle Module außer Kassen</div></div></div>
       <ul>
         <li>Termine für Spiele, Training und Events</li>
         <li>Umfragen, Kommentare und Spielberichte</li>
@@ -86,19 +97,19 @@ li.no::before{content:"–";color:var(--muted)}
       <div class="act"><a class="btn" href="app.html?v=b">Demo öffnen</a></div>
     </section>
     <section class="card" style="--k:var(--c)">
-      <div class="top"><span class="lt">C</span><div><h2>Kasse</h2><div class="s">Nur die Gelder der Mannschaft</div></div></div>
+      <div class="top"><span class="lt">C</span><div><h2>Kassen</h2><div class="s">Kassen, Zugänge und Mitteilungen</div></div></div>
       <ul>
         <li>Getränkekasse nach Anwesenheitstagen</li>
         <li>Mannschaftskasse mit Monatsbeitrag</li>
         <li>Sonstiges, z. B. Strafen oder Geschenke</li>
         <li>Übersicht der offenen Beträge mit PayPal-Link</li>
-        <li class="no">Keine Termine, keine Aufstellung</li>
+        <li class="no">Termine ohne Zu-/Absagen und Aufstellung</li>
       </ul>
       <div class="act"><a class="btn" href="app.html?v=c">Demo öffnen</a></div>
     </section>
   </div>
   <p class="note">In der Demo kannst du oben rechts über das Schloss zur Admin-Ansicht wechseln oder als Spieler ansehen, wie die App für die Mannschaft aussieht. Unter Optionen lassen sich die Beispieldaten jederzeit zurücksetzen.</p>
-  <p class="note" id="ver">Version 1.26</p>
+  <p class="note" id="ver">Version 1.30</p>
 </div></main>
 </body>
 </html>
